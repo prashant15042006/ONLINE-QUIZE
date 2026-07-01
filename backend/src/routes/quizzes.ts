@@ -1,5 +1,6 @@
 import { Router } from "express";
 import admin from "firebase-admin";
+import { generateAnswer } from "../utils/ai";
 
 const router = Router();
 
@@ -30,6 +31,21 @@ router.get("/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "failed" });
+  }
+});
+
+// Generate AI answer for a quiz question
+router.post('/generate-answer', async (req, res) => {
+  const { question } = req.body;
+  if (!question) {
+    return res.status(400).json({ error: 'question required' });
+  }
+  try {
+    const answer = await generateAnswer(question);
+    res.json({ answer });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'failed' });
   }
 });
 
