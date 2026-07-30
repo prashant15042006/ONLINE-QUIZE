@@ -1,52 +1,74 @@
-import { Router } from "express";
-import admin from "firebase-admin";
-import { generateAnswer } from "../utils/ai";
+import { Router, Request, Response } from "express";
+import { generateQuiz, generateExplanation, generateAnswer } from "../utils/ai";
 
 const router = Router();
 
-// Create a quiz (admin)
-router.post("/", async (req, res) => {
-  const data = req.body;
+// POST /api/quizzes/generate - Generate AI quiz questions
+router.post("/generate", async (req: Request, res: Response) => {
+  const { topic, company, difficulty, questionCount, customPrompt } = req.body;
+
+  if (!topic || !company) {
+    return res.status(400).json({ error: "topic and company are required" });
+  }
+
   try {
-    const db = admin.firestore();
-    const ref = await db.collection("quizzes").add({
-      ...data,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+    const quiz = await generateQuiz({
+      topic,
+      company,
+      difficulty: difficulty || "Medium",
+      questionCount: questionCount || 10,
+      customPrompt: customPrompt || "",
     });
-    res.json({ id: ref.id });
+
+    res.json(quiz);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "failed" });
+    console.error("Quiz generation error:", err);
+    res.status(500).json({ error: "Failed to generate quiz. Please try again." });
   }
 });
 
-// Get quiz by id
-router.get("/:id", async (req, res) => {
-  const { id } = req.params;
+// POST /api/quizzes/explain - Get AI explanation for a question
+router.post("/explain", async (req: Request, res: Response) => {
+  const { question, options, userAnswer, correctAnswer, userApiKey } = req.body;
+
+  if (!question) {
+    return res.status(400).json({ error: "question is required" });
+  }
+
   try {
-    const db = admin.firestore();
-    const doc = await db.collection("quizzes").doc(id).get();
-    if (!doc.exists) return res.status(404).json({ error: "not found" });
-    res.json({ id: doc.id, ...doc.data() });
+    const explanation = await generateExplanation({
+      question,
+      options: options || [],
+      userAnswer: userAnswer ?? -1,
+      correctAnswer: correctAnswer ?? 0,
+      userApiKey,
+    });
+
+    res.json({ explanation });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "failed" });
+    console.error("Explanation error:", err);
+    res.status(500).json({ error: "Failed to generate explanation." });
   }
 });
 
-// Generate AI answer for a quiz question
-router.post('/generate-answer', async (req, res) => {
+// POST /api/quizzes/generate-answer - Legacy simple Q&A
+router.post("/generate-answer", async (req: Request, res: Response) => {
   const { question } = req.body;
   if (!question) {
-    return res.status(400).json({ error: 'question required' });
+    return res.status(400).json({ error: "question required" });
   }
   try {
     const answer = await generateAnswer(question);
     res.json({ answer });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'failed' });
+    res.status(500).json({ error: "failed" });
   }
+});
+
+// GET /api/quizzes/health - Simple API health check
+router.get("/health", (_req: Request, res: Response) => {
+  res.json({ ok: true, provider: "groq", model: "llama-3.3-70b-versatile" });
 });
 
 export default router;

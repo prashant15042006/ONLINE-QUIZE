@@ -13,11 +13,16 @@ const server = http.createServer(app);
 
 const io = new SocketIOServer(server, {
   cors: {
-    origin: process.env.FRONTEND_ORIGIN || "http://localhost:3000",
+    origin: "*",
+    methods: ["GET", "POST"],
   },
 });
 
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
 app.use(express.json());
 
 // Initialize Firebase Admin
