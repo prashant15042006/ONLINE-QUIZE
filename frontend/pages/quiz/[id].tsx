@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Sparkles, ArrowLeft, Send } from "lucide-react";
 
@@ -13,7 +13,7 @@ export default function QuizPage() {
     if (!aiQuestion) return;
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/api/quizzes/explain", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000"}/api/quizzes/explain`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: aiQuestion, options: ["A", "B", "C", "D"], userAnswer: -1, correctAnswer: 0 }),
       });

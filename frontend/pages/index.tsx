@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import ApiKeyModal from "../components/ApiKeyModal";
 import ExamTargetModal from "../components/ExamTargetModal";
@@ -59,7 +59,7 @@ export default function Home() {
   const handleGenerateQuiz = async (params: { topic: string; company: string; difficulty: string; questionCount: number; customPrompt: string }) => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:4000/api/quizzes/generate", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000"}/api/quizzes/generate`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...params, userApiKey, aiProvider }),
       });
@@ -89,7 +89,7 @@ export default function Home() {
     const q = activeQuiz.questions[questionIndex];
     const userChoice = lastExamResult?.userAnswers[questionIndex] ?? -1;
     try {
-      const res = await fetch("http://localhost:4000/api/quizzes/explain", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: q.question, options: q.options, userAnswer: userChoice, correctAnswer: q.correctAnswer, userApiKey }) });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000"}/api/quizzes/explain`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question: q.question, options: q.options, userAnswer: userChoice, correctAnswer: q.correctAnswer, userApiKey }) });
       const data = await res.json();
       return data.explanation || q.explanation;
     } catch (e) { return q.explanation; }
