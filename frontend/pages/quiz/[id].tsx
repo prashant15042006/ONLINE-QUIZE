@@ -1,104 +1,58 @@
-import React, { useEffect, useState } from "react";
-import { io } from "socket.io-client";
-import { initFirebase } from "../../utils/firebaseClient";
+﻿import React, { useState } from "react";
+import Link from "next/link";
+import { Sparkles, ArrowLeft, Send } from "lucide-react";
 
-// Skip static generation for this page
-export const getServerSideProps = async () => {
-  return { props: {} };
-};
+export const getServerSideProps = async () => ({ props: {} });
 
 export default function QuizPage() {
-  const [joined, setJoined] = useState(false);
-  const [room, setRoom] = useState("sample-room");
-  const [liveScores, setLiveScores] = useState<any[]>([]);
-  const [socket, setSocket] = useState<any>(null);
-
-  useEffect(() => {
-    initFirebase();
-    const socketInstance = io(process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000");
-    setSocket(socketInstance);
-
-    socketInstance.on("connect", () => console.log("socket connected", socketInstance.id));
-    socketInstance.on("live-score-update", ({ result }) => {
-      setLiveScores((s) => [...s, result]);
-    });
-
-    return () => {
-      socketInstance.off("connect");
-      socketInstance.off("live-score-update");
-      socketInstance.disconnect();
-    };
-  }, []);
-
-  function join() {
-    if (socket) {
-      socket.emit("join-room", { roomId: room, user: { name: "Guest" } });
-      setJoined(true);
-    }
-  }
-
-  const [aiQuestion, setAiQuestion] = useState('');
-  const [aiAnswer, setAiAnswer] = useState('');
+  const [aiQuestion, setAiQuestion] = useState("");
+  const [aiAnswer, setAiAnswer] = useState("");
   const [loading, setLoading] = useState(false);
 
   const fetchAIAnswer = async () => {
     if (!aiQuestion) return;
     setLoading(true);
     try {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
-      const res = await fetch(`${backendUrl}/api/quizzes/generate-answer`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: aiQuestion }),
+      const res = await fetch("http://localhost:4000/api/quizzes/explain", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: aiQuestion, options: ["A", "B", "C", "D"], userAnswer: -1, correctAnswer: 0 }),
       });
       const data = await res.json();
-      setAiAnswer(data.answer || 'No answer');
+      setAiAnswer(data.explanation || "No response received.");
     } catch (e) {
-      console.error(e);
-      setAiAnswer('Error fetching answer');
-    } finally {
-      setLoading(false);
-    }
+      setAiAnswer("Could not connect to AI backend. Make sure backend is running on port 4000.");
+    } finally { setLoading(false); }
   };
 
   return (
-    <main className="min-h-screen p-8">
-      <h2 className="text-2xl">Live Quiz Room</h2>
-      {!joined ? (
-        <div className="mt-4">
-          <input value={room} onChange={(e) => setRoom(e.target.value)} className="p-2 border rounded" />
-          <button onClick={join} className="ml-2 px-4 py-2 bg-blue-600 text-white rounded">Join</button>
-        </div>
-      ) : (
-        <div className="mt-4">
-          <p>Joined room: {room}</p>
-          <div className="mt-3">
-            <h3 className="font-semibold">Live Scores</h3>
-            <pre className="bg-gray-100 p-2 rounded max-w-md">{JSON.stringify(liveScores, null, 2)}</pre>
+    <main className="min-h-screen bg-slate-950 text-slate-100 p-6 lg:p-12">
+      <div className="max-w-3xl mx-auto space-y-6">
+        <Link href="/" className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-white transition-all">
+          <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+        </Link>
+        <div className="glass-panel rounded-3xl p-6 lg:p-8 border border-slate-800 space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-xl font-extrabold text-white">Interactive AI Tutor</h2>
+              <p className="text-xs text-slate-400">Ask any exam question for instant AI breakdown</p>
+            </div>
           </div>
-          {/* AI Hint Section */}
-          <div className="mt-6 glass p-4 max-w-lg">
-            <h3 className="font-semibold mb-2">AI Hint</h3>
-            <input
-              value={aiQuestion}
-              onChange={(e) => setAiQuestion(e.target.value)}
-              placeholder="Enter your question"
-              className="w-full p-2 border rounded mb-2"
-            />
-            <button
-              onClick={fetchAIAnswer}
-              disabled={loading}
-              className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/80 transition"
-            >
-              {loading ? 'Thinking…' : 'Get Answer'}
+          <div className="space-y-3 pt-2">
+            <textarea value={aiQuestion} onChange={(e) => setAiQuestion(e.target.value)} placeholder="Enter your question or math/coding problem here..." rows={3} className="w-full p-4 rounded-xl bg-slate-900 border border-slate-800 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm font-mono resize-none" />
+            <button onClick={fetchAIAnswer} disabled={loading} className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg flex items-center gap-2 disabled:opacity-50">
+              <Send className="w-3.5 h-3.5" />{loading ? "AI is thinking..." : "Get AI Explanation"}
             </button>
             {aiAnswer && (
-              <p className="mt-3 p-2 bg-gray-100 rounded">{aiAnswer}</p>
+              <div className="p-4 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 text-xs text-indigo-200 leading-relaxed whitespace-pre-line">
+                <strong className="block text-indigo-400 font-bold mb-1">AI Solution:</strong>{aiAnswer}
+              </div>
             )}
           </div>
         </div>
-      )}
+      </div>
     </main>
   );
 }
-
