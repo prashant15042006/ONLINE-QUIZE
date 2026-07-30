@@ -45,7 +45,8 @@ export default function QuizPage() {
     if (!aiQuestion) return;
     setLoading(true);
     try {
-      const res = await fetch('/api/quizzes/generate-answer', {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+      const res = await fetch(`${backendUrl}/api/quizzes/generate-answer`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: aiQuestion }),
