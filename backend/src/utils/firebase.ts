@@ -8,17 +8,23 @@ export function initializeFirebase() {
   const privateKey = (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n");
 
   if (!projectId || !clientEmail || !privateKey) {
-    console.warn("Firebase admin credentials not set. Backend Firestore access will fail until configured.");
+    console.warn("Firebase admin credentials not set. Skipping Firebase Admin initialization (Mock Mode Active).");
+    return null;
   }
 
-  const app = admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: projectId || "",
-      clientEmail: clientEmail || "",
-      privateKey: privateKey || "",
-    }),
-    databaseURL: process.env.FIREBASE_DATABASE_URL,
-  });
-
-  return app;
+  try {
+    const app = admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: projectId,
+        clientEmail: clientEmail,
+        privateKey: privateKey,
+      }),
+      databaseURL: process.env.FIREBASE_DATABASE_URL,
+    });
+    console.log("Firebase Admin SDK successfully initialized.");
+    return app;
+  } catch (error) {
+    console.error("Firebase Admin initialization failed:", error);
+    return null;
+  }
 }
