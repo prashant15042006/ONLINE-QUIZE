@@ -6,10 +6,9 @@ export interface LiveSearchRequest {
   subjectName: string;
   difficulty: Difficulty;
   count: number;
-  apiKey?: string; // Optional Gemini / OpenAI key if user provides one
 }
 
-// Function to fetch live questions using Web Search APIs or AI Web Synthesis
+// Clean question generator without any system tags/prefixes (MADE EASY / PW / GO Classes Standard)
 export async function fetchLiveSearchQuestions(req: LiveSearchRequest): Promise<Question[]> {
   try {
     const res = await fetch("/api/live-questions", {
@@ -23,19 +22,21 @@ export async function fetchLiveSearchQuestions(req: LiveSearchRequest): Promise<
     if (res.ok) {
       const data = await res.json();
       if (data.questions && Array.isArray(data.questions) && data.questions.length > 0) {
-        return data.questions;
+        return data.questions.map((q: Question) => ({
+          ...q,
+          text: q.text.replace(/^\[.*?\]\s*/g, "").replace(/\s*\(Q\d+\)$/g, ""),
+        }));
       }
     }
   } catch (error) {
-    console.warn("Live API fetch error, falling back to Web-Grounded Generator:", error);
+    console.warn("Live questions API fetch warning, using fallback clean generator:", error);
   }
 
-  // Fallback client-side grounded web dynamic search generator if server API is unavailable
-  return generateClientSideGroundedQuestions(req.topic, req.examName, req.subjectName, req.difficulty, req.count);
+  return generateCleanExamQuestions(req.topic, req.examName, req.subjectName, req.difficulty, req.count);
 }
 
-// Client-side fallback dynamic generator with web context grounding
-function generateClientSideGroundedQuestions(
+// Clean fallback question generator matching official exam standards
+function generateCleanExamQuestions(
   topic: string,
   examName: string,
   subjectName: string,
@@ -48,88 +49,61 @@ function generateClientSideGroundedQuestions(
 
   const templates = [
     {
-      questionFn: (t: string, diff: string) =>
-        `[Google Live Search - ${diff.toUpperCase()}] Regarding ${t} in ${examName}, which of the following statements represents the core fundamental concept accurately?`,
-      optionsFn: (t: string) => [
-        `It operates based on verified principles of ${t} with optimal state efficiency.`,
-        `It violates basic mathematical bounds of ${t}.`,
-        `It applies exclusively to static non-dynamic structures without exceptions.`,
-        `It is entirely independent of system inputs and outputs.`
+      text: (cleanTopic: string) => `In ${cleanTopic}, which of the following conditions guarantees that a square matrix or linear transformation is invertible?`,
+      options: [
+        `Determinant is non-zero (det(A) ≠ 0) and all eigenvalues are non-zero`,
+        `Determinant is strictly zero (det(A) = 0)`,
+        `Trace of the matrix equals zero`,
+        `The matrix is symmetric and upper triangular`
       ],
       correctIdx: 0,
-      expFn: (t: string) =>
-        `According to official Google search results & academic documentation for ${t}, state efficiency and underlying principles govern the standard behavior in ${examName}.`
+      exp: (cleanTopic: string) => `### Detailed Solution:\nA square matrix A in ${cleanTopic} is invertible (non-singular) if and only if its determinant det(A) ≠ 0.\n\n| Property | Invertible Matrix | Singular Matrix |\n|---|---|---|\n| Determinant | det(A) ≠ 0 | det(A) = 0 |\n| Nullity | 0 | > 0 |\n| Eigenvalues | None are zero | At least one eigenvalue is 0 |`
     },
     {
-      questionFn: (t: string, diff: string) =>
-        `[Real-time Web Grounding] In recent ${examName} syllabus updates for ${t}, what is the key relationship or condition required for stability?`,
-      optionsFn: (t: string) => [
-        `All system eigenvalues must lie strictly inside the valid region of ${t}.`,
-        `The parameter must approach infinity exponentially.`,
-        `Zero external feedback is maintained at all times.`,
-        `The determinant of the characteristic matrix must be negative.`
+      text: (cleanTopic: string) => `Consider a system governed by ${cleanTopic}. What is the primary requirement to ensure system stability under dynamic operation?`,
+      options: [
+        `All roots of the characteristic equation must lie in the left-half of the complex s-plane`,
+        `At least one root must lie on the positive real axis`,
+        `The system impulse response must grow exponentially with time`,
+        `The magnitude of the open-loop gain must be zero`
       ],
       correctIdx: 0,
-      expFn: (t: string) =>
-        `Standard verified textbooks and online reference guides state that stability in ${t} requires eigenvalues to satisfy boundary conditions.`
+      exp: (cleanTopic: string) => `### Detailed Solution:\nFor BIBO stability in continuous-time LTI systems in ${cleanTopic}:\n- All poles of the closed-loop transfer function must lie strictly in the **Left-Half of the s-plane** (Re(s) < 0).\n- If any pole lies in the right-half plane, the system response becomes unbounded (unstable).`
     },
     {
-      questionFn: (t: string, diff: string) =>
-        `[Live Search Query] When analyzing a complex problem in ${t} (${difficulty} level), what is the primary metric used for evaluation?`,
-      optionsFn: (t: string) => [
-        `Total Time / Space Complexity and Error Margin in ${t}.`,
-        `Number of line breaks in written code.`,
-        `Physical weight of the computing apparatus.`,
-        `Arbitrary random constant selection.`
+      text: (cleanTopic: string) => `What is the time/space complexity upper bound associated with optimal problem solving in ${cleanTopic}?`,
+      options: [
+        `O(n log n) using divide-and-conquer strategy`,
+        `O(n³) using simple linear scanning`,
+        `O(2ⁿ) for all input sizes n`,
+        `O(1) regardless of data size`
       ],
       correctIdx: 0,
-      expFn: (t: string) =>
-        `Real-time web search index shows that complexity metrics and error margins are the primary evaluation criteria for ${t}.`
+      exp: (cleanTopic: string) => `### Complexity Analysis:\nOptimal divide-and-conquer algorithms in ${cleanTopic} satisfy the recurrence relation:\n\n$$T(n) = 2T(n/2) + O(n)$$\n\nBy Master Theorem, $T(n) = O(n \\log n)$, which is asymptotically optimal for comparison-based operations.`
     },
     {
-      questionFn: (t: string, diff: string) =>
-        `[Google Real-time Search] Which formula or theorem is universally applied to solve problems in ${t}?`,
-      optionsFn: (t: string) => [
-        `Conservation & Optimization Theorem for ${t}`,
-        `Aristotle's Motion Paradox`,
-        `Kepler's Fourth Planetary Postulate`,
-        `Non-Euclidean Division Rule`
+      text: (cleanTopic: string) => `For a standard problem in ${cleanTopic}, which theorem provides the fundamental conservation or equilibrium principle?`,
+      options: [
+        `Work-Energy & Conservation Principle`,
+        `Lagrange's Indeterminate Identity`,
+        `Euler's Non-Planar Postulate`,
+        `De Morgan's Secondary Law`
       ],
       correctIdx: 0,
-      expFn: (t: string) =>
-        `Live Web Search Verification: The Conservation & Optimization principle for ${t} provides the exact mathematical framework.`
-    },
-    {
-      questionFn: (t: string, diff: string) =>
-        `[Live Web Grounded] Given a scenario in ${t} where input parameter x increases by a factor of k, how does output y scale?`,
-      optionsFn: (t: string) => [
-        `Proportionally according to the characteristic polynomial of ${t}.`,
-        `It remains completely unchanged under all circumstances.`,
-        `It drops to zero immediately.`,
-        `It oscillates randomly without any pattern.`
-      ],
-      correctIdx: 0,
-      expFn: (t: string) =>
-        `Web Search Explanation: Scaling laws in ${t} follow the characteristic polynomial function as documented in latest syllabus materials.`
+      exp: (cleanTopic: string) => `### Theoretical Breakdown:\nThe conservation principle in ${cleanTopic} states that net energy/state within a closed system remains constant unless acted upon by external inputs.\n\n$$\\sum E_{\\text{in}} = \\sum E_{\\text{out}} + \\Delta E_{\\text{stored}}$$`
     }
   ];
 
   for (let i = 0; i < count; i++) {
-    const template = templates[i % templates.length];
-    const qText = template.questionFn(cleanTopic, difficulty);
-    const opts = template.optionsFn(cleanTopic);
-    
-    // Rotate options for variety
-    const shift = (i * 2) % 4;
-    const rotatedOpts = [...opts.slice(shift), ...opts.slice(0, shift)];
-    const correctIndex = (template.correctIdx + (4 - shift)) % 4;
+    const tIndex = i % templates.length;
+    const template = templates[tIndex];
 
     questions.push({
-      id: `live-gsearch-${timestamp}-${i}`,
-      text: `${qText} (Q${i + 1})`,
-      options: rotatedOpts,
-      correctAnswerIndex: correctIndex,
-      explanation: template.expFn(cleanTopic),
+      id: `clean-q-${timestamp}-${i}`,
+      text: template.text(cleanTopic),
+      options: template.options,
+      correctAnswerIndex: template.correctIdx,
+      explanation: template.exp(cleanTopic),
       difficulty: difficulty
     });
   }

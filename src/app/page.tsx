@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { EXAMS_DATA, Exam, Branch, Subject, Chapter, Question, getChapterQuestions } from "../data/quizData";
 import { fetchLiveSearchQuestions } from "../lib/liveSearchQuizEngine";
-import { addQuizResultToBlockchain, verifyCertificateOnBlockchain } from "../lib/blockchain";
+import { addQuizResultToBlockchain } from "../lib/blockchain";
 
 type Screen = "dashboard" | "branches" | "subjects" | "chapters" | "settings" | "quiz" | "result";
 
@@ -11,6 +11,41 @@ interface UserAnswer {
   questionId: string;
   selectedOptionIndex: number | null;
   isMarkedForReview: boolean;
+}
+
+// Clean question statement by stripping debug prefixes
+function cleanQuestionText(text: string): string {
+  return text.replace(/^\[.*?\]\s*/g, "").replace(/\s*\(Q\d+\)$/g, "").trim();
+}
+
+// Format step-by-step solutions with tables & equations
+function renderFormattedSolution(exp: string) {
+  if (!exp) return null;
+  const lines = exp.split("\n");
+  return (
+    <div className="space-y-1.5 font-sans leading-relaxed text-slate-300 text-xs">
+      {lines.map((line, lIdx) => {
+        if (line.startsWith("### ")) {
+          return <h5 key={lIdx} className="font-bold text-emerald-400 mt-2 mb-1">{line.replace("### ", "")}</h5>;
+        }
+        if (line.startsWith("|")) {
+          return (
+            <div key={lIdx} className="font-mono text-[11px] bg-slate-900/90 px-2.5 py-1 rounded border border-slate-800 text-cyan-300 overflow-x-auto my-0.5">
+              {line}
+            </div>
+          );
+        }
+        if (line.startsWith("$$")) {
+          return (
+            <div key={lIdx} className="font-mono text-center bg-slate-900 p-2 rounded-xl border border-slate-800 text-amber-300 my-1 font-bold">
+              {line.replaceAll("$$", "")}
+            </div>
+          );
+        }
+        return <p key={lIdx}>{line}</p>;
+      })}
+    </div>
+  );
 }
 
 export default function Home() {
@@ -116,14 +151,13 @@ export default function Home() {
     setCurrentScreen("settings");
   };
 
-  // Start Quiz (Automatic backend live search & question generation)
+  // Start Quiz (Clean automatic backend question generation)
   const startQuiz = async () => {
     if (!selectedChapter) return;
     setIsPreparingQuiz(true);
 
     let questions: Question[] = [];
     try {
-      // Backend live question search fetcher
       questions = await fetchLiveSearchQuestions({
         topic: `${selectedChapter.name} ${selectedSubject?.name || ""}`,
         examName: selectedExam.name,
@@ -142,12 +176,18 @@ export default function Home() {
       questions = getChapterQuestions(selectedChapter, difficulty, questionCount);
     }
 
-    setActiveQuestions(questions);
+    // Clean text for all questions
+    const cleanedQuestions = questions.map(q => ({
+      ...q,
+      text: cleanQuestionText(q.text)
+    }));
+
+    setActiveQuestions(cleanedQuestions);
     setCurrentQuestionIndex(0);
     setIsAnswerChecked(false);
 
     const initialAnswers: Record<string, UserAnswer> = {};
-    questions.forEach((q) => {
+    cleanedQuestions.forEach((q) => {
       initialAnswers[q.id] = {
         questionId: q.id,
         selectedOptionIndex: null,
@@ -165,7 +205,7 @@ export default function Home() {
 
   // Select Option
   const handleSelectOption = (optionIndex: number) => {
-    if (isAnswerChecked) return; // Locked once checked
+    if (isAnswerChecked) return;
     const activeQ = activeQuestions[currentQuestionIndex];
     if (!activeQ) return;
 
@@ -183,7 +223,6 @@ export default function Home() {
     if (!isAnswerChecked) {
       setIsAnswerChecked(true);
     } else {
-      // Next question or submit
       if (currentQuestionIndex < activeQuestions.length - 1) {
         setCurrentQuestionIndex((prev) => prev + 1);
         setIsAnswerChecked(false);
@@ -235,7 +274,6 @@ export default function Home() {
       localStorage.setItem("examiq_xp", newXP.toString());
     }
 
-    // Generate verified certificate hash in background silently
     const certCode = `EXAM-CERT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     setCertificateId(certCode);
 
@@ -254,7 +292,7 @@ export default function Home() {
         timestamp: new Date().toISOString(),
       });
     } catch (err) {
-      console.warn("Background score verification log error", err);
+      console.warn("Background score log error", err);
     }
 
     setCurrentScreen("result");
@@ -272,11 +310,8 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between font-sans">
-      {/* ───────────────────────────────────────────────────────────── */}
       {/* GAMIFIED TOP BAR / HEADER */}
-      {/* ───────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3 flex items-center justify-between">
-        {/* Brand Logo */}
         <div
           onClick={() => setCurrentScreen("dashboard")}
           className="flex items-center gap-3 cursor-pointer group"
@@ -292,21 +327,17 @@ export default function Home() {
           </div>
         </div>
 
-        {/* User Gamified Stats (Streak & XP Bar) */}
         <div className="flex items-center gap-4">
-          {/* Streak Badge */}
           <div className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-full text-orange-400 font-bold text-xs">
             <span className="text-sm">🔥</span>
             <span>{streakCount} Days</span>
           </div>
 
-          {/* XP Gems Badge */}
           <div className="flex items-center gap-1.5 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-full text-cyan-300 font-bold text-xs">
             <span className="text-sm">⚡</span>
             <span>{userXP} XP</span>
           </div>
 
-          {/* User Avatar */}
           <div className="hidden sm:flex items-center gap-2 bg-slate-800 border border-slate-700 px-3 py-1 rounded-full text-xs font-semibold text-slate-200">
             <span>👤</span>
             <span>{userName}</span>
@@ -314,16 +345,10 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ───────────────────────────────────────────────────────────── */}
-      {/* SCREEN 1: DUOLINGO DASHBOARD & LEARNING PATHWAY */}
-      {/* ───────────────────────────────────────────────────────────── */}
+      {/* DASHBOARD SCREEN */}
       {currentScreen === "dashboard" && (
         <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* LEFT & CENTER: EXAM SELECTION & SKILL PATHWAY */}
           <div className="lg:col-span-8 space-y-8">
-            
-            {/* Exam Selector Tabs (Duolingo Skill Tree Bar) */}
             <div>
               <div className="flex justify-between items-center mb-3">
                 <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Select Exam Path</h2>
@@ -348,7 +373,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* GATE Branch Selector if GATE exam selected */}
             {selectedExam.id === "gate" && selectedExam.branches && (
               <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
@@ -373,7 +397,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* LEARNING PATH (DUOLINGO UNIT STAGE) */}
             <div className="space-y-6">
               <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-6 text-white shadow-xl shadow-emerald-950/40 relative overflow-hidden">
                 <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -392,7 +415,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* SUBJECT NODES LIST */}
               <div className="space-y-6">
                 {availableSubjects.map((subj, subjIdx) => (
                   <div key={subj.id} className="duo-card p-6">
@@ -412,7 +434,6 @@ export default function Home() {
                       </span>
                     </div>
 
-                    {/* CHAPTER NODES GRID */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                       {subj.chapters.map((chap) => (
                         <div
@@ -426,7 +447,7 @@ export default function Home() {
                                 📖 Chapter
                               </span>
                               <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-md">
-                                Unlimited Qs
+                                Full Question Pool
                               </span>
                             </div>
                             <h4 className="text-sm font-bold text-slate-200 group-hover:text-white mb-1">
@@ -452,10 +473,7 @@ export default function Home() {
 
           </div>
 
-          {/* RIGHT SIDEBAR: DAILY GOAL & QUICK ACTION STATS */}
           <div className="lg:col-span-4 space-y-6">
-            
-            {/* DAILY TARGET CARD */}
             <div className="duo-card p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center text-xl">
@@ -467,7 +485,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Progress Bar */}
               <div className="mb-3">
                 <div className="flex justify-between text-xs font-bold mb-1.5">
                   <span className="text-slate-400">Progress</span>
@@ -488,7 +505,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* RECENT VERIFIED CERTIFICATES */}
             <div className="duo-card p-6">
               <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
                 <span>🛡️</span> Official Verified Certificates
@@ -509,9 +525,7 @@ export default function Home() {
         </div>
       )}
 
-      {/* ───────────────────────────────────────────────────────────── */}
-      {/* SCREEN 2: QUIZ CONFIGURATION SETTINGS MODAL */}
-      {/* ───────────────────────────────────────────────────────────── */}
+      {/* SETTINGS MODAL */}
       {currentScreen === "settings" && selectedChapter && (
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="duo-card max-w-md w-full p-6 sm:p-8 space-y-6">
@@ -523,7 +537,6 @@ export default function Home() {
               <p className="text-xs text-slate-400 mt-1">Configure your practice session</p>
             </div>
 
-            {/* Candidate Name Input */}
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-1.5">Candidate Name</label>
               <input
@@ -537,7 +550,6 @@ export default function Home() {
               />
             </div>
 
-            {/* Difficulty Selection */}
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-2">Difficulty Level</label>
               <div className="grid grid-cols-3 gap-2">
@@ -562,7 +574,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Question Count */}
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-2">Number of Questions</label>
               <div className="grid grid-cols-4 gap-2">
@@ -581,7 +592,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Duration */}
             <div>
               <label className="block text-xs font-bold text-slate-300 mb-2">Timer Duration</label>
               <select
@@ -596,7 +606,6 @@ export default function Home() {
               </select>
             </div>
 
-            {/* Action Buttons */}
             <div className="flex gap-3 pt-2">
               <button
                 type="button"
@@ -615,7 +624,7 @@ export default function Home() {
                 {isPreparingQuiz ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Generating...</span>
+                    <span>Preparing Qs...</span>
                   </>
                 ) : (
                   <span>Start Quiz 🚀</span>
@@ -626,12 +635,9 @@ export default function Home() {
         </div>
       )}
 
-      {/* ───────────────────────────────────────────────────────────── */}
-      {/* SCREEN 3: DUOLINGO INTERACTIVE QUIZ INTERFACE */}
-      {/* ───────────────────────────────────────────────────────────── */}
+      {/* INTERACTIVE QUIZ INTERFACE */}
       {currentScreen === "quiz" && currentQ && (
         <div className="flex-1 flex flex-col justify-between max-w-3xl mx-auto w-full px-4 py-6">
-          {/* Top Progress Bar & Timer */}
           <div className="flex items-center gap-4 mb-8">
             <button
               onClick={() => {
@@ -644,7 +650,6 @@ export default function Home() {
               ✕
             </button>
 
-            {/* Duolingo Green Progress Bar */}
             <div className="flex-1 bg-slate-800 h-3.5 rounded-full overflow-hidden border border-slate-700">
               <div
                 className="bg-emerald-500 h-full rounded-full transition-all duration-300"
@@ -654,23 +659,20 @@ export default function Home() {
               ></div>
             </div>
 
-            {/* Timer Badge */}
             <div className="bg-slate-900 border border-slate-800 px-3 py-1 rounded-full text-xs font-mono font-bold text-amber-400">
               ⏱️ {formatTime(timeLeft)}
             </div>
           </div>
 
-          {/* Main Question Card */}
           <div className="flex-1 flex flex-col justify-center">
             <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
               Question {currentQuestionIndex + 1} of {activeQuestions.length}
             </div>
 
             <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-relaxed mb-8">
-              {currentQ.text}
+              {cleanQuestionText(currentQ.text)}
             </h2>
 
-            {/* Options List */}
             <div className="space-y-3 mb-8">
               {currentQ.options.map((opt, idx) => {
                 const isSelected = currentAns?.selectedOptionIndex === idx;
@@ -709,7 +711,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Duolingo Bottom Feedback & Action Footer */}
           <div className="pt-4 border-t border-slate-800">
             {isAnswerChecked && (
               <div
@@ -722,9 +723,9 @@ export default function Home() {
                 <span className="text-2xl">{isCorrect ? "🎉" : "💡"}</span>
                 <div className="flex-1">
                   <div className="font-extrabold text-sm mb-1">
-                    {isCorrect ? "Awesome! That's Correct! (+10 XP)" : "Explanation & Solution:"}
+                    {isCorrect ? "Awesome! That's Correct! (+10 XP)" : "Solution & Explanation:"}
                   </div>
-                  <div className="text-xs leading-relaxed opacity-95">{currentQ.explanation}</div>
+                  {renderFormattedSolution(currentQ.explanation)}
                 </div>
               </div>
             )}
@@ -761,14 +762,10 @@ export default function Home() {
         </div>
       )}
 
-      {/* ───────────────────────────────────────────────────────────── */}
-      {/* SCREEN 4: GAMIFIED RESULTS & OFFICIAL VERIFIED CERTIFICATE */}
-      {/* ───────────────────────────────────────────────────────────── */}
+      {/* RESULTS SCREEN */}
       {currentScreen === "result" && (
         <div className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
           <div className="duo-card p-6 sm:p-10 space-y-8 text-center">
-            
-            {/* Victory Header */}
             <div>
               <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-4xl mb-4 shadow-xl shadow-emerald-500/20 animate-bounce-subtle">
                 🏆
@@ -782,7 +779,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* XP & Score Summary Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800">
                 <div className="text-xs font-bold text-slate-400 mb-1">XP Earned</div>
@@ -807,7 +803,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Official Verified Certificate Card */}
             {certificateId && (
               <div className="bg-slate-950 border-2 border-emerald-500/30 rounded-3xl p-6 text-left relative overflow-hidden">
                 <div className="flex justify-between items-start mb-4 border-b border-slate-800 pb-3">
@@ -830,9 +825,8 @@ export default function Home() {
               </div>
             )}
 
-            {/* Question Review Section */}
             <div className="text-left space-y-3">
-              <h3 className="text-sm font-bold text-slate-300">Question Review & Solutions</h3>
+              <h3 className="text-sm font-bold text-slate-300">Detailed Solutions & Step-by-Step Breakdown</h3>
               {activeQuestions.map((q, idx) => {
                 const ans = userAnswers[q.id];
                 const selectedIdx = ans?.selectedOptionIndex;
@@ -847,21 +841,20 @@ export default function Home() {
                         : "bg-rose-950/20 border-rose-500/30"
                     }`}
                   >
-                    <div className="font-bold text-slate-200 mb-1">
-                      Q{idx + 1}. {q.text}
+                    <div className="font-bold text-slate-200 mb-1.5 text-sm">
+                      Q{idx + 1}. {cleanQuestionText(q.text)}
                     </div>
-                    <div className="text-[11px] text-slate-400 mb-2">
+                    <div className="text-xs text-slate-400 mb-2">
                       Correct Answer: <strong className="text-emerald-400">{q.options[q.correctAnswerIndex]}</strong>
                     </div>
-                    <div className="p-2.5 bg-slate-950 rounded-xl text-slate-300 leading-relaxed border border-slate-900">
-                      <strong>Solution:</strong> {q.explanation}
+                    <div className="p-3 bg-slate-950 rounded-xl text-slate-300 leading-relaxed border border-slate-900">
+                      {renderFormattedSolution(q.explanation)}
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* Back to Dashboard Button */}
             <button
               onClick={() => setCurrentScreen("dashboard")}
               className="w-full py-4 btn-3d-green font-black text-sm rounded-2xl cursor-pointer"
