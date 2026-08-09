@@ -1,18 +1,13 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { EXAMS_DATA, Exam, Branch, Subject, Question } from "../data/quizData";
+import { EXAMS_DATA, Exam, Branch, Subject, Chapter, Question, getChapterQuestions } from "../data/quizData";
+import { fetchLiveSearchQuestions } from "../lib/liveSearchQuizEngine";
+import { addQuizResultToBlockchain, verifyCertificateOnBlockchain, Block } from "../lib/blockchain";
+import BlockchainVerificationModal from "../components/BlockchainVerificationModal";
 
-type Screen = "home" | "branches" | "subjects" | "settings" | "quiz" | "result";
-
-interface UserQuizConfig {
-  exam: Exam;
-  branch?: Branch;
-  subject: Subject;
-  difficulty: "easy" | "medium" | "hard";
-  durationMinutes: number;
-  questionCount: number;
-}
+type Screen = "home" | "branches" | "subjects" | "chapters" | "settings" | "quiz" | "result";
+type QuestionMode = "procedural" | "google_live";
 
 interface UserAnswer {
   questionId: string;
@@ -26,11 +21,18 @@ export default function Home() {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
+
+  // Question Generator Mode
+  const [questionMode, setQuestionMode] = useState<QuestionMode>("procedural");
+  const [customTopic, setCustomTopic] = useState<string>("");
+  const [isFetchingLiveQuestions, setIsFetchingLiveQuestions] = useState<boolean>(false);
 
   // Settings states
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("easy");
   const [durationMinutes, setDurationMinutes] = useState<number>(15);
   const [questionCount, setQuestionCount] = useState<number>(10);
+  const [userName, setUserName] = useState<string>("Student Aspirant");
 
   // Active Quiz states
   const [activeQuestions, setActiveQuestions] = useState<Question[]>([]);
@@ -42,13 +44,16 @@ export default function Home() {
   const [timeTakenSeconds, setTimeTakenSeconds] = useState<number>(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Result metrics
+  // Result metrics & Blockchain
   const [score, setScore] = useState<number>(0);
   const [correctCount, setCorrectCount] = useState<number>(0);
   const [incorrectCount, setIncorrectCount] = useState<number>(0);
   const [skippedCount, setSkippedCount] = useState<number>(0);
+  const [minedBlock, setMinedBlock] = useState<Block | null>(null);
+  const [isBlockchainModalOpen, setIsBlockchainModalOpen] = useState<boolean>(false);
+  const [modalCertId, setModalCertId] = useState<string>("");
 
-  // Filtered list of subjects based on exam/branch choice
+  // Filtered lists
   const availableSubjects = useMemo(() => {
     if (!selectedExam) return [];
     if (selectedExam.id === "gate" && selectedBranch) {
@@ -57,22 +62,10 @@ export default function Home() {
     return selectedExam.subjects || [];
   }, [selectedExam, selectedBranch]);
 
-  // Total questions in selected subject matching difficulty
-  const questionsForSelection = useMemo(() => {
+  const availableChapters = useMemo(() => {
     if (!selectedSubject) return [];
-    return selectedSubject.questions.filter((q) => q.difficulty === difficulty);
-  }, [selectedSubject, difficulty]);
-
-  // Adjust requested question count based on actual pool size
-  useEffect(() => {
-    if (questionsForSelection.length > 0) {
-      if (questionCount > questionsForSelection.length) {
-        setQuestionCount(questionsForSelection.length);
-      }
-    } else {
-      setQuestionCount(5);
-    }
-  }, [questionsForSelection, questionCount]);
+    return selectedSubject.chapters || [];
+  }, [selectedSubject]);
 
   // Timer logic
   useEffect(() => {
@@ -81,7 +74,7 @@ export default function Home() {
         setTimeLeft((prev) => {
           if (prev <= 1) {
             clearInterval(timerRef.current!);
-            handleQuizSubmit(true); // force submit on timeout
+            handleQuizSubmit(true);
             return 0;
           }
           return prev - 1;
@@ -99,6 +92,7 @@ export default function Home() {
     setSelectedExam(exam);
     setSelectedBranch(null);
     setSelectedSubject(null);
+    setSelectedChapter(null);
     if (exam.branches && exam.branches.length > 0) {
       setCurrentScreen("branches");
     } else {
@@ -106,49 +100,65 @@ export default function Home() {
     }
   };
 
-  // Handle Branch Selection (for GATE)
+  // Handle Branch Selection
   const selectBranch = (branch: Branch) => {
     setSelectedBranch(branch);
     setSelectedSubject(null);
+    setSelectedChapter(null);
     setCurrentScreen("subjects");
   };
 
   // Handle Subject Selection
   const selectSubject = (subject: Subject) => {
     setSelectedSubject(subject);
-    // Reset defaults for this subject
-    const subjectQuestions = subject.questions;
-    // Set first available difficulty that has questions
-    const diffs: ("easy" | "medium" | "hard")[] = ["easy", "medium", "hard"];
-    const validDiff = diffs.find((d) => subjectQuestions.some((q) => q.difficulty === d)) || "easy";
-    setDifficulty(validDiff);
+    setSelectedChapter(null);
+    setCurrentScreen("chapters");
+  };
+
+  // Handle Chapter Selection
+  const selectChapter = (chapter: Chapter) => {
+    setSelectedChapter(chapter);
     setCurrentScreen("settings");
   };
 
-  // Start the Quiz
-  const startQuiz = () => {
-    if (!selectedSubject) return;
+  // Start the Quiz with either Database questions or Google Live Search questions
+  const startQuiz = async () => {
+    if (!selectedChapter) return;
 
-    // Filter questions by difficulty
-    let filteredQuestions = selectedSubject.questions.filter(
-      (q) => q.difficulty === difficulty
-    );
+    let generated: Question[] = [];
 
-    // If no questions in this difficulty, fallback to any available
-    if (filteredQuestions.length === 0) {
-      filteredQuestions = selectedSubject.questions;
+    if (questionMode === "google_live") {
+      setIsFetchingLiveQuestions(true);
+      try {
+        const topicToUse = customTopic.trim() || `${selectedChapter.name} - ${selectedSubject?.name}`;
+        generated = await fetchLiveSearchQuestions({
+          topic: topicToUse,
+          examName: selectedExam?.name || "Competitive Exam",
+          subjectName: selectedSubject?.name || "",
+          difficulty,
+          count: questionCount,
+        });
+      } catch (err) {
+        console.error("Failed to fetch live search questions", err);
+        generated = getChapterQuestions(selectedChapter, difficulty, questionCount);
+      } finally {
+        setIsFetchingLiveQuestions(false);
+      }
+    } else {
+      generated = getChapterQuestions(selectedChapter, difficulty, questionCount);
     }
 
-    // Shuffle questions
-    const shuffled = [...filteredQuestions].sort(() => 0.5 - Math.random());
-    const selected = shuffled.slice(0, Math.min(questionCount, shuffled.length));
+    if (generated.length === 0) {
+      alert("No questions available for this configuration. Switching to default pool.");
+      generated = getChapterQuestions(selectedChapter, difficulty, questionCount);
+    }
 
-    setActiveQuestions(selected);
+    setActiveQuestions(generated);
     setCurrentQuestionIndex(0);
 
     // Initialize answers map
     const initialAnswers: Record<string, UserAnswer> = {};
-    selected.forEach((q) => {
+    generated.forEach((q) => {
       initialAnswers[q.id] = {
         questionId: q.id,
         selectedOptionIndex: null,
@@ -193,7 +203,7 @@ export default function Home() {
     }));
   };
 
-  // Clear current response
+  // Clear response
   const clearResponse = () => {
     const activeQ = activeQuestions[currentQuestionIndex];
     if (!activeQ) return;
@@ -207,15 +217,14 @@ export default function Home() {
     }));
   };
 
-  // Quiz submission handler
-  const handleQuizSubmit = (isTimeout = false) => {
+  // Quiz submission handler with Blockchain Ledger Hashing
+  const handleQuizSubmit = async (isTimeout = false) => {
     if (timerRef.current) clearInterval(timerRef.current);
 
-    // Calculate time taken
     const elapsedSeconds = Math.round((Date.now() - quizStartTime) / 1000);
-    setTimeTakenSeconds(Math.min(elapsedSeconds, totalQuizTime));
+    const actualTimeTaken = Math.min(elapsedSeconds, totalQuizTime);
+    setTimeTakenSeconds(actualTimeTaken);
 
-    // Calculate score & statistics
     let calculatedScore = 0;
     let correct = 0;
     let incorrect = 0;
@@ -227,11 +236,9 @@ export default function Home() {
         skipped++;
       } else if (ans.selectedOptionIndex === q.correctAnswerIndex) {
         correct++;
-        // Give +4 for correct (JEE/NEET style) or generic points
         calculatedScore += 4;
       } else {
         incorrect++;
-        // -1 negative marking
         calculatedScore -= 1;
       }
     });
@@ -240,6 +247,29 @@ export default function Home() {
     setCorrectCount(correct);
     setIncorrectCount(incorrect);
     setSkippedCount(skipped);
+
+    const percentage = Math.max(0, Math.round((correct / activeQuestions.length) * 100));
+    const certId = `CERT-${(selectedExam?.id || "EXAM").toUpperCase()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+
+    // Mine and store block in Blockchain Ledger
+    try {
+      const block = await addQuizResultToBlockchain({
+        certificateId: certId,
+        userName: userName.trim() || "Student Aspirant",
+        examName: selectedExam?.name || "Quiz",
+        subjectName: selectedSubject?.name || "Subject",
+        chapterName: selectedChapter?.name || "Chapter",
+        score: calculatedScore,
+        totalQuestions: activeQuestions.length,
+        percentage,
+        difficulty,
+        timeTakenSeconds: actualTimeTaken,
+        timestamp: new Date().toISOString(),
+      });
+      setMinedBlock(block);
+    } catch (e) {
+      console.error("Blockchain ledger mine error", e);
+    }
 
     setCurrentScreen("result");
   };
@@ -286,34 +316,51 @@ export default function Home() {
       } else {
         setCurrentScreen("home");
       }
-    } else if (currentScreen === "settings") setCurrentScreen("subjects");
-    else if (currentScreen === "result") setCurrentScreen("home");
+    } else if (currentScreen === "chapters") {
+      setCurrentScreen("subjects");
+    } else if (currentScreen === "settings") {
+      setCurrentScreen("chapters");
+    } else if (currentScreen === "result") {
+      setCurrentScreen("home");
+    }
   };
 
   return (
-    <main className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 flex flex-col justify-between max-w-7xl mx-auto w-full">
+    <main className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 flex flex-col justify-between max-w-7xl mx-auto w-full text-slate-100 font-sans">
       {/* HEADER SECTION */}
-      <header className="flex justify-between items-center mb-8 pb-4 border-b border-slate-800">
+      <header className="flex flex-wrap justify-between items-center mb-8 pb-4 border-b border-slate-800 gap-4">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => setCurrentScreen("home")}>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-xl font-bold shadow-lg shadow-indigo-500/20">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-600 to-pink-500 flex items-center justify-center text-xl font-black shadow-lg shadow-indigo-500/30">
             EQ
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-1.5">
-              ExamiQ <span className="text-[10px] uppercase bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30">PRO</span>
+            <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
+              ExamiQ <span className="text-[10px] uppercase bg-gradient-to-r from-indigo-500/30 to-purple-500/30 text-indigo-300 px-2.5 py-0.5 rounded-full border border-indigo-500/40 font-semibold tracking-wider">PRO AI</span>
             </h1>
-            <p className="text-xs text-slate-400">Advanced Quiz & Real-time Exam Prep</p>
+            <p className="text-xs text-slate-400">Google Search AI & Blockchain Ledger Testing Platform</p>
           </div>
         </div>
 
-        {currentScreen !== "home" && currentScreen !== "quiz" && (
+        <div className="flex items-center gap-3">
           <button
-            onClick={goBack}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/40 text-slate-300 hover:bg-slate-800 transition text-sm cursor-pointer"
+            onClick={() => {
+              setModalCertId("");
+              setIsBlockchainModalOpen(true);
+            }}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-indigo-500/30 bg-indigo-950/40 hover:bg-indigo-900/60 text-indigo-300 text-xs font-semibold transition shadow-md shadow-indigo-500/10 cursor-pointer"
           >
-            ← Back
+            <span>🔗</span> Blockchain Ledger
           </button>
-        )}
+
+          {currentScreen !== "home" && currentScreen !== "quiz" && (
+            <button
+              onClick={goBack}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-700 bg-slate-800/60 text-slate-300 hover:bg-slate-700 transition text-xs font-semibold cursor-pointer"
+            >
+              ← Back
+            </button>
+          )}
+        </div>
       </header>
 
       {/* SCREEN ROUTING */}
@@ -322,41 +369,42 @@ export default function Home() {
       {currentScreen === "home" && (
         <section className="flex-1 flex flex-col justify-center py-6">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-gradient mb-4">
-              Select Your Target Exam
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-semibold mb-4">
+              <span>🚀</span> Google Real-Time AI Search & Blockchain Ledger Integration Active
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-4">
+              Choose Your Targeted <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">Competitive Exam</span>
             </h2>
-            <p className="text-slate-400 text-lg">
-              Start preparing with real-time test settings, branch selection, customized difficulty, and in-depth performance analysis.
+            <p className="text-slate-400 text-sm sm:text-base">
+              Select an exam below to access full branch syllabi, chapter-wise questions, real-time Google search question model, and blockchain verified score certificates.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {EXAMS_DATA.map((exam) => (
               <div
                 key={exam.id}
                 onClick={() => selectExam(exam)}
-                className="glass-panel p-6 cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+                className="group relative bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-indigo-500/10 cursor-pointer flex flex-col justify-between"
               >
-                {/* Decorative background glow */}
-                <div className="absolute -right-4 -top-4 w-24 h-24 bg-indigo-500/5 rounded-full blur-xl group-hover:bg-indigo-500/10 transition-all duration-300" />
-                
-                <div>
-                  <div className="text-4xl mb-4 p-2 bg-slate-800/50 rounded-xl w-14 h-14 flex items-center justify-center border border-slate-700/50">
-                    {exam.icon}
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-indigo-400 transition-colors">
-                    {exam.name}
-                  </h3>
-                  <p className="text-xs text-slate-400 uppercase font-semibold mb-3 tracking-wider">
-                    {exam.fullName}
-                  </p>
-                  <p className="text-sm text-slate-300 line-clamp-3">
-                    {exam.description}
-                  </p>
+                <div className="absolute top-4 right-4 text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition">
+                  {exam.totalSubjects} Subjects
                 </div>
 
-                <div className="mt-6 flex items-center justify-end text-sm font-semibold text-indigo-400 group-hover:translate-x-1 transition-transform">
-                  Configure Test →
+                <div>
+                  <div className="w-12 h-12 rounded-xl bg-slate-800 group-hover:scale-110 flex items-center justify-center text-2xl mb-4 transition duration-300">
+                    {exam.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-white group-hover:text-indigo-400 transition mb-1">
+                    {exam.name}
+                  </h3>
+                  <p className="text-xs text-indigo-300/80 font-medium mb-3">{exam.fullName}</p>
+                  <p className="text-xs text-slate-400 leading-relaxed line-clamp-2">{exam.description}</p>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs font-semibold text-indigo-400 group-hover:text-indigo-300">
+                  <span>Explore Syllabus</span>
+                  <span className="group-hover:translate-x-1 transition">→</span>
                 </div>
               </div>
             ))}
@@ -364,341 +412,410 @@ export default function Home() {
         </section>
       )}
 
-      {/* 2. GATE BRANCH SELECTION */}
+      {/* 2. BRANCH SELECTION SCREEN (FOR GATE) */}
       {currentScreen === "branches" && selectedExam && (
-        <section className="flex-1 py-6">
-          <div className="mb-8">
-            <h2 className="text-3xl font-extrabold text-white mb-2">Select Your GATE Branch</h2>
-            <p className="text-slate-400 text-sm">Choose your specialized branch to view the syllabus and subject list.</p>
+        <section className="flex-1 flex flex-col justify-center py-6">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
+              {selectedExam.name} Branches
+            </span>
+            <h2 className="text-3xl font-extrabold text-white mt-3 mb-2">Select Engineering Branch</h2>
+            <p className="text-xs sm:text-sm text-slate-400">Choose your specific GATE branch to view dedicated subjects & chapter pools.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {selectedExam.branches?.map((branch) => (
               <div
                 key={branch.id}
                 onClick={() => selectBranch(branch)}
-                className="glass-panel p-6 cursor-pointer flex flex-col justify-between group h-44"
+                className="group bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-5 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 cursor-pointer"
               >
-                <div>
-                  <div className="text-xs font-semibold text-indigo-400 uppercase tracking-widest mb-2">
-                    GATE Core Branch
+                <div className="flex items-center justify-between mb-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl font-bold">
+                    {branch.icon}
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2 group-hover:text-indigo-400 transition">
-                    {branch.name}
-                  </h3>
-                  <p className="text-xs text-slate-400 line-clamp-3">{branch.description}</p>
+                  <span className="text-[10px] font-bold bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">
+                    {branch.subjects.length} Subjects
+                  </span>
                 </div>
-                <div className="text-xs text-right font-medium text-slate-500 group-hover:text-indigo-400 transition">
-                  {branch.subjects.length} Subjects Available
-                </div>
+                <h3 className="text-lg font-bold text-white group-hover:text-indigo-400 transition">{branch.name}</h3>
+                <p className="text-xs text-slate-400 mt-1 line-clamp-1">{branch.fullName}</p>
               </div>
             ))}
           </div>
         </section>
       )}
 
-      {/* 3. SUBJECT SELECTION */}
+      {/* 3. SUBJECT SELECTION SCREEN */}
       {currentScreen === "subjects" && selectedExam && (
-        <section className="flex-1 py-6">
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-3xl font-extrabold text-white mb-2">
-                {selectedExam.name} {selectedBranch ? `(${selectedBranch.name})` : ""} - Subjects
-              </h2>
-              <p className="text-slate-400 text-sm">
-                Select a subject from the official syllabus to customize and launch your quiz.
-              </p>
-            </div>
-            {selectedExam.id === "gate" && (
-              <button
-                onClick={() => setCurrentScreen("branches")}
-                className="px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/40 text-slate-300 hover:bg-slate-800 text-xs self-start"
-              >
-                Change Branch
-              </button>
-            )}
+        <section className="flex-1 flex flex-col justify-center py-6">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
+              {selectedBranch ? `${selectedExam.name} (${selectedBranch.name})` : selectedExam.name}
+            </span>
+            <h2 className="text-3xl font-extrabold text-white mt-3 mb-2">Select Subject</h2>
+            <p className="text-xs sm:text-sm text-slate-400">Pick a subject to explore its chapters and generate tests.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {availableSubjects.map((subject) => (
               <div
                 key={subject.id}
                 onClick={() => selectSubject(subject)}
-                className="glass-panel p-6 cursor-pointer flex items-center justify-between group gap-4"
+                className="group bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-6 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 cursor-pointer flex flex-col justify-between"
               >
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-white group-hover:text-indigo-400 transition mb-1">
-                    {subject.name}
-                  </h3>
-                  <p className="text-xs text-slate-400">{subject.description}</p>
+                <div>
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-xl font-bold text-white group-hover:text-indigo-400 transition">
+                      {subject.name}
+                    </h3>
+                    <span className="text-xs font-semibold bg-indigo-950 text-indigo-300 border border-indigo-500/30 px-2.5 py-0.5 rounded-full">
+                      {subject.chapters.length} Chapters
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed mb-4">{subject.description}</p>
                 </div>
-                <div className="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition">
-                  ➔
+                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-semibold text-indigo-400 group-hover:text-indigo-300">
+                  <span>View Chapters</span>
+                  <span>→</span>
                 </div>
               </div>
             ))}
-
-            {availableSubjects.length === 0 && (
-              <div className="col-span-full py-12 text-center text-slate-500">
-                No subjects configured yet for this category.
-              </div>
-            )}
           </div>
         </section>
       )}
 
-      {/* 4. QUIZ SETTINGS */}
-      {currentScreen === "settings" && selectedSubject && (
-        <section className="flex-1 py-6 max-w-2xl mx-auto w-full">
-          <div className="mb-8 text-center">
-            <h2 className="text-3xl font-extrabold text-white mb-2">Configure Practice Test</h2>
-            <p className="text-slate-400 text-sm">
-              Target: <span className="text-indigo-400 font-semibold">{selectedSubject.name}</span>
-            </p>
+      {/* 4. CHAPTER SELECTION SCREEN */}
+      {currentScreen === "chapters" && selectedSubject && (
+        <section className="flex-1 flex flex-col justify-center py-6">
+          <div className="text-center max-w-2xl mx-auto mb-10">
+            <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
+              {selectedSubject.name}
+            </span>
+            <h2 className="text-3xl font-extrabold text-white mt-3 mb-2">Select Chapter / Topic</h2>
+            <p className="text-xs sm:text-sm text-slate-400">Choose a chapter to configure timer, difficulty, and question model.</p>
           </div>
 
-          <div className="glass-panel p-8 space-y-8 bg-slate-900/40 border-slate-800">
-            {/* DIFFICULTY */}
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-slate-300">Select Difficulty Level</label>
-              <div className="grid grid-cols-3 gap-3">
-                {[
-                  { id: "easy", label: "Easy", color: "border-emerald-500/30 text-emerald-400 bg-emerald-500/5", activeColor: "bg-emerald-500 text-slate-950 border-emerald-400 font-bold" },
-                  { id: "medium", label: "Medium", color: "border-amber-500/30 text-amber-400 bg-amber-500/5", activeColor: "bg-amber-500 text-slate-950 border-amber-400 font-bold" },
-                  { id: "hard", label: "Hard", color: "border-rose-500/30 text-rose-400 bg-rose-500/5", activeColor: "bg-rose-500 text-slate-950 border-rose-400 font-bold" }
-                ].map((level) => {
-                  const isSelected = difficulty === level.id;
-                  const count = selectedSubject.questions.filter((q) => q.difficulty === level.id).length;
-                  const isDisabled = count === 0;
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {availableChapters.map((chapter) => (
+              <div
+                key={chapter.id}
+                onClick={() => selectChapter(chapter)}
+                className="group bg-slate-900/80 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/50 rounded-2xl p-6 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10 cursor-pointer flex flex-col justify-between"
+              >
+                <div>
+                  <h3 className="text-lg font-bold text-white group-hover:text-indigo-400 transition mb-2">
+                    {chapter.name}
+                  </h3>
+                  <p className="text-xs text-slate-400 leading-relaxed mb-4">{chapter.description}</p>
+                </div>
 
-                  return (
-                    <button
-                      key={level.id}
-                      disabled={isDisabled}
-                      onClick={() => setDifficulty(level.id as any)}
-                      className={`py-3 px-4 rounded-xl border text-center transition flex flex-col items-center justify-center gap-1 cursor-pointer ${
-                        isDisabled
-                          ? "opacity-30 cursor-not-allowed border-slate-800 text-slate-600 bg-transparent"
-                          : isSelected
-                          ? level.activeColor
-                          : `${level.color} hover:bg-opacity-20`
-                      }`}
-                    >
-                      <span className="text-sm">{level.label}</span>
-                      <span className="text-[10px] opacity-80">({count} Questions)</span>
-                    </button>
-                  );
-                })}
+                <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-semibold text-indigo-400 group-hover:text-indigo-300">
+                  <span>Configure Test</span>
+                  <span>→</span>
+                </div>
               </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 5. SETTINGS & MODEL CONFIGURATION SCREEN */}
+      {currentScreen === "settings" && selectedChapter && (
+        <section className="flex-1 flex flex-col items-center justify-center py-6">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl relative">
+            <div className="text-center mb-8">
+              <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-3.5 py-1 rounded-full border border-indigo-500/20">
+                {selectedExam?.name} • {selectedSubject?.name}
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-3">{selectedChapter.name}</h2>
+              <p className="text-xs text-slate-400 mt-1">Configure your AI Question Generator & Test parameters</p>
             </div>
 
-            {/* DURATION SLIDER */}
-            <div className="space-y-3">
-              <div className="flex justify-between items-center text-sm">
-                <label className="font-semibold text-slate-300">Set Timer Duration</label>
-                <span className="text-indigo-400 font-bold">{durationMinutes} Minutes</span>
-              </div>
+            {/* Candidate Name Input */}
+            <div className="mb-6">
+              <label className="block text-xs font-semibold text-slate-300 mb-2">Candidate Name (For Blockchain Certificate)</label>
               <input
-                type="range"
-                min="5"
-                max="60"
-                step="5"
-                value={durationMinutes}
-                onChange={(e) => setDurationMinutes(Number(e.target.value))}
-                className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                type="text"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                placeholder="Enter your name..."
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-indigo-500"
               />
-              <div className="flex justify-between text-[10px] text-slate-500">
-                <span>5m</span>
-                <span>15m</span>
-                <span>30m</span>
-                <span>45m</span>
-                <span>60m</span>
+            </div>
+
+            {/* Question Generation Model Selection */}
+            <div className="mb-6 bg-slate-950/80 p-4 rounded-2xl border border-indigo-500/30">
+              <label className="block text-xs font-bold uppercase tracking-wider text-indigo-400 mb-3">
+                🤖 Question Engine Model
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setQuestionMode("procedural")}
+                  className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${
+                    questionMode === "procedural"
+                      ? "bg-indigo-600/30 border-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+                      : "bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800"
+                  }`}
+                >
+                  <div className="text-sm font-bold flex items-center gap-2">
+                    <span>⚡</span> Procedural Generator
+                  </div>
+                  <div className="text-[11px] opacity-80 mt-1">Instant dynamic math & formula based questions</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setQuestionMode("google_live")}
+                  className={`p-3.5 rounded-xl border text-left transition cursor-pointer ${
+                    questionMode === "google_live"
+                      ? "bg-gradient-to-r from-pink-600/30 to-purple-600/30 border-pink-500 text-white shadow-lg shadow-pink-500/20"
+                      : "bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-800"
+                  }`}
+                >
+                  <div className="text-sm font-bold flex items-center gap-2 text-pink-300">
+                    <span>🔥</span> Google Real-Time AI Search
+                  </div>
+                  <div className="text-[11px] opacity-80 mt-1">Live web search queries for fresh questions</div>
+                </button>
+              </div>
+
+              {/* Custom Topic Input for Google Live Mode */}
+              {questionMode === "google_live" && (
+                <div className="mt-4 pt-4 border-t border-slate-800 animate-fadeIn">
+                  <label className="block text-xs font-medium text-pink-300 mb-1.5">
+                    Custom Web Search Query / Topic (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={customTopic}
+                    onChange={(e) => setCustomTopic(e.target.value)}
+                    placeholder={`e.g. ${selectedChapter.name} GATE 2026 practice questions...`}
+                    className="w-full bg-slate-900 border border-pink-500/40 rounded-xl px-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-pink-400"
+                  />
+                  <p className="text-[10px] text-slate-400 mt-1">
+                    Searches Google & academic references live to fetch unique, non-repeating questions.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Difficulty Selection */}
+            <div className="mb-6">
+              <label className="block text-xs font-semibold text-slate-300 mb-2">Difficulty Level</label>
+              <div className="grid grid-cols-3 gap-3">
+                {(["easy", "medium", "hard"] as const).map((diff) => (
+                  <button
+                    key={diff}
+                    type="button"
+                    onClick={() => setDifficulty(diff)}
+                    className={`py-2.5 text-xs font-bold capitalize rounded-xl border transition cursor-pointer ${
+                      difficulty === diff
+                        ? diff === "easy"
+                          ? "bg-emerald-600/20 border-emerald-500 text-emerald-300"
+                          : diff === "medium"
+                          ? "bg-amber-600/20 border-amber-500 text-amber-300"
+                          : "bg-rose-600/20 border-rose-500 text-rose-300"
+                        : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800"
+                    }`}
+                  >
+                    {diff}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* QUESTIONS COUNT */}
-            <div className="space-y-3">
-              <label className="text-sm font-semibold text-slate-300 block">Number of Questions</label>
-              <div className="flex gap-3">
-                {[5, 10, 15, 20].map((num) => {
-                  const isAvailable = questionsForSelection.length >= num;
-                  const isSelected = questionCount === num;
-
-                  return (
-                    <button
-                      key={num}
-                      disabled={questionsForSelection.length === 0}
-                      onClick={() => setQuestionCount(num)}
-                      className={`flex-1 py-2 px-3 rounded-lg border text-center text-sm transition cursor-pointer ${
-                        isSelected
-                          ? "bg-indigo-600 border-indigo-400 text-white font-semibold shadow-md"
-                          : "border-slate-800 bg-slate-850 hover:bg-slate-800 text-slate-300"
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  );
-                })}
+            {/* Question Count & Duration */}
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-2">Questions Count</label>
+                <select
+                  value={questionCount}
+                  onChange={(e) => setQuestionCount(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                >
+                  <option value={5}>5 Questions</option>
+                  <option value={10}>10 Questions</option>
+                  <option value={15}>15 Questions</option>
+                  <option value={20}>20 Questions</option>
+                </select>
               </div>
-              <p className="text-[11px] text-slate-500">
-                * Maximum questions available for this setting: {questionsForSelection.length}
-              </p>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-2">Timer Duration</label>
+                <select
+                  value={durationMinutes}
+                  onChange={(e) => setDurationMinutes(Number(e.target.value))}
+                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none"
+                >
+                  <option value={5}>5 Minutes</option>
+                  <option value={10}>10 Minutes</option>
+                  <option value={15}>15 Minutes</option>
+                  <option value={30}>30 Minutes</option>
+                  <option value={60}>60 Minutes</option>
+                </select>
+              </div>
             </div>
 
-            {/* ACTION BUTTON */}
+            {/* Start Button */}
             <button
               onClick={startQuiz}
-              disabled={questionsForSelection.length === 0}
-              className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold rounded-xl transition shadow-lg shadow-indigo-600/30 cursor-pointer"
+              disabled={isFetchingLiveQuestions}
+              className="w-full py-4 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:to-pink-500 text-white font-bold text-base rounded-2xl shadow-xl shadow-indigo-600/30 transition transform hover:-translate-y-0.5 cursor-pointer disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              Launch Exam Now ➔
+              {isFetchingLiveQuestions ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Searching Google & Generating Questions...</span>
+                </>
+              ) : (
+                <span>🚀 Launch Quiz Session</span>
+              )}
             </button>
           </div>
         </section>
       )}
 
-      {/* 5. LIVE QUIZ SCREEN */}
+      {/* 6. ACTIVE QUIZ INTERFACE */}
       {currentScreen === "quiz" && activeQuestions.length > 0 && (
-        <section className="flex-1 flex flex-col lg:flex-row gap-6 py-6">
+        <section className="flex-1 flex flex-col lg:flex-row gap-6 py-2">
           {/* Main Question Panel */}
-          <div className="flex-1 flex flex-col justify-between glass-panel p-6 sm:p-8 bg-slate-900/25">
-            {/* Header / Info */}
-            <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-800">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-indigo-400 tracking-wider">
-                  {selectedExam?.name} {selectedBranch ? `· ${selectedBranch.name}` : ""}
+          <div className="flex-1 bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-2xl">
+            <div>
+              {/* Question Header */}
+              <div className="flex justify-between items-center mb-6 border-b border-slate-800 pb-4">
+                <span className="text-xs font-bold text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/20">
+                  Question {currentQuestionIndex + 1} of {activeQuestions.length}
                 </span>
-                <h3 className="text-sm font-semibold text-slate-300">{selectedSubject?.name}</h3>
-              </div>
-
-              {/* Real-time countdown clock */}
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <div className="text-xs text-slate-400 uppercase tracking-widest">Time Remaining</div>
-                  <div className={`text-xl font-bold font-mono tracking-wider ${timeLeft < 60 ? "text-rose-500 pulse-active" : "text-white"}`}>
-                    {formatTime(timeLeft)}
-                  </div>
-                </div>
-                {/* Visual Timer Progress Circle (Simple border indicator) */}
-                <div className="w-10 h-10 rounded-full border-2 border-slate-800 flex items-center justify-center relative">
-                  <div 
-                    className="absolute inset-0 rounded-full border-2 border-indigo-500 transition-all duration-1000"
-                    style={{
-                      clipPath: `inset(0 0 0 0)`,
-                      opacity: timeLeft / totalQuizTime
-                    }}
-                  />
-                  <span className="text-xs">⏱️</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Question Panel */}
-            <div className="flex-1 space-y-6">
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span>QUESTION {currentQuestionIndex + 1} OF {activeQuestions.length}</span>
-                <span className="capitalize px-2 py-0.5 bg-slate-800 rounded text-slate-300 border border-slate-700">
-                  {difficulty}
+                <span className="text-xs font-semibold capitalize text-slate-400 bg-slate-800 px-3 py-1 rounded-full">
+                  {activeQuestions[currentQuestionIndex]?.difficulty}
                 </span>
               </div>
 
-              <h4 className="text-lg sm:text-xl font-semibold text-white leading-relaxed">
-                {activeQuestions[currentQuestionIndex].text}
-              </h4>
+              {/* Question Text */}
+              <h2 className="text-lg sm:text-xl font-bold text-white leading-snug mb-8">
+                {activeQuestions[currentQuestionIndex]?.text}
+              </h2>
 
-              {/* Options Grid */}
-              <div className="space-y-3">
-                {activeQuestions[currentQuestionIndex].options.map((option, idx) => {
-                  const isSelected = userAnswers[activeQuestions[currentQuestionIndex].id]?.selectedOptionIndex === idx;
+              {/* Options List */}
+              <div className="space-y-3 mb-8">
+                {activeQuestions[currentQuestionIndex]?.options.map((option, idx) => {
+                  const qId = activeQuestions[currentQuestionIndex].id;
+                  const isSelected = userAnswers[qId]?.selectedOptionIndex === idx;
 
                   return (
                     <button
                       key={idx}
                       onClick={() => handleSelectOption(idx)}
-                      className={`w-full text-left p-4 rounded-xl border transition flex items-center gap-4 group cursor-pointer ${
+                      className={`w-full p-4 rounded-2xl border text-left text-sm font-medium transition cursor-pointer flex items-center gap-4 ${
                         isSelected
-                          ? "bg-indigo-600/20 border-indigo-500 text-white font-medium shadow-md shadow-indigo-500/5"
-                          : "border-slate-800 bg-slate-900/40 hover:bg-slate-850 hover:border-slate-700 text-slate-300"
+                          ? "bg-indigo-600/20 border-indigo-500 text-white shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-500"
+                          : "bg-slate-950/80 border-slate-800 text-slate-300 hover:bg-slate-800/80 hover:border-slate-700"
                       }`}
                     >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition ${
-                        isSelected
-                          ? "bg-indigo-600 text-white"
-                          : "bg-slate-800 text-slate-400 group-hover:bg-slate-700"
-                      }`}>
+                      <div
+                        className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-bold border ${
+                          isSelected
+                            ? "bg-indigo-600 text-white border-indigo-400"
+                            : "bg-slate-800 text-slate-400 border-slate-700"
+                        }`}
+                      >
                         {String.fromCharCode(65 + idx)}
                       </div>
-                      <span className="flex-1 text-sm sm:text-base">{option}</span>
+                      <span className="flex-1 leading-normal">{option}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Footer / Control Actions */}
-            <div className="mt-8 pt-4 border-t border-slate-800 flex flex-wrap gap-4 items-center justify-between">
+            {/* Bottom Action Controls */}
+            <div className="pt-4 border-t border-slate-800 flex flex-wrap justify-between items-center gap-3">
               <div className="flex gap-2">
                 <button
                   onClick={toggleMarkForReview}
-                  className={`px-4 py-2 rounded-lg border text-xs font-semibold transition cursor-pointer ${
-                    userAnswers[activeQuestions[currentQuestionIndex].id]?.isMarkedForReview
-                      ? "bg-amber-600 text-white border-amber-400"
-                      : "border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white"
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer ${
+                    userAnswers[activeQuestions[currentQuestionIndex]?.id]?.isMarkedForReview
+                      ? "bg-amber-600 text-white border-amber-500"
+                      : "bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700"
                   }`}
                 >
-                  {userAnswers[activeQuestions[currentQuestionIndex].id]?.isMarkedForReview
-                    ? "✓ Marked for Review"
-                    : "★ Mark for Review"}
+                  {userAnswers[activeQuestions[currentQuestionIndex]?.id]?.isMarkedForReview
+                    ? "★ Marked for Review"
+                    : "☆ Mark for Review"}
                 </button>
 
                 <button
                   onClick={clearResponse}
-                  disabled={userAnswers[activeQuestions[currentQuestionIndex].id]?.selectedOptionIndex === null}
-                  className="px-4 py-2 border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-40 disabled:hover:bg-transparent rounded-lg text-xs font-semibold transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-400 border border-slate-700 transition cursor-pointer"
                 >
-                  Clear Response
+                  Clear Selection
                 </button>
               </div>
 
-              <div className="flex gap-2 w-full sm:w-auto justify-between sm:justify-end">
+              <div className="flex gap-2">
                 <button
                   disabled={currentQuestionIndex === 0}
                   onClick={() => setCurrentQuestionIndex((prev) => prev - 1)}
-                  className="px-4 py-2 border border-slate-800 text-slate-300 hover:bg-slate-800 disabled:opacity-30 rounded-lg text-xs font-semibold transition cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 disabled:opacity-40 transition cursor-pointer"
                 >
-                  ◀ Previous
+                  ← Previous
                 </button>
 
                 {currentQuestionIndex < activeQuestions.length - 1 ? (
                   <button
                     onClick={() => setCurrentQuestionIndex((prev) => prev + 1)}
-                    className="px-5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-xs font-semibold transition cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 transition cursor-pointer"
                   >
-                    Next ▶
+                    Next →
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleQuizSubmit()}
-                    className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-lg text-xs tracking-wider uppercase transition shadow-md shadow-emerald-600/20 cursor-pointer"
+                    onClick={() => handleQuizSubmit(false)}
+                    className="px-6 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20 transition cursor-pointer"
                   >
-                    Submit Exam
+                    Submit Test ✓
                   </button>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Question Palette Sidebar */}
-          <div className="w-full lg:w-80 glass-panel p-6 bg-slate-900/10 flex flex-col justify-between gap-6 h-fit">
+          {/* Right Sidebar Palette */}
+          <div className="w-full lg:w-80 bg-slate-900/90 border border-slate-800 rounded-3xl p-6 flex flex-col justify-between shadow-2xl">
             <div>
-              <h3 className="text-sm font-bold text-slate-300 mb-4 uppercase tracking-wider">Question Palette</h3>
-              
-              <div className="grid grid-cols-5 gap-2.5">
+              {/* Timer Bar */}
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 mb-6 text-center">
+                <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1">Time Remaining</div>
+                <div className="text-3xl font-black font-mono text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-pink-400">
+                  {formatTime(timeLeft)}
+                </div>
+              </div>
+
+              {/* Status Legend */}
+              <div className="grid grid-cols-2 gap-2 text-[10px] mb-6 text-slate-400">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full bg-indigo-600"></span> Answered
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full bg-amber-600"></span> Marked
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-3 h-3 rounded-full bg-slate-800 border border-slate-700"></span> Unvisited
+                </div>
+              </div>
+
+              {/* Question Palette Grid */}
+              <h3 className="text-xs font-bold text-slate-300 mb-3">Question Palette</h3>
+              <div className="grid grid-cols-5 gap-2 max-h-60 overflow-y-auto pr-1">
                 {activeQuestions.map((_, idx) => (
                   <button
                     key={idx}
                     onClick={() => setCurrentQuestionIndex(idx)}
-                    className={`h-10 rounded-lg border text-xs font-semibold flex items-center justify-center transition cursor-pointer ${getQuestionStatusClass(idx)}`}
+                    className={`h-9 rounded-xl border text-xs font-semibold flex items-center justify-center transition cursor-pointer ${getQuestionStatusClass(
+                      idx
+                    )}`}
                   >
                     {idx + 1}
                   </button>
@@ -706,211 +823,179 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Color Legend */}
-            <div className="border-t border-slate-800 pt-4 space-y-2 text-xs">
-              <div className="flex items-center gap-2 text-slate-400">
-                <span className="w-3.5 h-3.5 rounded bg-indigo-650 border border-indigo-400 block" />
-                <span>Answered</span>
+            <button
+              onClick={() => handleQuizSubmit(false)}
+              className="mt-6 w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-emerald-600/20 transition cursor-pointer"
+            >
+              Submit Test Now
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* 7. RESULT & BLOCKCHAIN CERTIFICATE DASHBOARD */}
+      {currentScreen === "result" && (
+        <section className="flex-1 py-4 max-w-4xl mx-auto w-full">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl mb-8">
+            <div className="text-center mb-8">
+              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3.5 py-1 rounded-full border border-emerald-500/20">
+                Test Completed Successfully
+              </span>
+              <h2 className="text-3xl font-extrabold text-white mt-3">Performance Overview</h2>
+              <p className="text-xs text-slate-400 mt-1">
+                {selectedExam?.name} • {selectedSubject?.name} ({selectedChapter?.name})
+              </p>
+            </div>
+
+            {/* Score Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center">
+                <div className="text-xs font-semibold text-slate-400 mb-1">Final Score</div>
+                <div className="text-2xl font-black text-indigo-400">{score}</div>
               </div>
-              <div className="flex items-center gap-2 text-slate-400">
-                <span className="w-3.5 h-3.5 rounded bg-amber-600 border border-amber-400 block" />
-                <span>Marked for Review</span>
+
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center">
+                <div className="text-xs font-semibold text-slate-400 mb-1">Correct</div>
+                <div className="text-2xl font-black text-emerald-400">{correctCount}</div>
               </div>
-              <div className="flex items-center gap-2 text-slate-400">
-                <span className="w-3.5 h-3.5 rounded bg-slate-800 border border-slate-700 block" />
-                <span>Unvisited / Unanswered</span>
+
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center">
+                <div className="text-xs font-semibold text-slate-400 mb-1">Incorrect</div>
+                <div className="text-2xl font-black text-rose-400">{incorrectCount}</div>
+              </div>
+
+              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-center">
+                <div className="text-xs font-semibold text-slate-400 mb-1">Accuracy</div>
+                <div className="text-2xl font-black text-amber-400">
+                  {activeQuestions.length > 0 ? Math.round((correctCount / activeQuestions.length) * 100) : 0}%
+                </div>
               </div>
             </div>
 
-            {/* Quick Submit Block */}
-            <div className="pt-2">
+            {/* Blockchain Certificate Card */}
+            {minedBlock && (
+              <div className="bg-gradient-to-r from-indigo-950/80 via-slate-900 to-purple-950/80 border border-indigo-500/40 rounded-2xl p-6 mb-8 shadow-xl">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-indigo-500/20 pb-4 mb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl">🔗</span>
+                    <div>
+                      <h3 className="font-bold text-white text-base">Blockchain Proof-of-Quiz Certificate</h3>
+                      <p className="text-xs text-indigo-300">Cryptographically mined on PoQ Ledger</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setModalCertId(minedBlock.data.certificateId);
+                      setIsBlockchainModalOpen(true);
+                    }}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs rounded-xl shadow-lg shadow-indigo-600/30 transition cursor-pointer"
+                  >
+                    Verify on Blockchain Ledger
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-mono">
+                  <div>
+                    <span className="text-slate-400">Certificate ID:</span>{" "}
+                    <span className="text-emerald-300 font-bold">{minedBlock.data.certificateId}</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400">Block Index:</span>{" "}
+                    <span className="text-indigo-300 font-bold">#{minedBlock.index}</span>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <span className="text-slate-400">Block Hash:</span>{" "}
+                    <span className="text-cyan-400/90 break-all">{minedBlock.hash}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Detailed Question Review Section */}
+            <h3 className="text-lg font-bold text-white mb-4">Detailed Question Review & Explanations</h3>
+            <div className="space-y-4">
+              {activeQuestions.map((q, idx) => {
+                const userAns = userAnswers[q.id];
+                const selectedIdx = userAns?.selectedOptionIndex;
+                const isCorrect = selectedIdx === q.correctAnswerIndex;
+                const isSkipped = selectedIdx === null;
+
+                return (
+                  <div
+                    key={q.id}
+                    className={`p-5 rounded-2xl border ${
+                      isCorrect
+                        ? "bg-emerald-950/20 border-emerald-500/30"
+                        : isSkipped
+                        ? "bg-slate-950 border-slate-800"
+                        : "bg-rose-950/20 border-rose-500/30"
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <span className="text-xs font-bold text-slate-300">Question {idx + 1}</span>
+                      <span
+                        className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${
+                          isCorrect
+                            ? "bg-emerald-500/20 text-emerald-300"
+                            : isSkipped
+                            ? "bg-slate-800 text-slate-400"
+                            : "bg-rose-500/20 text-rose-300"
+                        }`}
+                      >
+                        {isCorrect ? "Correct ✓" : isSkipped ? "Skipped" : "Incorrect ✗"}
+                      </span>
+                    </div>
+
+                    <h4 className="text-sm font-semibold text-white mb-3">{q.text}</h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs mb-3">
+                      {q.options.map((opt, oIdx) => {
+                        let optStyle = "bg-slate-900 border-slate-800 text-slate-400";
+                        if (oIdx === q.correctAnswerIndex) {
+                          optStyle = "bg-emerald-600/30 border-emerald-500 text-emerald-200 font-bold";
+                        } else if (oIdx === selectedIdx && !isCorrect) {
+                          optStyle = "bg-rose-600/30 border-rose-500 text-rose-200 line-through";
+                        }
+
+                        return (
+                          <div key={oIdx} className={`p-2.5 rounded-xl border ${optStyle}`}>
+                            {String.fromCharCode(65 + oIdx)}. {opt}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="p-3 bg-slate-950 rounded-xl text-xs text-slate-300 border border-slate-800/80">
+                      <span className="font-bold text-indigo-400">Explanation:</span> {q.explanation}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 flex justify-center gap-4">
               <button
-                onClick={() => {
-                  if (confirm("Are you sure you want to submit the exam?")) {
-                    handleQuizSubmit();
-                  }
-                }}
-                className="w-full py-2.5 border border-rose-500/30 bg-rose-500/5 hover:bg-rose-500 hover:text-slate-950 text-rose-400 font-bold rounded-lg text-xs tracking-wider uppercase transition cursor-pointer"
+                onClick={() => setCurrentScreen("home")}
+                className="px-8 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-600/20 transition cursor-pointer"
               >
-                Submit Entire Test
+                Back to Exams Home
               </button>
             </div>
           </div>
         </section>
       )}
 
-      {/* 6. RESULT & DETAILED PERFORMANCE ANALYSIS */}
-      {currentScreen === "result" && (
-        <section className="flex-1 py-6 max-w-4xl mx-auto w-full space-y-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-white mb-1 text-gradient-success">Performance Dashboard</h2>
-            <p className="text-slate-400 text-xs uppercase tracking-widest">
-              Subject: {selectedSubject?.name} ({difficulty} mode)
-            </p>
-          </div>
-
-          {/* Results Score Metrics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="glass-panel p-5 bg-slate-900/30 border-indigo-500/20 text-center">
-              <div className="text-xs text-slate-400 uppercase font-semibold mb-1">Final Score</div>
-              <div className="text-3xl font-extrabold text-indigo-400 font-mono">
-                {score} <span className="text-xs text-slate-500">pts</span>
-              </div>
-              <p className="text-[10px] text-slate-500 mt-2">* +4 for Correct, -1 for Incorrect</p>
-            </div>
-
-            <div className="glass-panel p-5 bg-slate-900/30 border-emerald-500/20 text-center">
-              <div className="text-xs text-slate-400 uppercase font-semibold mb-1">Accuracy</div>
-              <div className="text-3xl font-extrabold text-emerald-400 font-mono">
-                {correctCount + incorrectCount > 0
-                  ? Math.round((correctCount / (correctCount + incorrectCount)) * 100)
-                  : 0}
-                %
-              </div>
-              <p className="text-[10px] text-slate-500 mt-2">Correct vs Attempted</p>
-            </div>
-
-            <div className="glass-panel p-5 bg-slate-900/30 text-center">
-              <div className="text-xs text-slate-400 uppercase font-semibold mb-1">Questions Breakdown</div>
-              <div className="flex justify-center gap-3 items-baseline mt-2">
-                <span className="text-emerald-400 font-bold text-xl">{correctCount} <span className="text-[10px] font-normal text-slate-400">✓</span></span>
-                <span className="text-rose-400 font-bold text-xl">{incorrectCount} <span className="text-[10px] font-normal text-slate-400">✗</span></span>
-                <span className="text-slate-400 font-bold text-xl">{skippedCount} <span className="text-[10px] font-normal text-slate-400">∅</span></span>
-              </div>
-              <p className="text-[10px] text-slate-500 mt-2">Correct / Wrong / Skipped</p>
-            </div>
-
-            <div className="glass-panel p-5 bg-slate-900/30 text-center">
-              <div className="text-xs text-slate-400 uppercase font-semibold mb-1">Time Elapsed</div>
-              <div className="text-3xl font-extrabold text-amber-400 font-mono">
-                {formatTime(timeTakenSeconds)}
-              </div>
-              <p className="text-[10px] text-slate-500 mt-2">Out of {formatTime(totalQuizTime)}</p>
-            </div>
-          </div>
-
-          {/* Feedback Section */}
-          <div className="glass-panel p-6 bg-slate-900/20 border-slate-800 text-center">
-            <h3 className="text-lg font-bold text-white mb-2">
-              {correctCount / activeQuestions.length >= 0.8
-                ? "🏆 Exceptional Performance!"
-                : correctCount / activeQuestions.length >= 0.5
-                ? "💡 Good Attempt! Keep practicing."
-                : "📈 Scope for Improvement."}
-            </h3>
-            <p className="text-sm text-slate-350 max-w-2xl mx-auto">
-              Analyze the question-by-question explanations below to study correct logic, formulas, and methods. Reviewing wrong attempts is vital to boost scores in competitive exams.
-            </p>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex gap-4 justify-center">
-            <button
-              onClick={() => {
-                setCurrentScreen("settings");
-              }}
-              className="py-2.5 px-6 border border-slate-800 text-slate-300 hover:bg-slate-800 rounded-lg text-sm font-semibold transition cursor-pointer"
-            >
-              Re-attempt Quiz
-            </button>
-            <button
-              onClick={() => {
-                setCurrentScreen("home");
-              }}
-              className="py-2.5 px-6 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg text-sm font-bold shadow-md shadow-indigo-600/10 transition cursor-pointer"
-            >
-              Choose New Subject
-            </button>
-          </div>
-
-          {/* Detailed Solutions Review */}
-          <div className="space-y-6 pt-4 border-t border-slate-800">
-            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-              🔍 Question Explanations &amp; Review
-            </h3>
-
-            {activeQuestions.map((q, idx) => {
-              const ans = userAnswers[q.id];
-              const isCorrect = ans?.selectedOptionIndex === q.correctAnswerIndex;
-              const isSkipped = ans?.selectedOptionIndex === null;
-
-              return (
-                <div
-                  key={q.id}
-                  className={`glass-panel p-6 border ${
-                    isCorrect
-                      ? "border-emerald-500/20 bg-emerald-500/2"
-                      : isSkipped
-                      ? "border-slate-800 bg-slate-900/10"
-                      : "border-rose-500/20 bg-rose-500/2"
-                  }`}
-                >
-                  {/* Status Badge */}
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-xs font-bold text-slate-400">QUESTION {idx + 1}</span>
-                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold border uppercase ${
-                      isCorrect
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                        : isSkipped
-                        ? "bg-slate-800 text-slate-400 border-slate-700"
-                        : "bg-rose-500/10 text-rose-400 border-rose-500/30"
-                    }`}>
-                      {isCorrect ? "Correct" : isSkipped ? "Skipped" : "Incorrect"}
-                    </span>
-                  </div>
-
-                  <p className="text-base font-semibold text-white mb-4 leading-relaxed">{q.text}</p>
-
-                  {/* Options List */}
-                  <div className="space-y-2 mb-4">
-                    {q.options.map((option, oIdx) => {
-                      const isOptionSelected = ans?.selectedOptionIndex === oIdx;
-                      const isOptionCorrect = q.correctAnswerIndex === oIdx;
-
-                      let optClass = "border-slate-800 bg-slate-900/20 text-slate-400";
-                      if (isOptionCorrect) {
-                        optClass = "border-emerald-500/30 bg-emerald-500/10 text-emerald-300 font-medium";
-                      } else if (isOptionSelected && !isCorrect) {
-                        optClass = "border-rose-500/30 bg-rose-500/10 text-rose-300 font-medium";
-                      }
-
-                      return (
-                        <div key={oIdx} className={`p-3 rounded-lg border text-sm flex items-center gap-3 ${optClass}`}>
-                          <span className={`w-6 h-6 rounded flex items-center justify-center text-[11px] font-bold ${
-                            isOptionCorrect
-                              ? "bg-emerald-500 text-slate-950"
-                              : isOptionSelected
-                              ? "bg-rose-500 text-white"
-                              : "bg-slate-800 text-slate-400"
-                          }`}>
-                            {String.fromCharCode(65 + oIdx)}
-                          </span>
-                          <span>{option}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {/* Step-by-Step Explanation Block */}
-                  <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-850 mt-4">
-                    <h5 className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                      💡 Detailed Solution &amp; Explanation
-                    </h5>
-                    <p className="text-xs sm:text-sm text-slate-300 leading-relaxed whitespace-pre-line">
-                      {q.explanation}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
       {/* FOOTER */}
       <footer className="mt-12 pt-6 border-t border-slate-800 text-center text-xs text-slate-500">
-        <p>© 2026 ExamiQ Online Testing. Designed for premium preparation.</p>
+        <p>© 2026 ExamiQ Online Quiz Platform. Powered by Google Real-Time AI Search & Blockchain Ledger Security.</p>
       </footer>
+
+      {/* BLOCKCHAIN LEDGER VERIFICATION MODAL */}
+      <BlockchainVerificationModal
+        isOpen={isBlockchainModalOpen}
+        onClose={() => setIsBlockchainModalOpen(false)}
+        initialCertificateId={modalCertId}
+      />
     </main>
   );
 }
