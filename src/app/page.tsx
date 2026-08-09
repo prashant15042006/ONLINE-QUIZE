@@ -72,7 +72,9 @@ export default function Home() {
   // Navigation states
   const [currentScreen, setCurrentScreen] = useState<Screen>("dashboard");
   const [selectedExam, setSelectedExam] = useState<Exam>(EXAMS_DATA[0]);
-  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(
+    EXAMS_DATA[0].branches && EXAMS_DATA[0].branches.length > 0 ? EXAMS_DATA[0].branches[0] : null
+  );
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
 
