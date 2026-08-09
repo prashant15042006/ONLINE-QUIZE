@@ -7,6 +7,11 @@ export interface Question {
   correctAnswerIndex: number;
   explanation: string;
   difficulty: Difficulty;
+  concept?: string;
+  shortExplanation?: string;
+  wrongOptionsExplanations?: string[];
+  year?: string;
+  source?: string;
 }
 
 export interface Chapter {
