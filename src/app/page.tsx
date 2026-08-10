@@ -12,7 +12,7 @@ import {
   getBookmarks,
   QuizAttemptRecord,
 } from "../lib/userStore";
-
+import MathRenderer from "../components/MathRenderer";
 import AIExplainModal from "../components/AIExplainModal";
 import MistakesNotebookModal from "../components/MistakesNotebookModal";
 import BookmarksModal from "../components/BookmarksModal";
@@ -32,33 +32,78 @@ function cleanQuestionText(text: string): string {
   return text.replace(/^\[.*?\]\s*/g, "").replace(/\s*\(Q\d+\)$/g, "").trim();
 }
 
+// Parse inline math ($...$) and block math ($$...$$) in text
+function renderTextWithMath(text: string): React.ReactNode {
+  if (!text) return null;
+  // Split on block math first
+  const blockParts = text.split(/(\$\$[^$]+\$\$)/g);
+  return blockParts.map((part, i) => {
+    if (part.startsWith("$$") && part.endsWith("$$")) {
+      return <MathRenderer key={i} math={part.slice(2, -2)} block={true} />;
+    }
+    // Split on inline math
+    const inlineParts = part.split(/(\$[^$]+\$)/g);
+    return inlineParts.map((ip, j) => {
+      if (ip.startsWith("$") && ip.endsWith("$") && ip.length > 2) {
+        return <MathRenderer key={`${i}-${j}`} math={ip.slice(1, -1)} block={false} />;
+      }
+      return <span key={`${i}-${j}`}>{ip}</span>;
+    });
+  });
+}
+
 function renderFormattedSolution(exp: string) {
   if (!exp) return null;
   const lines = exp.split("\n");
-  return (
-    <div className="space-y-1.5 font-sans leading-relaxed text-slate-300 text-xs">
-      {lines.map((line, lIdx) => {
-        if (line.startsWith("### ")) {
-          return <h5 key={lIdx} className="font-bold text-emerald-400 mt-2 mb-1">{line.replace("### ", "")}</h5>;
-        }
-        if (line.startsWith("|")) {
-          return (
-            <div key={lIdx} className="font-mono text-[11px] bg-slate-900/90 px-2.5 py-1 rounded border border-slate-800 text-cyan-300 overflow-x-auto my-0.5">
-              {line}
-            </div>
-          );
-        }
-        if (line.startsWith("$$")) {
-          return (
-            <div key={lIdx} className="font-mono text-center bg-slate-900 p-2 rounded-xl border border-slate-800 text-amber-300 my-1 font-bold">
-              {line.replaceAll("$$", "")}
-            </div>
-          );
-        }
-        return <p key={lIdx}>{line}</p>;
-      })}
-    </div>
-  );
+  // Build table rows if consecutive pipe lines
+  const elements: React.ReactNode[] = [];
+  let tableRows: string[] = [];
+
+  const flushTable = (key: string) => {
+    if (tableRows.length < 2) {
+      tableRows.forEach((r, ri) => elements.push(<div key={`${key}-tr-${ri}`} className="font-mono text-[11px] text-cyan-300">{r}</div>));
+      tableRows = [];
+      return;
+    }
+    const headers = tableRows[0].split("|").filter(Boolean).map(h => h.trim());
+    const dataRows = tableRows.slice(2).filter(r => !r.match(/^[|\s-]+$/));
+    elements.push(
+      <div key={key} className="overflow-x-auto my-2">
+        <table className="solution-table">
+          <thead><tr>{headers.map((h,i) => <th key={i}>{h}</th>)}</tr></thead>
+          <tbody>{dataRows.map((row, ri) => {
+            const cells = row.split("|").filter(Boolean).map(c => c.trim());
+            return <tr key={ri}>{cells.map((c, ci) => <td key={ci}>{renderTextWithMath(c)}</td>)}</tr>;
+          })}</tbody>
+        </table>
+      </div>
+    );
+    tableRows = [];
+  };
+
+  lines.forEach((line, lIdx) => {
+    if (line.startsWith("|")) {
+      tableRows.push(line);
+    } else {
+      if (tableRows.length > 0) flushTable(`tbl-${lIdx}`);
+      if (line.startsWith("### ")) {
+        elements.push(<h5 key={lIdx} className="font-bold text-emerald-400 mt-3 mb-1 text-sm">{line.replace("### ", "")}</h5>);
+      } else if (line.startsWith("## ")) {
+        elements.push(<h4 key={lIdx} className="font-bold text-cyan-400 mt-3 mb-1">{line.replace("## ", "")}</h4>);
+      } else if (line.startsWith("$$") && line.endsWith("$$")) {
+        elements.push(<MathRenderer key={lIdx} math={line.slice(2, -2)} block={true} />);
+      } else if (line.startsWith("- ") || line.startsWith("* ")) {
+        elements.push(<li key={lIdx} className="ml-4 list-disc text-slate-300">{renderTextWithMath(line.slice(2))}</li>);
+      } else if (line.trim() === "") {
+        elements.push(<br key={lIdx} />);
+      } else {
+        elements.push(<p key={lIdx} className="text-slate-300 leading-relaxed">{renderTextWithMath(line)}</p>);
+      }
+    }
+  });
+  if (tableRows.length > 0) flushTable("tbl-end");
+
+  return <div className="space-y-1 text-xs">{elements}</div>;
 }
 
 export default function Home() {
@@ -872,7 +917,7 @@ export default function Home() {
           {/* Low Time Warning Banner */}
           {timeLeft > 0 && timeLeft < 60 && (
             <div className="bg-rose-600 text-white font-bold text-xs text-center py-2 rounded-xl mb-3 animate-pulse">
-              ⚠️ Warning: Less than 60 seconds remaining! Time will automatically submit on expiry.
+              ⚠️ Less than {timeLeft}s remaining! Quiz will auto-submit.
             </div>
           )}
 
@@ -915,8 +960,14 @@ export default function Home() {
                 🤖 AI Explain
               </button>
 
-              <div className="bg-slate-900 border border-slate-800 px-3 py-1 rounded-full text-xs font-mono font-bold text-amber-400">
-                ⏱️ {formatTime(timeLeft)}
+              <div className={`px-3 py-1.5 rounded-full text-xs font-mono font-black border ${
+                timeLeft > 0 && timeLeft <= 30
+                  ? "bg-rose-950 border-rose-500 timer-danger"
+                  : timeLeft > 0 && timeLeft <= 120
+                  ? "bg-amber-950 border-amber-500 timer-warning"
+                  : "bg-slate-900 border-slate-700 timer-normal"
+              }`}>
+                ⏱ {formatTime(timeLeft)}
               </div>
             </div>
           </div>
@@ -925,47 +976,67 @@ export default function Home() {
             {/* Main Question Column */}
             <div className="flex-1 flex flex-col justify-between">
               <div>
-                <div className="flex justify-between items-center mb-2 text-xs font-bold text-slate-400">
-                  <span>Question {currentQuestionIndex + 1} of {activeQuestions.length}</span>
-                  <span className="uppercase text-emerald-400">{currentQ.difficulty}</span>
+                <div className="flex justify-between items-center mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black text-slate-400">Q {currentQuestionIndex + 1}</span>
+                    <span className="text-slate-700">/</span>
+                    <span className="text-xs font-bold text-slate-600">{activeQuestions.length}</span>
+                    {currentQ.concept && (
+                      <span className="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded-full font-bold">
+                        {currentQ.concept}
+                      </span>
+                    )}
+                  </div>
+                  <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full ${
+                    currentQ.difficulty === "easy" ? "bg-emerald-500/10 text-emerald-400" :
+                    currentQ.difficulty === "medium" ? "bg-amber-500/10 text-amber-400" :
+                    "bg-rose-500/10 text-rose-400"
+                  }`}>{currentQ.difficulty}</span>
                 </div>
 
-                <h2 className="text-lg sm:text-xl font-extrabold text-white leading-relaxed mb-6">
-                  {cleanQuestionText(currentQ.text)}
-                </h2>
+                <div className="text-base sm:text-lg font-extrabold text-white leading-relaxed mb-6">
+                  {renderTextWithMath(cleanQuestionText(currentQ.text))}
+                </div>
 
                 <div className="space-y-3 mb-6">
                   {currentQ.options.map((opt, idx) => {
                     const isSelected = currentAns?.selectedOptionIndex === idx;
+                    const isRevealed = quizMode === "practice" && isAnswerChecked;
+                    const isOptCorrect = idx === currentQ.correctAnswerIndex;
+                    const isOptWrong = isSelected && !isOptCorrect && isRevealed;
 
-                    let cardStyle = "btn-3d-slate";
-                    if (quizMode === "practice" && isAnswerChecked) {
-                      if (idx === currentQ.correctAnswerIndex) {
-                        cardStyle = "bg-emerald-600 text-white border-2 border-emerald-400 shadow-[0_4px_0_#047857]";
-                      } else if (isSelected && !isCorrect) {
-                        cardStyle = "bg-rose-600 text-white border-2 border-rose-400 shadow-[0_4px_0_#be123c]";
+                    let optClass = "option-default";
+                    let icon = null;
+                    if (isRevealed) {
+                      if (isOptCorrect) {
+                        optClass = "option-correct";
+                        icon = <span className="text-base">✓</span>;
+                      } else if (isOptWrong) {
+                        optClass = "option-wrong";
+                        icon = <span className="text-base">✗</span>;
+                      } else {
+                        optClass = "option-default opacity-50";
                       }
                     } else if (isSelected) {
-                      cardStyle = "btn-3d-blue border-2 border-blue-300";
+                      optClass = "option-selected";
                     }
 
                     return (
                       <button
                         key={idx}
                         onClick={() => handleSelectOption(idx)}
-                        disabled={quizMode === "practice" && isAnswerChecked}
-                        className={`w-full p-4 rounded-2xl text-left text-sm font-bold flex items-center gap-4 cursor-pointer ${cardStyle}`}
+                        disabled={isRevealed}
+                        className={`w-full p-4 rounded-2xl text-left text-sm font-semibold flex items-center gap-4 cursor-pointer disabled:cursor-default ${optClass}`}
                       >
-                        <div
-                          className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold border ${
-                            isSelected
-                              ? "bg-white text-slate-900 border-white"
-                              : "bg-slate-800 text-slate-300 border-slate-700"
-                          }`}
-                        >
-                          {String.fromCharCode(65 + idx)}
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black border shrink-0 ${
+                          isRevealed && isOptCorrect ? "bg-white/20 border-white/40" :
+                          isRevealed && isOptWrong ? "bg-white/20 border-white/40" :
+                          isSelected ? "bg-white text-blue-700 border-white" :
+                          "bg-slate-800 text-slate-300 border-slate-700"
+                        }`}>
+                          {icon || String.fromCharCode(65 + idx)}
                         </div>
-                        <span className="flex-1">{opt}</span>
+                        <span className="flex-1 leading-snug">{renderTextWithMath(opt)}</span>
                       </button>
                     );
                   })}
@@ -1096,17 +1167,42 @@ export default function Home() {
       {currentScreen === "result" && (
         <div className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
           <div className="duo-card p-6 sm:p-10 space-y-8 text-center">
-            <div>
-              <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-4xl mb-4 shadow-xl shadow-emerald-500/20 animate-bounce-subtle">
-                🏆
+            {/* Score Circle */}
+            <div className="flex flex-col items-center gap-3">
+              {(() => {
+                const pct = activeQuestions.length > 0 ? Math.round((correctCount / activeQuestions.length) * 100) : 0;
+                const r = 52, circ = 2 * Math.PI * r;
+                const offset = circ - (pct / 100) * circ;
+                const emoji = pct >= 80 ? "🏆" : pct >= 60 ? "🎯" : pct >= 40 ? "📚" : "💪";
+                const color = pct >= 80 ? "#4ade80" : pct >= 60 ? "#fbbf24" : pct >= 40 ? "#60a5fa" : "#f87171";
+                return (
+                  <div className="relative w-36 h-36">
+                    <svg width="144" height="144" viewBox="0 0 144 144">
+                      <circle cx="72" cy="72" r={r} fill="none" stroke="#1e293b" strokeWidth="12" />
+                      <circle cx="72" cy="72" r={r} fill="none" stroke={color} strokeWidth="12"
+                        strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset}
+                        transform="rotate(-90 72 72)" className="score-ring" />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-3xl">{emoji}</span>
+                      <span className="text-2xl font-black" style={{color}}>{pct}%</span>
+                    </div>
+                  </div>
+                );
+              })()}
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3.5 py-1 rounded-full border border-emerald-500/20">
+                  Session Completed
+                </span>
+                <h2 className="text-2xl font-black text-white mt-2">
+                  {activeQuestions.length > 0 && Math.round((correctCount / activeQuestions.length) * 100) >= 80
+                    ? "Outstanding! 🚀" : Math.round((correctCount / activeQuestions.length) * 100) >= 60
+                    ? "Good Work! 🎯" : "Keep Practicing! 💪"}
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  {selectedExam?.name} • {selectedSubject?.name}{selectedChapter ? ` • ${selectedChapter.name}` : ""}
+                </p>
               </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3.5 py-1 rounded-full border border-emerald-500/20">
-                Practice Session Completed
-              </span>
-              <h2 className="text-3xl font-black text-white mt-3">Outstanding Effort!</h2>
-              <p className="text-xs text-slate-400 mt-1">
-                {selectedExam?.name} • {selectedSubject?.name} ({selectedChapter?.name})
-              </p>
             </div>
 
             {/* Retry Accuracy Comparison Banner */}
