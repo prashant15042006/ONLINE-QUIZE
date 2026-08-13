@@ -26,35 +26,75 @@ async function callLLM(
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      max_tokens: 2500,
-      temperature: 0.5,
+      max_tokens: 3000,
+      temperature: 0.4,
     }),
   });
-  if (!res.ok) throw new Error(`API ${res.status}`);
+  if (!res.ok) throw new Error(`API ${res.status}: ${await res.text()}`);
   const data = await res.json();
   return data.choices?.[0]?.message?.content || "";
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const { topic, examName, difficulty, notes, count = 5 } = await req.json();
+    // Support both old field names (topicText, pdfContentText) and new (topic, notes)
+    const body = await req.json();
+    const topic = body.topic || body.topicText || "";
+    const notes = body.notes || body.pdfContentText || "";
+    const examName = body.examName || "GATE";
+    const difficulty = body.difficulty || "medium";
+    const count = Math.min(body.count || 5, 10);
 
-    const systemPrompt = `You are an expert MCQ question generator for Indian competitive exams (GATE, JEE, NEET, SSC, UPSC).
-Generate high-quality exam-standard questions. Return ONLY a valid JSON array — no explanation, no markdown, no code fences.
-Each object in the array MUST follow this exact schema:
+    const systemPrompt = `You are an expert MCQ question generator specializing in GATE, JEE, NEET, SSC competitive exams.
+Generate CLEAR, SPECIFIC, and ACCURATE multiple-choice questions. Each question must:
+- Have a precise, unambiguous question statement
+- Have exactly 4 options where only ONE is definitively correct
+- Have a clear step-by-step solution explanation
+- Match actual exam standard (like GATE PYQ, JEE PYQ, MADE EASY, PW level)
+
+Return ONLY a raw JSON array. No markdown, no code fences, no extra text whatsoever.
+Each element MUST follow this exact schema:
 {
-  "id": "gen-<unique_number>",
-  "text": "Clear, professional exam-standard question",
-  "options": ["Option A text", "Option B text", "Option C text", "Option D text"],
+  "id": "gen-1",
+  "text": "Precise question text here",
+  "options": ["Option A", "Option B", "Option C", "Option D"],
   "correctAnswerIndex": 0,
-  "explanation": "### Solution\\nStep-by-step explanation. Use $inline-math$ or $$block-math$$ for equations.",
-  "difficulty": "${difficulty || "medium"}",
-  "concept": "Core concept name"
+  "explanation": "### Solution\\nStep 1: ...\\nStep 2: ...\\n$$formula$$\\n\\nFinal Answer: Option A",
+  "difficulty": "${difficulty}",
+  "concept": "Concept Name"
 }`;
 
-    const userPrompt = notes?.trim()
-      ? `Generate ${count} MCQs based on these study notes for ${examName} exam:\n---\n${notes.substring(0, 3000)}\n---\nDifficulty: ${difficulty || "medium"}. Return only the JSON array.`
-      : `Generate ${count} high-quality MCQ questions for topic: "${topic}" in ${examName} exam.\nDifficulty: ${difficulty || "medium"}. Questions should match PW, MADE EASY, or GO Classes standard. Return only the JSON array.`;
+    let userPrompt: string;
+
+    if (notes && notes.trim().length > 20) {
+      userPrompt = `Generate ${count} high-quality MCQ questions based on these study notes.
+Exam: ${examName} | Difficulty: ${difficulty}
+
+Study Notes:
+---
+${notes.substring(0, 4000)}
+---
+
+Create questions that test understanding of the key concepts in these notes.
+Return ONLY the JSON array with ${count} question objects.`;
+    } else {
+      userPrompt = `Generate ${count} high-quality ${examName} exam MCQ questions on the topic: "${topic}"
+
+Requirements:
+- Difficulty: ${difficulty}
+- Questions should match GATE PYQ / JEE Advanced / MADE EASY standard
+- Each question must have a clear, specific scenario or concept being tested
+- Options must be plausible but only one correct
+- Explanation must be detailed with formulas where applicable
+- Use $formula$ for inline math and $$formula$$ for block equations
+
+Examples of good question styles:
+- "Consider a process with arrival time 0ms and burst time 8ms. With Round Robin scheduling (quantum=3ms), the turnaround time is:"
+- "The time complexity of Dijkstra's algorithm using min-heap is:"
+- "A B+ tree of order 5 with 100 records has minimum number of entries in root as:"
+
+Return ONLY the JSON array with ${count} question objects.`;
+    }
 
     let content = "";
 
@@ -76,17 +116,41 @@ Each object in the array MUST follow this exact schema:
 
     if (!content) return NextResponse.json({ questions: [], error: "AI service unavailable." });
 
-    // Extract JSON array from response
-    const match = content.match(/\[[\s\S]*\]/);
-    const jsonStr = match ? match[0] : content;
+    // Extract JSON array robustly
+    let jsonStr = content;
+    const arrayMatch = content.match(/\[[\s\S]*\]/);
+    if (arrayMatch) jsonStr = arrayMatch[0];
 
-    const questions = JSON.parse(jsonStr);
+    let questions = [];
+    try {
+      questions = JSON.parse(jsonStr);
+    } catch {
+      // Try to extract partial valid JSON
+      console.error("JSON parse failed, content:", content.slice(0, 500));
+      return NextResponse.json({ questions: [], error: "AI returned invalid JSON." });
+    }
+
     const valid = Array.isArray(questions)
-      ? questions.filter(
-          (q: Record<string, unknown>) =>
-            q.text && Array.isArray(q.options) && (q.options as unknown[]).length >= 2 &&
-            q.correctAnswerIndex !== undefined
-        )
+      ? questions
+          .filter(
+            (q: Record<string, unknown>) =>
+              q.text &&
+              typeof q.text === "string" &&
+              q.text.trim().length > 10 &&
+              Array.isArray(q.options) &&
+              (q.options as unknown[]).length >= 2 &&
+              q.correctAnswerIndex !== undefined &&
+              typeof q.correctAnswerIndex === "number"
+          )
+          .map((q: Record<string, unknown>, i: number) => ({
+            id: `gen-${Date.now()}-${i}`,
+            text: q.text,
+            options: q.options,
+            correctAnswerIndex: q.correctAnswerIndex,
+            explanation: q.explanation || "See the correct answer above.",
+            difficulty: q.difficulty || difficulty,
+            concept: q.concept || topic || "AI Generated",
+          }))
       : [];
 
     return NextResponse.json({ questions: valid });
