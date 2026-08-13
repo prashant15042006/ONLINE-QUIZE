@@ -22,6 +22,7 @@ import QuestionNavigationGrid from "../components/QuestionNavigationGrid";
 import ResultReviewModal from "../components/ResultReviewModal";
 import GateRankEstimatorModal from "../components/GateRankEstimatorModal";
 import QuestionSearchModal from "../components/QuestionSearchModal";
+import GatePyqMockModal from "../components/GatePyqMockModal";
 
 type Screen = "dashboard" | "branches" | "subjects" | "chapters" | "settings" | "quiz" | "result";
 type QuizMode = "practice" | "test" | "exam";
@@ -163,6 +164,7 @@ export default function Home() {
   const [isRankEstimatorOpen, setIsRankEstimatorOpen] = useState(false);
   const [isQuestionSearchOpen, setIsQuestionSearchOpen] = useState(false);
   const [isResultReviewModalOpen, setIsResultReviewModalOpen] = useState(false);
+  const [isGatePyqModalOpen, setIsGatePyqModalOpen] = useState(false);
   const [showAnalyticsView, setShowAnalyticsView] = useState(false);
 
   // Bookmark status toggle
@@ -263,7 +265,7 @@ export default function Home() {
     setCurrentScreen("settings");
   };
 
-  // Launch custom quiz from Mistakes / Bookmarks / AI
+  // Launch custom quiz from Mistakes / Bookmarks / AI / PYQ Papers
   const launchCustomQuestionPool = (questions: Question[], title: string) => {
     if (questions.length === 0) return;
     const cleaned = questions.map((q) => ({ ...q, text: cleanQuestionText(q.text) }));
@@ -542,6 +544,13 @@ export default function Home() {
         {/* Action Header & Badges */}
         <div className="flex items-center gap-2 sm:gap-3">
           <button
+            onClick={() => setIsGatePyqModalOpen(true)}
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 text-xs font-bold transition cursor-pointer"
+          >
+            <span>📜</span> GATE PYQ Mocks
+          </button>
+
+          <button
             onClick={() => setIsQuestionSearchOpen(true)}
             className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20 text-xs font-bold transition cursor-pointer"
           >
@@ -593,6 +602,13 @@ export default function Home() {
           {/* Quick Action Navigation Bar */}
           <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
             <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setIsGatePyqModalOpen(true)}
+                className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 rounded-xl text-xs font-black transition cursor-pointer shadow-lg shadow-amber-500/20 flex items-center gap-1.5"
+              >
+                <span>📜</span> GATE Year-Wise PYQ Papers (2015-2024)
+              </button>
+
               <button
                 onClick={() => setShowAnalyticsView(false)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
@@ -772,6 +788,30 @@ export default function Home() {
 
               {/* Sidebar Cards */}
               <div className="lg:col-span-4 space-y-6">
+
+                {/* GATE PYQ Year-Wise Paper Banner */}
+                <div className="bg-gradient-to-br from-amber-900/60 to-orange-900/60 border border-amber-500/40 rounded-3xl p-5 space-y-3 shadow-xl relative overflow-hidden">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 bg-amber-500/20 px-2.5 py-1 rounded-full border border-amber-400/30">
+                      📜 Official GATE PYQs
+                    </span>
+                    <span className="text-xs font-bold text-amber-300">2015 – 2024</span>
+                  </div>
+
+                  <h4 className="font-extrabold text-white text-base leading-snug">
+                    GATE CSE Official Year-Wise Papers
+                  </h4>
+                  <p className="text-xs text-amber-100/80 leading-relaxed">
+                    Practice complete original GATE papers (2024 Set 1/2, 2023, 2022, 2021 Set 1/2, 2020 down to 2015) with step-by-step solutions!
+                  </p>
+
+                  <button
+                    onClick={() => setIsGatePyqModalOpen(true)}
+                    className="w-full py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-xs rounded-xl cursor-pointer shadow-lg"
+                  >
+                    Explore All Year Papers (2015-2024) 🚀
+                  </button>
+                </div>
 
                 {/* Daily Challenge Card */}
                 {dailyChallengeQuestion && (
@@ -1403,6 +1443,12 @@ export default function Home() {
         isOpen={isQuestionSearchOpen}
         onClose={() => setIsQuestionSearchOpen(false)}
         onSelectQuestion={(q, subjectName) => launchCustomQuestionPool([q], `Practice: ${subjectName}`)}
+      />
+
+      <GatePyqMockModal
+        isOpen={isGatePyqModalOpen}
+        onClose={() => setIsGatePyqModalOpen(false)}
+        onStartPaper={(questions, paperTitle) => launchCustomQuestionPool(questions, paperTitle)}
       />
 
       {isResultReviewModalOpen && (
