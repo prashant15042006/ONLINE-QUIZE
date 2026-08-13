@@ -32,7 +32,7 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
             </div>
             <div>
               <h3 className="font-extrabold text-white text-base">GATE CSE Official Year-Wise PYQ Papers</h3>
-              <p className="text-[11px] text-slate-400">Practice full previous year official papers (2015 – 2024)</p>
+              <p className="text-[11px] text-slate-400">Official GATE Previous Year Questions from 2015 to 2024</p>
             </div>
           </div>
           <button
@@ -53,7 +53,7 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
                 : "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"
             }`}
           >
-            All Years ({GATE_PYQ_PAPERS.length})
+            All Papers ({GATE_PYQ_PAPERS.length})
           </button>
           {years.map((y) => (
             <button
@@ -83,14 +83,14 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
                     GATE {paper.year} {paper.setTitle}
                   </span>
                   <span className="text-[10px] text-slate-500 font-bold">
-                    ⏱ {paper.timeMinutes} mins
+                    ⏱ {paper.questions.length * 2} mins
                   </span>
                 </div>
                 <h4 className="font-extrabold text-white text-sm group-hover:text-amber-300 transition mb-1">
                   {paper.title}
                 </h4>
                 <p className="text-[11px] text-slate-400">
-                  {paper.questions.length} Exam-Standard GATE Questions
+                  {paper.questions.length} Authentic PYQ Questions Loaded
                 </p>
               </div>
 
@@ -99,10 +99,10 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
                   href={paper.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-[10px] text-slate-500 hover:text-slate-300 underline"
+                  className="text-[10px] text-slate-500 hover:text-slate-300 underline flex items-center gap-1"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  View on GateOverflow 🔗
+                  GateOverflow Paper 🔗
                 </a>
 
                 <button
@@ -112,7 +112,7 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
                   }}
                   className="px-3.5 py-1.5 btn-3d-green text-xs font-bold rounded-xl cursor-pointer"
                 >
-                  Start PYQ Mock 🚀
+                  Attempt All {paper.questions.length} Qs 🚀
                 </button>
               </div>
             </div>
