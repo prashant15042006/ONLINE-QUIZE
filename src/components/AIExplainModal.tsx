@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Question } from "../data/quizData";
+import MathRenderer from "./MathRenderer";
 
 interface Props {
   isOpen: boolean;
@@ -11,6 +12,18 @@ interface Props {
   examName?: string;
   subjectName?: string;
   chapterName?: string;
+}
+
+function renderTextWithMath(text: string): React.ReactNode {
+  if (!text) return null;
+  const parts = text.split(/(\$\$[^$]+\$\$|\$[^$]+\$)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("$$") && part.endsWith("$$"))
+      return <MathRenderer key={i} math={part.slice(2, -2)} block={true} />;
+    if (part.startsWith("$") && part.endsWith("$") && part.length > 2)
+      return <MathRenderer key={i} math={part.slice(1, -1)} block={false} />;
+    return <span key={i}>{part}</span>;
+  });
 }
 
 export default function AIExplainModal({
@@ -24,41 +37,55 @@ export default function AIExplainModal({
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<string>("simply");
-  const [response, setResponse] = useState<{ title: string; content: string } | null>(null);
+  const [responseContent, setResponseContent] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   if (!isOpen || !question) return null;
 
   const fetchAIExplanation = async (selectedMode: string) => {
     setMode(selectedMode);
     setLoading(true);
+    setResponseContent(null);
+    setCopied(false);
+
     try {
       const res = await fetch("/api/ai-explain", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          questionText: question.text,
+          question: question.text,
           options: question.options,
           correctAnswerIndex: question.correctAnswerIndex,
           userSelectedIndex,
+          explanation: question.explanation,
+          examName,
+          subjectName,
           mode: selectedMode,
-          subject: subjectName,
-          topic: chapterName,
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        setResponse({ title: data.title, content: data.content });
+        setResponseContent(data.explanation);
       }
     } catch (e) {
       console.error("AI explain fetch error", e);
+      setResponseContent(question.explanation || "Failed to fetch AI explanation. Please check your connection.");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleCopy = () => {
+    if (responseContent) {
+      navigator.clipboard.writeText(responseContent);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in">
       <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-2xl w-full p-6 text-slate-100 shadow-2xl relative max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex justify-between items-center border-b border-slate-800 pb-4 mb-4">
@@ -67,8 +94,8 @@ export default function AIExplainModal({
               🤖
             </div>
             <div>
-              <h3 className="font-extrabold text-white text-lg">AI Learning Assistant</h3>
-              <p className="text-xs text-slate-400">Ask AI to explain this question in your preferred style</p>
+              <h3 className="font-extrabold text-white text-lg">ExamiQ AI Tutor</h3>
+              <p className="text-xs text-slate-400">Get exam-focused explanations powered by Llama 3.3 70B</p>
             </div>
           </div>
 
@@ -83,14 +110,14 @@ export default function AIExplainModal({
         {/* Option Mode Buttons */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
           <button
-            onClick={() => fetchAIExplanation("simply")}
+            onClick={() => fetchAIExplanation("simple")}
             className={`p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer ${
-              mode === "simply"
+              mode === "simple"
                 ? "bg-purple-600 border-purple-400 text-white"
                 : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800"
             }`}
           >
-            💡 Explain Simply
+            💡 Simple English
           </button>
 
           <button
@@ -116,9 +143,9 @@ export default function AIExplainModal({
           </button>
 
           <button
-            onClick={() => fetchAIExplanation("step_by_step")}
+            onClick={() => fetchAIExplanation("steps")}
             className={`p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer ${
-              mode === "step_by_step"
+              mode === "steps"
                 ? "bg-purple-600 border-purple-400 text-white"
                 : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800"
             }`}
@@ -127,9 +154,9 @@ export default function AIExplainModal({
           </button>
 
           <button
-            onClick={() => fetchAIExplanation("real_life")}
+            onClick={() => fetchAIExplanation("reallife")}
             className={`p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer ${
-              mode === "real_life"
+              mode === "reallife"
                 ? "bg-purple-600 border-purple-400 text-white"
                 : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800"
             }`}
@@ -138,38 +165,46 @@ export default function AIExplainModal({
           </button>
 
           <button
-            onClick={() => fetchAIExplanation("why_wrong")}
+            onClick={() => fetchAIExplanation("wrong")}
             className={`p-2.5 rounded-xl border text-xs font-bold transition cursor-pointer ${
-              mode === "why_wrong"
+              mode === "wrong"
                 ? "bg-purple-600 border-purple-400 text-white"
                 : "bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-800"
             }`}
           >
-            ❓ Why Answer Wrong?
+            ❓ Why Wrong Option?
           </button>
         </div>
 
         {/* Content View */}
-        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 min-h-[160px] text-xs leading-relaxed text-slate-300">
+        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 min-h-[180px] text-xs leading-relaxed text-slate-300 relative">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-10 space-y-3">
               <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-slate-400 text-xs font-medium">Generating AI explanation...</p>
+              <p className="text-slate-400 text-xs font-medium">Generating AI response with Groq Llama 3.3...</p>
             </div>
-          ) : response ? (
+          ) : responseContent ? (
             <div>
-              <h4 className="font-extrabold text-purple-400 text-sm mb-3 border-b border-slate-900 pb-2">
-                {response.title}
-              </h4>
-              <div className="space-y-2">
-                {response.content.split("\n").map((line, idx) => (
-                  <p key={idx}>{line}</p>
+              <div className="flex justify-between items-center border-b border-slate-900 pb-2 mb-3">
+                <span className="text-[10px] font-black text-purple-400 uppercase tracking-wider">
+                  AI Breakdown ({mode})
+                </span>
+                <button
+                  onClick={handleCopy}
+                  className="text-[10px] bg-slate-800 hover:bg-slate-700 px-2 py-1 rounded text-slate-300 transition cursor-pointer"
+                >
+                  {copied ? "✓ Copied!" : "📋 Copy Solution"}
+                </button>
+              </div>
+              <div className="space-y-2 leading-relaxed">
+                {responseContent.split("\n").map((line, idx) => (
+                  <p key={idx}>{renderTextWithMath(line)}</p>
                 ))}
               </div>
             </div>
           ) : (
-            <div className="text-center py-8 text-slate-500">
-              Select any of the AI explanation styles above to get an instant tailored breakdown!
+            <div className="text-center py-10 text-slate-500">
+              Click any of the AI explanation buttons above to get instant tailored explanation!
             </div>
           )}
         </div>

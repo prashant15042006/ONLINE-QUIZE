@@ -18,6 +18,10 @@ import MistakesNotebookModal from "../components/MistakesNotebookModal";
 import BookmarksModal from "../components/BookmarksModal";
 import AIQuizGeneratorModal from "../components/AIQuizGeneratorModal";
 import PerformanceAnalyticsView from "../components/PerformanceAnalyticsView";
+import QuestionNavigationGrid from "../components/QuestionNavigationGrid";
+import ResultReviewModal from "../components/ResultReviewModal";
+import GateRankEstimatorModal from "../components/GateRankEstimatorModal";
+import QuestionSearchModal from "../components/QuestionSearchModal";
 
 type Screen = "dashboard" | "branches" | "subjects" | "chapters" | "settings" | "quiz" | "result";
 type QuizMode = "practice" | "test" | "exam";
@@ -156,6 +160,9 @@ export default function Home() {
   const [isBookmarksModalOpen, setIsBookmarksModalOpen] = useState(false);
   const [isAIExplainModalOpen, setIsAIExplainModalOpen] = useState(false);
   const [isAIQuizGenModalOpen, setIsAIQuizGenModalOpen] = useState(false);
+  const [isRankEstimatorOpen, setIsRankEstimatorOpen] = useState(false);
+  const [isQuestionSearchOpen, setIsQuestionSearchOpen] = useState(false);
+  const [isResultReviewModalOpen, setIsResultReviewModalOpen] = useState(false);
   const [showAnalyticsView, setShowAnalyticsView] = useState(false);
 
   // Bookmark status toggle
@@ -191,6 +198,27 @@ export default function Home() {
     if (!selectedSubject) return [];
     return selectedSubject.chapters || [];
   }, [selectedSubject]);
+
+  // Map for correct answers for Navigation Grid
+  const correctAnswersMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    activeQuestions.forEach((q) => {
+      map[q.id] = q.correctAnswerIndex;
+    });
+    return map;
+  }, [activeQuestions]);
+
+  // Daily Challenge Question Picker
+  const dailyChallengeQuestion = useMemo(() => {
+    const allQs: Question[] = [];
+    EXAMS_DATA.forEach((e) => {
+      const subs = e.branches ? e.branches.flatMap((b) => b.subjects) : e.subjects || [];
+      subs.forEach((s) => s.chapters.forEach((c) => allQs.push(...c.questions)));
+    });
+    if (allQs.length === 0) return null;
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+    return allQs[dayOfYear % allQs.length];
+  }, []);
 
   // Timer logic
   useEffect(() => {
@@ -512,7 +540,21 @@ export default function Home() {
         </div>
 
         {/* Action Header & Badges */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <button
+            onClick={() => setIsQuestionSearchOpen(true)}
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20 text-xs font-bold transition cursor-pointer"
+          >
+            <span>🔍</span> Search Qs
+          </button>
+
+          <button
+            onClick={() => setIsRankEstimatorOpen(true)}
+            className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 text-xs font-bold transition cursor-pointer"
+          >
+            <span>📊</span> Rank Predictor
+          </button>
+
           <button
             onClick={() => setIsMistakesModalOpen(true)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 text-xs font-bold transition cursor-pointer"
@@ -546,9 +588,11 @@ export default function Home() {
 
       {/* DASHBOARD SCREEN */}
       {currentScreen === "dashboard" && (
-        <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 space-y-8">
-          <div className="flex flex-wrap items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
-            <div className="flex gap-2">
+        <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
+
+          {/* Quick Action Navigation Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-4 rounded-2xl">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setShowAnalyticsView(false)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
@@ -565,6 +609,20 @@ export default function Home() {
                 }`}
               >
                 📊 Performance Analytics
+              </button>
+
+              <button
+                onClick={() => setIsQuestionSearchOpen(true)}
+                className="px-4 py-2 btn-3d-slate rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+              >
+                <span>🔍</span> Search Question Bank
+              </button>
+
+              <button
+                onClick={() => setIsRankEstimatorOpen(true)}
+                className="px-4 py-2 btn-3d-slate rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+              >
+                <span>📊</span> GATE Rank Estimator
               </button>
             </div>
 
@@ -588,11 +646,13 @@ export default function Home() {
             />
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-              <div className="lg:col-span-8 space-y-8">
+              <div className="lg:col-span-8 space-y-6">
+
+                {/* Exam Path Selector */}
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Select Exam Path</h2>
-                    <span className="text-xs text-emerald-400 font-semibold">{EXAMS_DATA.length} Targeted Exams</span>
+                    <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">Select Exam Target</h2>
+                    <span className="text-xs text-emerald-400 font-semibold">{EXAMS_DATA.length} Major Exams</span>
                   </div>
 
                   <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
@@ -611,6 +671,7 @@ export default function Home() {
                   </div>
                 </div>
 
+                {/* Branch selector if GATE */}
                 {selectedExam.id === "gate" && selectedExam.branches && (
                   <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4">
                     <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">
@@ -635,216 +696,197 @@ export default function Home() {
                   </div>
                 )}
 
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-6 text-white shadow-xl shadow-emerald-950/40 relative overflow-hidden">
-                    <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div>
-                        <span className="text-xs font-bold uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
-                          Current Target: {selectedExam.name} {selectedBranch ? `(${selectedBranch.name})` : ""}
-                        </span>
-                        <h2 className="text-2xl font-black mt-2 mb-1">{selectedExam.fullName}</h2>
-                        <p className="text-xs text-emerald-100 max-w-lg">{selectedExam.description}</p>
-                      </div>
+                {/* Hero Target Banner */}
+                <div className="bg-gradient-to-r from-emerald-600 to-teal-600 rounded-3xl p-6 text-white shadow-xl shadow-emerald-950/40 relative overflow-hidden">
+                  <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider bg-white/20 px-3 py-1 rounded-full">
+                        Current Target: {selectedExam.name} {selectedBranch ? `(${selectedBranch.name})` : ""}
+                      </span>
+                      <h2 className="text-2xl font-black mt-2 mb-1">{selectedExam.fullName}</h2>
+                      <p className="text-xs text-emerald-100 max-w-lg">{selectedExam.description}</p>
+                    </div>
 
-                      <div className="text-right">
-                        <span className="text-3xl font-black">{availableSubjects.length}</span>
-                        <div className="text-xs font-medium text-emerald-200">Active Subjects</div>
-                      </div>
+                    <div className="text-right">
+                      <span className="text-3xl font-black">{availableSubjects.length}</span>
+                      <div className="text-xs font-medium text-emerald-200">Active Subjects</div>
                     </div>
                   </div>
+                </div>
 
-                  <div className="space-y-6">
-                    {availableSubjects.map((subj, subjIdx) => (
-                      <div key={subj.id} className="duo-card p-6">
-                        <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-400 font-black flex items-center justify-center border border-indigo-500/20 text-sm">
-                              0{subjIdx + 1}
-                            </div>
+                {/* Subjects & Chapters List */}
+                <div className="space-y-6">
+                  {availableSubjects.map((subj, subjIdx) => (
+                    <div key={subj.id} className="duo-card p-6">
+                      <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 text-indigo-400 font-black flex items-center justify-center border border-indigo-500/20 text-sm">
+                            0{subjIdx + 1}
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-bold text-white">{subj.name}</h3>
+                            <p className="text-xs text-slate-400">{subj.description}</p>
+                          </div>
+                        </div>
+
+                        <span className="text-xs font-bold bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">
+                          {subj.chapters.length} Chapters
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {subj.chapters.map((chap) => (
+                          <div
+                            key={chap.id}
+                            onClick={() => quickLaunchChapterQuiz(subj, chap)}
+                            className="bg-slate-950 hover:bg-slate-800/80 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl transition cursor-pointer flex flex-col justify-between group"
+                          >
                             <div>
-                              <h3 className="text-lg font-bold text-white">{subj.name}</h3>
-                              <p className="text-xs text-slate-400">{subj.description}</p>
+                              <div className="flex justify-between items-start mb-2">
+                                <span className="text-xs font-bold text-emerald-400 group-hover:text-emerald-300">
+                                  📖 Chapter
+                                </span>
+                                <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-md">
+                                  {chap.questions.length} Qs
+                                </span>
+                              </div>
+                              <h4 className="text-sm font-bold text-slate-200 group-hover:text-white mb-1">
+                                {chap.name}
+                              </h4>
+                              <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                                {chap.description}
+                              </p>
+                            </div>
+
+                            <div className="mt-4 pt-3 border-t border-slate-900 flex items-center justify-between text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition">
+                              <span>Start Practice</span>
+                              <span>→</span>
                             </div>
                           </div>
-
-                          <span className="text-xs font-bold bg-slate-800 text-slate-300 px-3 py-1 rounded-full border border-slate-700">
-                            {subj.chapters.length} Chapters
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {subj.chapters.map((chap) => (
-                            <div
-                              key={chap.id}
-                              onClick={() => quickLaunchChapterQuiz(subj, chap)}
-                              className="bg-slate-950 hover:bg-slate-800/80 border border-slate-800 hover:border-emerald-500/50 p-4 rounded-2xl transition cursor-pointer flex flex-col justify-between group"
-                            >
-                              <div>
-                                <div className="flex justify-between items-start mb-2">
-                                  <span className="text-xs font-bold text-emerald-400 group-hover:text-emerald-300">
-                                    📖 Chapter
-                                  </span>
-                                  <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-md">
-                                    Full Question Pool
-                                  </span>
-                                </div>
-                                <h4 className="text-sm font-bold text-slate-200 group-hover:text-white mb-1">
-                                  {chap.name}
-                                </h4>
-                                <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                                  {chap.description}
-                                </p>
-                              </div>
-
-                              <div className="mt-4 pt-3 border-t border-slate-900 flex items-center justify-between text-xs font-bold text-emerald-400 group-hover:translate-x-1 transition">
-                                <span>Start Practice</span>
-                                <span>→</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-
+                    </div>
+                  ))}
                 </div>
-
               </div>
 
+              {/* Sidebar Cards */}
               <div className="lg:col-span-4 space-y-6">
-                <div className="duo-card p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center text-xl">
-                      🎯
+
+                {/* Daily Challenge Card */}
+                {dailyChallengeQuestion && (
+                  <div className="bg-gradient-to-br from-purple-900/60 to-indigo-900/60 border border-purple-500/40 rounded-3xl p-5 space-y-3 shadow-xl relative overflow-hidden">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-purple-300 bg-purple-500/20 px-2.5 py-1 rounded-full border border-purple-400/30">
+                        ⚡ Daily Challenge
+                      </span>
+                      <span className="text-xs font-bold text-amber-400">+20 XP</span>
+                    </div>
+
+                    <div className="text-xs font-bold text-white leading-snug">
+                      {renderTextWithMath(cleanQuestionText(dailyChallengeQuestion.text))}
+                    </div>
+
+                    <button
+                      onClick={() => launchCustomQuestionPool([dailyChallengeQuestion], "Daily Challenge Question")}
+                      className="w-full py-2.5 btn-3d-purple font-bold text-xs rounded-xl cursor-pointer"
+                    >
+                      Solve Daily Question 🚀
+                    </button>
+                  </div>
+                )}
+
+                {/* Rank Estimator Promotion */}
+                <div className="bg-slate-900 border border-amber-500/30 rounded-3xl p-5 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 text-xl font-bold flex items-center justify-center border border-amber-500/20">
+                      📊
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-white">Daily Learning Goal</h3>
-                      <p className="text-xs text-slate-400">Complete 3 quizzes today to keep streak</p>
+                      <h4 className="font-extrabold text-white text-sm">GATE Rank Predictor</h4>
+                      <p className="text-[11px] text-slate-400">Estimate your AIR rank based on expected marks</p>
                     </div>
                   </div>
 
-                  <div className="mb-3">
-                    <div className="flex justify-between text-xs font-bold mb-1.5">
-                      <span className="text-slate-400">Progress</span>
-                      <span className="text-orange-400">{dailyQuizzesDone} / {dailyGoal} Quizzes</span>
-                    </div>
-                    <div className="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
-                      <div
-                        className="bg-gradient-to-r from-orange-500 to-amber-400 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${Math.min(100, (dailyQuizzesDone / dailyGoal) * 100)}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  <p className="text-[11px] text-slate-400">
-                    {dailyQuizzesDone >= dailyGoal
-                      ? "🎉 Daily goal accomplished! +50 Bonus XP earned!"
-                      : `Complete ${dailyGoal - dailyQuizzesDone} more quiz to complete today's goal.`}
-                  </p>
+                  <button
+                    onClick={() => setIsRankEstimatorOpen(true)}
+                    className="w-full py-2.5 btn-3d-blue font-bold text-xs rounded-xl cursor-pointer"
+                  >
+                    Open Rank Estimator →
+                  </button>
                 </div>
 
-                <div className="duo-card p-6">
-                  <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
-                    <span>🛡️</span> Official Verified Certificates
-                  </h3>
-                  <p className="text-xs text-slate-400 mb-4">
-                    All test results are automatically verified & logged with authentic credentials.
-                  </p>
-
-                  <div className="bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center">
-                    <div className="text-2xl mb-1">🏅</div>
-                    <div className="text-xs font-bold text-slate-200">Instant Verification Guarantee</div>
-                    <div className="text-[10px] text-slate-500 mt-1">Take any quiz to receive your verified digital certificate!</div>
+                {/* AI Quiz Generator Banner */}
+                <div className="bg-slate-900 border border-cyan-500/30 rounded-3xl p-5 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-400 text-xl font-bold flex items-center justify-center border border-cyan-500/20">
+                      ✨
+                    </div>
+                    <div>
+                      <h4 className="font-extrabold text-white text-sm">AI Quiz Generator</h4>
+                      <p className="text-[11px] text-slate-400">Generate custom quiz from topic or notes</p>
+                    </div>
                   </div>
+
+                  <button
+                    onClick={() => setIsAIQuizGenModalOpen(true)}
+                    className="w-full py-2.5 btn-3d-purple font-bold text-xs rounded-xl cursor-pointer"
+                  >
+                    Generate AI Quiz →
+                  </button>
                 </div>
 
               </div>
-
             </div>
           )}
         </div>
       )}
 
-      {/* SETTINGS MODAL */}
-      {currentScreen === "settings" && selectedChapter && (
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="duo-card max-w-md w-full p-6 sm:p-8 space-y-6">
-            <div className="text-center">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                {selectedExam.name} • {selectedSubject?.name}
+      {/* SETTINGS SCREEN */}
+      {currentScreen === "settings" && selectedSubject && selectedChapter && (
+        <div className="flex-1 max-w-xl mx-auto w-full px-4 py-8 flex flex-col justify-center">
+          <div className="duo-card p-6 sm:p-8 space-y-6">
+            <div className="border-b border-slate-800 pb-4">
+              <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                {selectedExam.name} • {selectedSubject.name}
               </span>
-              <h2 className="text-2xl font-black text-white mt-3">{selectedChapter.name}</h2>
-              <p className="text-xs text-slate-400 mt-1">Configure your practice session</p>
+              <h2 className="text-xl sm:text-2xl font-black text-white mt-1">
+                {selectedChapter.name}
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">{selectedChapter.description}</p>
             </div>
 
-            {/* Quiz Mode Selection (Practice vs Test vs Exam) */}
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-2">Practice / Test Mode</label>
+              <label className="block text-xs font-bold text-slate-300 mb-2">Quiz Mode</label>
               <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setQuizMode("practice")}
-                  className={`p-2.5 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
-                    quizMode === "practice" ? "btn-3d-green" : "btn-3d-slate"
-                  }`}
-                >
-                  📖 Practice (Instant Feedback)
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setQuizMode("test")}
-                  className={`p-2.5 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
-                    quizMode === "test" ? "btn-3d-blue" : "btn-3d-slate"
-                  }`}
-                >
-                  ⏱️ Test (Timed Palette)
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setQuizMode("exam")}
-                  className={`p-2.5 rounded-xl border text-[11px] font-bold transition cursor-pointer ${
-                    quizMode === "exam" ? "btn-3d-purple" : "btn-3d-slate"
-                  }`}
-                >
-                  🎓 Exam (-1 Negative)
-                </button>
+                {(["practice", "test", "exam"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setQuizMode(m)}
+                    className={`py-2.5 rounded-xl text-xs font-bold capitalize transition cursor-pointer ${
+                      quizMode === m ? "btn-3d-blue" : "btn-3d-slate"
+                    }`}
+                  >
+                    {m}
+                  </button>
+                ))}
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 mb-1.5">Candidate Name</label>
-              <input
-                type="text"
-                value={userName}
-                onChange={(e) => {
-                  setUserName(e.target.value);
-                  if (typeof window !== "undefined") localStorage.setItem("examiq_name", e.target.value);
-                }}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-300 mb-2">Difficulty Level</label>
+              <label className="block text-xs font-bold text-slate-300 mb-2">Difficulty</label>
               <div className="grid grid-cols-3 gap-2">
-                {(["easy", "medium", "hard"] as const).map((diff) => (
+                {(["easy", "medium", "hard"] as const).map((d) => (
                   <button
-                    key={diff}
+                    key={d}
                     type="button"
-                    onClick={() => setDifficulty(diff)}
-                    className={`py-2.5 text-xs font-bold capitalize rounded-xl transition cursor-pointer ${
-                      difficulty === diff
-                        ? diff === "easy"
-                          ? "btn-3d-green"
-                          : diff === "medium"
-                          ? "bg-amber-500 text-white shadow-[0_4px_0_#d97706]"
-                          : "bg-rose-500 text-white shadow-[0_4px_0_#be123c]"
-                        : "btn-3d-slate"
+                    onClick={() => setDifficulty(d)}
+                    className={`py-2.5 rounded-xl text-xs font-bold capitalize transition cursor-pointer ${
+                      difficulty === d ? "btn-3d-blue" : "btn-3d-slate"
                     }`}
                   >
-                    {diff}
+                    {d}
                   </button>
                 ))}
               </div>
@@ -913,7 +955,7 @@ export default function Home() {
 
       {/* QUIZ INTERFACE */}
       {currentScreen === "quiz" && currentQ && (
-        <div className="flex-1 flex flex-col justify-between max-w-4xl mx-auto w-full px-4 py-6">
+        <div className="flex-1 max-w-6xl mx-auto w-full px-4 py-6">
           {/* Low Time Warning Banner */}
           {timeLeft > 0 && timeLeft < 60 && (
             <div className="bg-rose-600 text-white font-bold text-xs text-center py-2 rounded-xl mb-3 animate-pulse">
@@ -972,9 +1014,9 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-6 flex-1">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Main Question Column */}
-            <div className="flex-1 flex flex-col justify-between">
+            <div className="lg:col-span-8 flex flex-col justify-between min-h-[420px]">
               <div>
                 <div className="flex justify-between items-center mb-3">
                   <div className="flex items-center gap-2">
@@ -1116,47 +1158,25 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Question Palette Sidebar (For Test & Exam Mode) */}
-            <div className="w-full lg:w-64 bg-slate-900/90 border border-slate-800 p-4 rounded-2xl flex flex-col justify-between">
-              <div>
-                <h4 className="text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
-                  Question Palette
-                </h4>
-
-                <div className="grid grid-cols-5 gap-1.5 max-h-48 overflow-y-auto pr-1">
-                  {activeQuestions.map((q, idx) => {
-                    const ans = userAnswers[q.id];
-                    const isCur = idx === currentQuestionIndex;
-                    const hasAns = ans && ans.selectedOptionIndex !== null;
-                    const isMarked = ans && ans.isMarkedForReview;
-
-                    let bg = "bg-slate-950 text-slate-400 border-slate-800";
-                    if (isMarked) bg = "bg-amber-600 text-white border-amber-400";
-                    else if (hasAns) bg = "bg-emerald-600 text-white border-emerald-400";
-
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          setCurrentQuestionIndex(idx);
-                          setIsAnswerChecked(false);
-                        }}
-                        className={`h-8 rounded-lg border text-xs font-bold flex items-center justify-center transition ${bg} ${
-                          isCur ? "ring-2 ring-purple-500 scale-105" : ""
-                        }`}
-                      >
-                        {idx + 1}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+            {/* GATE-Style Question Navigation Palette Sidebar */}
+            <div className="lg:col-span-4 space-y-4">
+              <QuestionNavigationGrid
+                questions={activeQuestions}
+                userAnswers={userAnswers}
+                correctAnswers={correctAnswersMap}
+                currentIndex={currentQuestionIndex}
+                isSubmitted={false}
+                onJumpTo={(idx) => {
+                  setCurrentQuestionIndex(idx);
+                  setIsAnswerChecked(false);
+                }}
+              />
 
               <button
                 onClick={() => handleQuizSubmit(false)}
-                className="mt-4 w-full py-2.5 btn-3d-green font-bold text-xs rounded-xl cursor-pointer"
+                className="w-full py-3 btn-3d-green font-black text-xs rounded-xl cursor-pointer"
               >
-                Submit Test Now ✓
+                Submit Quiz Session ✓
               </button>
             </div>
           </div>
@@ -1240,8 +1260,15 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Special Action Buttons: Retry Wrong + Try Similar */}
+            {/* Special Action Buttons */}
             <div className="flex flex-wrap gap-3 justify-center">
+              <button
+                onClick={() => setIsResultReviewModalOpen(true)}
+                className="px-6 py-3 btn-3d-blue font-bold text-xs rounded-xl cursor-pointer flex items-center gap-2"
+              >
+                <span>📋</span> Open Full Question Review Grid
+              </button>
+
               {incorrectCount > 0 && (
                 <button
                   onClick={retryIncorrectQuestions}
@@ -1254,7 +1281,7 @@ export default function Home() {
               {activeQuestions.length > 0 && (
                 <button
                   onClick={() => trySimilarQuestion(activeQuestions[0])}
-                  className="px-6 py-3 btn-3d-blue font-bold text-xs rounded-xl cursor-pointer"
+                  className="px-6 py-3 btn-3d-slate font-bold text-xs rounded-xl cursor-pointer"
                 >
                   🔄 Try Similar Question
                 </button>
@@ -1366,6 +1393,25 @@ export default function Home() {
         onClose={() => setIsAIQuizGenModalOpen(false)}
         onStartGeneratedQuiz={(questions, title) => launchCustomQuestionPool(questions, title)}
       />
+
+      <GateRankEstimatorModal
+        isOpen={isRankEstimatorOpen}
+        onClose={() => setIsRankEstimatorOpen(false)}
+      />
+
+      <QuestionSearchModal
+        isOpen={isQuestionSearchOpen}
+        onClose={() => setIsQuestionSearchOpen(false)}
+        onSelectQuestion={(q, subjectName) => launchCustomQuestionPool([q], `Practice: ${subjectName}`)}
+      />
+
+      {isResultReviewModalOpen && (
+        <ResultReviewModal
+          questions={activeQuestions}
+          userAnswers={userAnswers}
+          onClose={() => setIsResultReviewModalOpen(false)}
+        />
+      )}
     </main>
   );
 }
