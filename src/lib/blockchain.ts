@@ -126,11 +126,15 @@ export async function verifyCertificateOnBlockchain(certificateIdOrHash: string)
       const computedMerkle = await calculateSHA256(dataString);
       const raw = `${block.index}${block.timestamp}${computedMerkle}${block.previousHash}${block.nonce}`;
       const recomputedHash = '0x' + (await calculateSHA256(raw)).substring(0, 62);
+      
+      const isIntegrityValid = recomputedHash === block.hash;
 
       return {
-        isValid: true,
+        isValid: isIntegrityValid,
         block,
-        message: `Verified! Block #${block.index} successfully authenticated on MadiGO1 Blockchain Network.`
+        message: isIntegrityValid
+          ? `Verified! Block #${block.index} successfully authenticated on MadiGO1 Blockchain Network.`
+          : `Integrity compromise detected! Block #${block.index} hash does not match computed signature.`
       };
     }
   }

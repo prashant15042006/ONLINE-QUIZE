@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Primary: Groq (gsk_...) | Fallback: OpenRouter (sk-or-...)
+// Primary: Gemini (GEMINI_API_KEY) | Fallbacks: Groq / OpenRouter
+const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 const GROQ_KEY = process.env.GROQ_API_KEY || "";
 const OR_KEY = process.env.OPENROUTER_API_KEY || "";
 
@@ -77,8 +79,23 @@ Task: ${modeInstruction}
 
     let aiText = "";
 
-    // Try Groq first (faster)
-    if (GROQ_KEY) {
+    // Try Gemini first
+    if (GEMINI_KEY) {
+      try {
+        const genAI = new GoogleGenerativeAI(GEMINI_KEY);
+        const model = genAI.getGenerativeModel({
+          model: "gemini-1.5-flash",
+          systemInstruction: systemPrompt,
+        });
+        const result = await model.generateContent(userPrompt);
+        aiText = result.response.text() || "";
+      } catch (geminiErr) {
+        console.warn("Gemini failed, trying other LLMs:", geminiErr);
+      }
+    }
+
+    // Try Groq as fallback
+    if (!aiText && GROQ_KEY) {
       try {
         aiText = await callLLM(GROQ_URL, GROQ_KEY, GROQ_MODEL, systemPrompt, userPrompt, false);
       } catch (groqErr) {
