@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://online-quize-eh1w.vercel.app"),
   title: "ExamiQ | Advanced Real-Time Quiz & Exam Prep",
   description:
     "Prepare for GATE, JEE, NEET, SSC, and Railway exams with real-time timers, adaptive difficulty, and comprehensive step-by-step AI solutions.",
