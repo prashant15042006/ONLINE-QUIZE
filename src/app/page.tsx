@@ -531,8 +531,16 @@ export default function Home() {
       {/* GAMIFIED TOP BAR */}
       <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3 flex items-center justify-between">
         <div onClick={() => setCurrentScreen("dashboard")} className="flex items-center gap-3 cursor-pointer group">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-xl shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition">
-            🎓
+          {/* ExamiQ Professional Logo */}
+          <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition border border-emerald-500/20">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo.jpg"
+              alt="ExamiQ Logo"
+              width={40}
+              height={40}
+              className="w-full h-full object-cover"
+            />
           </div>
           <div>
             <h1 className="text-lg sm:text-xl font-black tracking-tight text-white flex items-center gap-2">
@@ -622,7 +630,10 @@ export default function Home() {
             <div className="space-y-6">
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">🎓</span>
+                  <div className="w-7 h-7 rounded-xl overflow-hidden border border-emerald-500/20">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src="/logo.jpg" alt="ExamiQ" width={28} height={28} className="w-full h-full object-cover" />
+                  </div>
                   <span className="font-extrabold text-white text-base">ExamiQ Menu</span>
                 </div>
                 <button

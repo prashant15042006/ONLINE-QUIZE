@@ -1,0 +1,73 @@
+{
+  "name": "ExamiQ | Advanced Real-Time Quiz & Exam Prep",
+  "short_name": "ExamiQ",
+  "description": "Prepare for GATE, JEE, NEET, SSC CGL exams with real-time timers, adaptive difficulty, and comprehensive step-by-step AI solutions.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080710",
+  "theme_color": "#0f172a",
+  "orientation": "portrait",
+  "categories": ["education", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "AI Quiz Generator",
+      "short_name": "AI Quiz",
+      "description": "Generate custom quiz from topic or notes",
+      "url": "/?shortcut=ai-quiz",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Mistakes Notebook",
+      "short_name": "Mistakes",
+      "description": "Review and resolve saved practice mistakes",
+      "url": "/?shortcut=mistakes",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Bookmarked Questions",
+      "short_name": "Bookmarks",
+      "description": "Practice bookmarked questions",
+      "url": "/?shortcut=bookmarks",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "GATE PYQ Papers",
+      "short_name": "GATE PYQ",
+      "description": "Official GATE CSE Previous Year Papers",
+      "url": "/?shortcut=pyqs",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
