@@ -166,6 +166,7 @@ export default function Home() {
   const [isResultReviewModalOpen, setIsResultReviewModalOpen] = useState(false);
   const [isGatePyqModalOpen, setIsGatePyqModalOpen] = useState(false);
   const [showAnalyticsView, setShowAnalyticsView] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   // Bookmark status toggle
   const [isCurrentQBookmarked, setIsCurrentQBookmarked] = useState(false);
@@ -526,7 +527,7 @@ export default function Home() {
   const isCorrect = currentAns && currentQ && currentAns.selectedOptionIndex === currentQ.correctAnswerIndex;
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between font-sans">
+    <main className="min-h-screen bg-slate-950 text-slate-100 flex flex-col justify-between font-sans safe-bottom-padding">
       {/* GAMIFIED TOP BAR */}
       <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 sm:px-8 py-3 flex items-center justify-between">
         <div onClick={() => setCurrentScreen("dashboard")} className="flex items-center gap-3 cursor-pointer group">
@@ -534,15 +535,15 @@ export default function Home() {
             🎓
           </div>
           <div>
-            <h1 className="text-xl font-black tracking-tight text-white flex items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-black tracking-tight text-white flex items-center gap-2">
               ExamiQ <span className="text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">PRO</span>
             </h1>
-            <p className="text-[11px] text-slate-400 font-medium">Smart Competitive Exam Prep</p>
+            <p className="text-[10px] sm:text-[11px] text-slate-400 font-medium">Smart Competitive Exam Prep</p>
           </div>
         </div>
 
-        {/* Action Header & Badges */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Action Header & Badges (Desktop) */}
+        <div className="hidden md:flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setIsGatePyqModalOpen(true)}
             className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 text-xs font-bold transition cursor-pointer"
@@ -580,7 +581,7 @@ export default function Home() {
 
           <button
             onClick={() => setIsAIQuizGenModalOpen(true)}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/20 text-xs font-bold transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/20 text-xs font-bold transition cursor-pointer"
           >
             <span>✨</span> AI Quiz
           </button>
@@ -593,7 +594,128 @@ export default function Home() {
             <span>⚡</span> {userXP} XP
           </div>
         </div>
+
+        {/* Mobile Badges & Hamburger Toggle */}
+        <div className="flex md:hidden items-center gap-2">
+          <div className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-full text-orange-400 font-bold text-[11px]">
+            <span>🔥</span> {streakCount}d
+          </div>
+
+          <div className="flex items-center gap-1 bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 rounded-full text-cyan-300 font-bold text-[11px]">
+            <span>⚡</span> {userXP}
+          </div>
+
+          <button
+            onClick={() => setIsMobileDrawerOpen(true)}
+            className="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-200 text-lg hover:bg-slate-700 transition cursor-pointer"
+            aria-label="Open mobile menu"
+          >
+            ☰
+          </button>
+        </div>
       </header>
+
+      {/* MOBILE SLIDE-OVER DRAWER */}
+      {isMobileDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-sm md:hidden animate-fadeIn">
+          <div className="w-4/5 max-w-xs bg-slate-900 h-full border-l border-slate-800 p-5 flex flex-col justify-between shadow-2xl">
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🎓</span>
+                  <span className="font-extrabold text-white text-base">ExamiQ Menu</span>
+                </div>
+                <button
+                  onClick={() => setIsMobileDrawerOpen(false)}
+                  className="w-8 h-8 rounded-xl bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <button
+                  onClick={() => {
+                    setCurrentScreen("dashboard");
+                    setShowAnalyticsView(false);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-800 text-white font-bold text-xs cursor-pointer"
+                >
+                  <span>🗺️</span> Learning Pathway
+                </button>
+
+                <button
+                  onClick={() => {
+                    setCurrentScreen("dashboard");
+                    setShowAnalyticsView(true);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-950 border border-slate-800 text-slate-300 font-bold text-xs cursor-pointer"
+                >
+                  <span>📊</span> Performance Analytics
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsGatePyqModalOpen(true);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold text-xs cursor-pointer"
+                >
+                  <span>📜</span> GATE PYQ Papers (2015-2024)
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsRankEstimatorOpen(true);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-bold text-xs cursor-pointer"
+                >
+                  <span>📊</span> GATE Rank Estimator
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsMistakesModalOpen(true);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-rose-500/10 text-rose-300 border border-rose-500/20 font-bold text-xs cursor-pointer"
+                >
+                  <span className="flex items-center gap-3"><span>📕</span> Mistakes Notebook</span>
+                  <span className="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded-full text-[10px]">{mistakesCount}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsBookmarksModalOpen(true);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className="w-full flex items-center justify-between px-4 py-3 rounded-2xl bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold text-xs cursor-pointer"
+                >
+                  <span className="flex items-center gap-3"><span>🔖</span> Bookmarked Questions</span>
+                  <span className="bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full text-[10px]">{bookmarksCount}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsAIQuizGenModalOpen(true);
+                    setIsMobileDrawerOpen(false);
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold text-xs cursor-pointer"
+                >
+                  <span>✨</span> AI Quiz Generator
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-slate-800 text-center text-[11px] text-slate-500 font-medium">
+              Streak: <span className="text-orange-400 font-bold">{streakCount} Days</span> | Total XP: <span className="text-cyan-300 font-bold">{userXP}</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* DASHBOARD SCREEN */}
       {currentScreen === "dashboard" && (

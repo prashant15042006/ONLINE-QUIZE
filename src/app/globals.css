@@ -239,3 +239,27 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: #58cc02; }
 .scrollbar-none { scrollbar-width: none; }
 .scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* Mobile Touch & Navigation Enhancements */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.safe-bottom-padding {
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@keyframes slideUpBottomSheet {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-bottom-sheet {
+  animation: slideUpBottomSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

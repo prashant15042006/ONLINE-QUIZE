@@ -42,8 +42,9 @@ export default function MistakesNotebookModal({ isOpen, onClose, onStartMistakes
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-700 rounded-3xl max-w-3xl w-full p-6 text-slate-100 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-0 sm:p-4 animate-fadeIn">
+      <div className="bg-slate-900 border-t sm:border border-slate-700 rounded-t-3xl sm:rounded-3xl max-w-3xl w-full p-5 sm:p-6 text-slate-100 shadow-2xl relative max-h-[85vh] sm:max-h-[90vh] overflow-y-auto animate-bottom-sheet sm:animate-none">
+        <div className="w-12 h-1.5 bg-slate-700/80 rounded-full mx-auto mb-3 sm:hidden" />
         {/* Header */}
         <div className="flex justify-between items-center border-b border-slate-800 pb-4 mb-4">
           <div className="flex items-center gap-3">
