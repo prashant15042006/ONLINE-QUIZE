@@ -128,7 +128,33 @@ const gateCS_EM: Subject = {
         },
         {
           id:'dm-02', difficulty:'easy', concept:'Planar Graph — Euler Formula', year:'GATE 2019',
-          text: 'A connected planar graph has 10 vertices and 15 edges. How many faces does it have?',
+          text: 'A connected planar graph has 10 vertices and 15 edges. By Euler\'s formula (V - E + F = 2 for planar embeddings as illustrated below), how many faces (regions) does it divide the plane into?',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 160" width="260" height="160" font-family="Arial" font-size="11">
+  <defs>
+    <filter id="pln_sh" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="1" dy="1" stdDeviation="1" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+  <!-- Outer boundary polygon -->
+  <polygon points="130,20 230,80 180,145 80,145 30,80" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+  <!-- Interior connections -->
+  <line x1="130" y1="20" x2="130" y2="85" stroke="#64748b" stroke-width="1.8"/>
+  <line x1="30" y1="80" x2="130" y2="85" stroke="#64748b" stroke-width="1.8"/>
+  <line x1="230" y1="80" x2="130" y2="85" stroke="#64748b" stroke-width="1.8"/>
+  <line x1="80" y1="145" x2="130" y2="85" stroke="#64748b" stroke-width="1.8"/>
+  <line x1="180" y1="145" x2="130" y2="85" stroke="#64748b" stroke-width="1.8"/>
+  <!-- Face labels -->
+  <text x="90" y="60" text-anchor="middle" font-size="10" fill="#3b82f6" font-weight="bold">F1</text>
+  <text x="170" y="60" text-anchor="middle" font-size="10" fill="#3b82f6" font-weight="bold">F2</text>
+  <text x="95" y="115" text-anchor="middle" font-size="10" fill="#3b82f6" font-weight="bold">F3</text>
+  <text x="165" y="115" text-anchor="middle" font-size="10" fill="#3b82f6" font-weight="bold">F4</text>
+  <text x="130" y="138" text-anchor="middle" font-size="10" fill="#3b82f6" font-weight="bold">F5</text>
+  <text x="240" y="30" text-anchor="middle" font-size="10" fill="#64748b" font-weight="bold">F_ext</text>
+  <!-- Center vertex -->
+  <circle cx="130" cy="85" r="5" fill="#2563eb"/>
+  <text x="130" y="156" text-anchor="middle" font-size="10" fill="#64748b">V - E + F = 2 (Euler's Formula)</text>
+</svg>`,
+          imageAlt: "Planar graph planar embedding dividing plane into distinct bounded faces and one unbounded exterior face",
           options: ['5', '6', '7', '8'],
           correctAnswerIndex: 2,
           explanation: "### Solution\nEuler's formula for planar graphs: $V - E + F = 2$\n$$F = 2 - V + E = 2 - 10 + 15 = \\mathbf{7}$$"
@@ -260,7 +286,64 @@ const gateCS_DL: Subject = {
         },
         {
           id:'dl-03', difficulty:'medium', concept:'K-Map', year:'GATE 2019',
-          text: 'The minimal SOP expression for the K-map with minterms {0,1,4,5,8,9,12,13} for 4-variable function is:',
+          text: 'The 4-variable Karnaugh Map (K-map) shown below has minterms m(0, 1, 4, 5, 8, 9, 12, 13) set to 1. Grouping these 8 adjacent cells into an octet yields which minimal SOP expression?',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200" width="300" height="200" font-family="Arial" font-size="11">
+  <!-- Diagonal header -->
+  <line x1="20" y1="20" x2="60" y2="60" stroke="#64748b" stroke-width="1.5"/>
+  <text x="25" y="55" font-size="10" font-weight="bold" fill="#334155">AB</text>
+  <text x="45" y="32" font-size="10" font-weight="bold" fill="#334155">CD</text>
+
+  <!-- Column labels CD: 00, 01, 11, 10 -->
+  <text x="85" y="50" text-anchor="middle" font-size="10" fill="#64748b">00</text>
+  <text x="135" y="50" text-anchor="middle" font-size="10" fill="#64748b">01</text>
+  <text x="185" y="50" text-anchor="middle" font-size="10" fill="#64748b">11</text>
+  <text x="235" y="50" text-anchor="middle" font-size="10" fill="#64748b">10</text>
+
+  <!-- Row labels AB: 00, 01, 11, 10 -->
+  <text x="45" y="80" text-anchor="middle" font-size="10" fill="#64748b">00</text>
+  <text x="45" y="115" text-anchor="middle" font-size="10" fill="#64748b">01</text>
+  <text x="45" y="150" text-anchor="middle" font-size="10" fill="#64748b">11</text>
+  <text x="45" y="185" text-anchor="middle" font-size="10" fill="#64748b">10</text>
+
+  <!-- K-Map Grid -->
+  <!-- Highlight Octet group covering cols 00 and 01 for all 4 rows -->
+  <rect x="62" y="62" width="96" height="136" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2" stroke-dasharray="4,2"/>
+
+  <!-- Grid outline -->
+  <rect x="60" y="60" width="200" height="140" fill="none" stroke="#64748b" stroke-width="1.5"/>
+  <line x1="110" y1="60" x2="110" y2="200" stroke="#cbd5e1" stroke-width="1"/>
+  <line x1="160" y1="60" x2="160" y2="200" stroke="#cbd5e1" stroke-width="1"/>
+  <line x1="210" y1="60" x2="210" y2="200" stroke="#cbd5e1" stroke-width="1"/>
+  
+  <line x1="60" y1="95" x2="260" y2="95" stroke="#cbd5e1" stroke-width="1"/>
+  <line x1="60" y1="130" x2="260" y2="130" stroke="#cbd5e1" stroke-width="1"/>
+  <line x1="60" y1="165" x2="260" y2="165" stroke="#cbd5e1" stroke-width="1"/>
+
+  <!-- Cell values (Row 00: m0=1, m1=1, m3=0, m2=0) -->
+  <text x="85" y="82" text-anchor="middle" font-weight="bold" fill="#1e40af">1</text>
+  <text x="135" y="82" text-anchor="middle" font-weight="bold" fill="#1e40af">1</text>
+  <text x="185" y="82" text-anchor="middle" fill="#94a3b8">0</text>
+  <text x="235" y="82" text-anchor="middle" fill="#94a3b8">0</text>
+
+  <!-- Cell values (Row 01: m4=1, m5=1, m7=0, m6=0) -->
+  <text x="85" y="117" text-anchor="middle" font-weight="bold" fill="#1e40af">1</text>
+  <text x="135" y="117" text-anchor="middle" font-weight="bold" fill="#1e40af">1</text>
+  <text x="185" y="117" text-anchor="middle" fill="#94a3b8">0</text>
+  <text x="235" y="117" text-anchor="middle" fill="#94a3b8">0</text>
+
+  <!-- Cell values (Row 11: m12=1, m13=1, m15=0, m14=0) -->
+  <text x="85" y="152" text-anchor="middle" font-weight="bold" fill="#1e40af">1</text>
+  <text x="135" y="152" text-anchor="middle" font-weight="bold" fill="#1e40af">1</text>
+  <text x="185" y="152" text-anchor="middle" fill="#94a3b8">0</text>
+  <text x="235" y="152" text-anchor="middle" fill="#94a3b8">0</text>
+
+  <!-- Cell values (Row 10: m8=1, m9=1, m11=0, m10=0) -->
+  <text x="85" y="187" text-anchor="middle" font-weight="bold" fill="#1e40af">1</text>
+  <text x="135" y="187" text-anchor="middle" font-weight="bold" fill="#1e40af">1</text>
+  <text x="185" y="187" text-anchor="middle" fill="#94a3b8">0</text>
+  <text x="235" y="187" text-anchor="middle" fill="#94a3b8">0</text>
+</svg>`,
+          imageAlt: "4-variable Karnaugh Map showing an octet grouping covering columns CD = 00 and 01 across all rows",
           options: ["$\\overline{B}\\cdot\\overline{D}$", "$\\overline{B} + \\overline{D}$", "$\\overline{BD}$", "$\\overline{B} + D$"],
           correctAnswerIndex: 0,
           explanation: '### Solution\nMinterms {0,1,4,5,8,9,12,13} in ABCD:\n\nGrouping all 8 minterms: B=0, D=0 covers all → but checking: all minterms have B=0 OR D=0? All have B=0 (cells 0,1,4,5 have A=0,B=0; 8,9,12,13 have A=1,B=0). Actually B=0 for all.\n\n$$\\text{Minimal SOP} = \\overline{B} \\cdot \\overline{D}$$\nWait: minterm 1 = 0001 (B=0,D=1) → B=0 but D=1. So $\\overline{B}$ alone covers all minterms.\n$$\\text{Simplified} = \\mathbf{\\overline{B}}$$'

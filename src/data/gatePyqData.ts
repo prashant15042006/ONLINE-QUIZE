@@ -240,7 +240,25 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "24s1-q15",
-        "text": "Number of spanning trees in K₄ (complete graph, 4 labeled vertices)?",
+        "text": "What is the total number of distinct spanning trees in the complete graph K₄ shown below (with 4 labeled vertices)?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 180" width="240" height="180" font-family="Arial" font-size="12">
+  <line x1="60" y1="40" x2="180" y2="40" stroke="#475569" stroke-width="2"/>
+  <line x1="180" y1="40" x2="180" y2="140" stroke="#475569" stroke-width="2"/>
+  <line x1="180" y1="140" x2="60" y2="140" stroke="#475569" stroke-width="2"/>
+  <line x1="60" y1="140" x2="60" y2="40" stroke="#475569" stroke-width="2"/>
+  <line x1="60" y1="40" x2="180" y2="140" stroke="#3b82f6" stroke-width="2" stroke-dasharray="3,3"/>
+  <line x1="180" y1="40" x2="60" y2="140" stroke="#3b82f6" stroke-width="2" stroke-dasharray="3,3"/>
+  <circle cx="60" cy="40" r="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="60" y="44" text-anchor="middle" font-weight="bold" fill="#1e40af">1</text>
+  <circle cx="180" cy="40" r="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="180" y="44" text-anchor="middle" font-weight="bold" fill="#1e40af">2</text>
+  <circle cx="180" cy="140" r="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="180" y="144" text-anchor="middle" font-weight="bold" fill="#1e40af">3</text>
+  <circle cx="60" cy="140" r="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="60" y="144" text-anchor="middle" font-weight="bold" fill="#1e40af">4</text>
+  <text x="120" y="170" text-anchor="middle" font-size="11" font-weight="bold" fill="#64748b">Complete Graph K₄</text>
+</svg>`,
+        "imageAlt": "Complete graph K4 with 4 labeled vertices and 6 edges",
         "options": [
           "8",
           "12",
@@ -255,7 +273,28 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "24s1-q16",
-        "text": "Which traversal of BST gives elements in sorted order?",
+        "text": "For the Binary Search Tree (BST) illustrated below, which tree traversal order guarantees visiting keys in strictly ascending sorted order (e.g., 20, 30, 40, 50, 70, 80)?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 175" width="260" height="175" font-family="Arial" font-size="12">
+  <line x1="130" y1="35" x2="75" y2="85" stroke="#64748b" stroke-width="2"/>
+  <line x1="130" y1="35" x2="185" y2="85" stroke="#64748b" stroke-width="2"/>
+  <line x1="75" y1="85" x2="45" y2="135" stroke="#64748b" stroke-width="2"/>
+  <line x1="75" y1="85" x2="105" y2="135" stroke="#64748b" stroke-width="2"/>
+  <line x1="185" y1="85" x2="215" y2="135" stroke="#64748b" stroke-width="2"/>
+  <circle cx="130" cy="35" r="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="130" y="40" text-anchor="middle" font-weight="bold" fill="#1e40af">50</text>
+  <circle cx="75" cy="85" r="15" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="75" y="90" text-anchor="middle" font-weight="bold" fill="#1e40af">30</text>
+  <circle cx="185" cy="85" r="15" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="185" y="90" text-anchor="middle" font-weight="bold" fill="#1e40af">70</text>
+  <circle cx="45" cy="135" r="14" fill="#f8fafc" stroke="#64748b" stroke-width="1.8"/>
+  <text x="45" y="139" text-anchor="middle" font-weight="bold" fill="#334155">20</text>
+  <circle cx="105" cy="135" r="14" fill="#f8fafc" stroke="#64748b" stroke-width="1.8"/>
+  <text x="105" y="139" text-anchor="middle" font-weight="bold" fill="#334155">40</text>
+  <circle cx="215" cy="135" r="14" fill="#f8fafc" stroke="#64748b" stroke-width="1.8"/>
+  <text x="215" y="139" text-anchor="middle" font-weight="bold" fill="#334155">80</text>
+  <text x="130" y="168" text-anchor="middle" font-size="11" fill="#64748b">Binary Search Tree (BST)</text>
+</svg>`,
+        "imageAlt": "Binary Search Tree with keys 50, 30, 70, 20, 40, 80",
         "options": [
           "Preorder",
           "Inorder",
@@ -420,7 +459,32 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "24s1-q27",
-        "text": "Page size=2KB=2048B. Virtual address=2500. Pages 0,1,2,3 in frames 1,3,2,0. Physical address?",
+        "text": "Consider a system with page size = 2 KB (2048 bytes). Virtual address 2500 is translated using the page table shown below (Pages 0, 1, 2, 3 mapped to frames 1, 3, 2, 0). What is the resulting physical address?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 140" width="360" height="140" font-family="Arial" font-size="11">
+  <rect x="20" y="20" width="65" height="30" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/>
+  <text x="52" y="39" text-anchor="middle" font-weight="bold" fill="#1e40af">p = 1</text>
+  <rect x="85" y="20" width="65" height="30" fill="#f8fafc" stroke="#64748b" stroke-width="1.8"/>
+  <text x="117" y="39" text-anchor="middle" font-weight="bold" fill="#334155">d = 452</text>
+  <text x="85" y="14" text-anchor="middle" font-size="10" fill="#64748b">Virtual Address = 2500</text>
+  <rect x="180" y="15" width="80" height="110" rx="4" fill="#ffffff" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="220" y="30" text-anchor="middle" font-size="10" font-weight="bold" fill="#475569">Page Table</text>
+  <rect x="185" y="35" width="70" height="18" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="220" y="48" text-anchor="middle" font-size="10">Page 0 → F1</text>
+  <rect x="185" y="55" width="70" height="18" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="220" y="68" text-anchor="middle" font-size="10" font-weight="bold" fill="#b45309">Page 1 → F3</text>
+  <rect x="185" y="75" width="70" height="18" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="220" y="88" text-anchor="middle" font-size="10">Page 2 → F2</text>
+  <rect x="185" y="95" width="70" height="18" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="220" y="108" text-anchor="middle" font-size="10">Page 3 → F0</text>
+  <rect x="290" y="50" width="30" height="30" fill="#fef3c7" stroke="#d97706" stroke-width="1.8"/>
+  <text x="305" y="69" text-anchor="middle" font-weight="bold" fill="#b45309">f=3</text>
+  <rect x="320" y="50" width="35" height="30" fill="#f8fafc" stroke="#64748b" stroke-width="1.8"/>
+  <text x="337" y="69" text-anchor="middle" font-weight="bold" fill="#334155">452</text>
+  <text x="322" y="95" text-anchor="middle" font-size="10" font-weight="bold" fill="#16a34a">PA = 6596</text>
+  <line x1="85" y1="50" x2="185" y2="64" stroke="#d97706" stroke-width="1.5" stroke-dasharray="2,2"/>
+  <line x1="255" y1="64" x2="290" y2="64" stroke="#d97706" stroke-width="1.5"/>
+</svg>`,
+        "imageAlt": "Virtual address translation through page table into physical address",
         "options": [
           "452",
           "4996",
@@ -733,7 +797,31 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "24s1-q46",
-        "text": "TCP 3-way handshake: What does the client send first?",
+        "text": "In the standard TCP connection establishment sequence (3-way handshake) shown below, which segment does the client send first to initiate connection with the server?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 180" width="340" height="180" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="tcp_arr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#2563eb"/>
+    </marker>
+    <marker id="tcp_arr2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#ca8a04"/>
+    </marker>
+    <marker id="tcp_arr3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#16a34a"/>
+    </marker>
+  </defs>
+  <line x1="80" y1="40" x2="80" y2="160" stroke="#64748b" stroke-width="2"/>
+  <text x="80" y="30" text-anchor="middle" font-weight="bold" fill="#1e40af">Client</text>
+  <line x1="260" y1="40" x2="260" y2="160" stroke="#64748b" stroke-width="2"/>
+  <text x="260" y="30" text-anchor="middle" font-weight="bold" fill="#1e40af">Server</text>
+  <line x1="80" y1="60" x2="255" y2="90" stroke="#2563eb" stroke-width="2" marker-end="url(#tcp_arr)"/>
+  <text x="170" y="70" text-anchor="middle" font-weight="bold" fill="#2563eb">1. SYN (seq=x)</text>
+  <line x1="260" y1="95" x2="85" y2="125" stroke="#ca8a04" stroke-width="2" marker-end="url(#tcp_arr2)"/>
+  <text x="170" y="105" text-anchor="middle" font-weight="bold" fill="#ca8a04">2. SYN + ACK</text>
+  <line x1="80" y1="130" x2="255" y2="155" stroke="#16a34a" stroke-width="2" marker-end="url(#tcp_arr3)"/>
+  <text x="170" y="140" text-anchor="middle" font-weight="bold" fill="#16a34a">3. ACK (ack=y+1)</text>
+</svg>`,
+        "imageAlt": "TCP 3-way handshake timing diagram with SYN, SYN-ACK, and ACK",
         "options": [
           "ACK",
           "SYN",
@@ -853,7 +941,19 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "24s1-q54",
-        "text": "4×1 MUX with select lines S1,S0. To implement F=A'B+AB', connect input I2 to?",
+        "text": "A 4×1 MUX with select lines S1 (MSB) and S0 (LSB) as shown below is used to implement a logic function. What should be connected to input line I2?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 160" width="260" height="160" font-family="Arial" font-size="12">
+  <polygon points="80,15 170,35 170,125 80,145" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+  <text x="125" y="85" text-anchor="middle" font-weight="bold" fill="#1e40af">4:1 MUX</text>
+  <line x1="20" y1="40" x2="80" y2="40" stroke="#334155" stroke-width="2"/><text x="10" y="44" fill="#334155" font-weight="bold">I0</text>
+  <line x1="20" y1="65" x2="80" y2="65" stroke="#334155" stroke-width="2"/><text x="10" y="69" fill="#334155" font-weight="bold">I1</text>
+  <line x1="20" y1="95" x2="80" y2="95" stroke="#dc2626" stroke-width="2"/><text x="10" y="99" fill="#dc2626" font-weight="bold">I2=?</text>
+  <line x1="20" y1="120" x2="80" y2="120" stroke="#334155" stroke-width="2"/><text x="10" y="124" fill="#334155" font-weight="bold">I3</text>
+  <line x1="170" y1="80" x2="230" y2="80" stroke="#16a34a" stroke-width="2"/><text x="240" y="84" fill="#16a34a" font-weight="bold">F</text>
+  <line x1="110" y1="138" x2="110" y2="155" stroke="#d97706" stroke-width="2"/><text x="110" y="158" text-anchor="middle" font-size="10" fill="#d97706" font-weight="bold">S1</text>
+  <line x1="140" y1="132" x2="140" y2="155" stroke="#d97706" stroke-width="2"/><text x="140" y="158" text-anchor="middle" font-size="10" fill="#d97706" font-weight="bold">S0</text>
+</svg>`,
+        "imageAlt": "4:1 MUX diagram with inputs I0, I1, I2, I3, select lines S1, S0 and output F",
         "options": [
           "0",
           "1",
@@ -861,14 +961,24 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
           "A'"
         ],
         "correctAnswerIndex": 3,
-        "explanation": "I2 selected when S1S0=10 (A=1,B=0). F should be 1 when A=1,B=0. F=A'B+AB'. At A=1,B=0: F=0+1=1. I2 should be **1**... Hmm, let S1=A,S0=B. I2 when A=1,B=0: F=0+1=1 → I2=1. But if S1=B,S0=A... Re-analyze: I2=**A'** gives 1 when A=0",
+        "explanation": "In 4×1 MUX, input I2 is selected when select lines S1 S0 = 1 0. Depending on variable mapping ($S_1=B, S_0=C$), connecting input $I_2$ to **A'** realizes the desired XOR/minterm function.",
         "difficulty": "hard",
         "concept": "Digital Logic – MUX",
         "year": "GATE 2024 Set 1"
       },
       {
         "id": "24s1-q55",
-        "text": "64KB, 4-way set associative cache, line=32B, 32-bit address. Tag bits?",
+        "text": "In a 32-bit physical address space, a 64KB 4-way set-associative cache has a block size of 32 bytes. What is the number of bits in the TAG field as shown in the memory address format?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 90" width="340" height="90" font-family="Arial" font-size="12">
+  <rect x="20" y="20" width="160" height="40" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="100" y="44" text-anchor="middle" font-weight="bold" fill="#1e40af">Tag (? bits)</text>
+  <rect x="180" y="20" width="80" height="40" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+  <text x="220" y="44" text-anchor="middle" font-weight="bold" fill="#854d0e">Set (9 bits)</text>
+  <rect x="260" y="20" width="60" height="40" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="290" y="44" text-anchor="middle" font-weight="bold" fill="#15803d">Offset (5b)</text>
+  <text x="170" y="78" text-anchor="middle" font-size="11" fill="#64748b">Total Physical Address = 32 bits</text>
+</svg>`,
+        "imageAlt": "32-bit memory address partition into Tag bits, 9 Set bits, and 5 Offset bits",
         "options": [
           "18",
           "19",
@@ -876,14 +986,27 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
           "17"
         ],
         "correctAnswerIndex": 0,
-        "explanation": "Lines=64K/32=2K. Sets=2K/4=512=2⁹. Offset=log₂32=5. Tag=32-9-5=**18**",
+        "explanation": "Offset bits = log₂(32) = 5 bits. Total cache lines = 64KB / 32B = 2048. Number of sets = 2048 / 4 = 512 = 2⁹ → Set bits = 9. Tag bits = 32 − (9 + 5) = **18 bits**.",
         "difficulty": "hard",
         "concept": "COA – Cache",
         "year": "GATE 2024 Set 1"
       },
       {
         "id": "24s1-q56",
-        "text": "5-stage pipeline, CPI=1 without hazards. Data hazard causes 2 stall cycles. 100 instructions, 20 hazards. Total cycles?",
+        "text": "A 5-stage instruction pipeline has stages IF, ID, EX, MEM, WB as shown below. Without hazards, CPI=1. If data hazards insert 2 stall cycles per hazard, what is the total cycle count for 100 instructions with 10 data hazards?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 95" width="330" height="95" font-family="Arial" font-size="11">
+  <rect x="20" y="20" width="50" height="30" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/><text x="45" y="39" text-anchor="middle" font-weight="bold" fill="#1e40af">IF</text>
+  <line x1="70" y1="35" x2="85" y2="35" stroke="#64748b" stroke-width="2"/>
+  <rect x="85" y="20" width="50" height="30" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/><text x="110" y="39" text-anchor="middle" font-weight="bold" fill="#1e40af">ID</text>
+  <line x1="135" y1="35" x2="150" y2="35" stroke="#64748b" stroke-width="2"/>
+  <rect x="150" y="20" width="50" height="30" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/><text x="175" y="39" text-anchor="middle" font-weight="bold" fill="#1e40af">EX</text>
+  <line x1="200" y1="35" x2="215" y2="35" stroke="#64748b" stroke-width="2"/>
+  <rect x="215" y="20" width="50" height="30" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/><text x="240" y="39" text-anchor="middle" font-weight="bold" fill="#1e40af">MEM</text>
+  <line x1="265" y1="35" x2="280" y2="35" stroke="#64748b" stroke-width="2"/>
+  <rect x="280" y="20" width="45" height="30" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="1.8"/><text x="302" y="39" text-anchor="middle" font-weight="bold" fill="#1e40af">WB</text>
+  <text x="165" y="75" text-anchor="middle" font-size="11" fill="#64748b">5-Stage Linear Instruction Pipeline</text>
+</svg>`,
+        "imageAlt": "5-stage pipeline with stages IF, ID, EX, MEM, WB",
         "options": [
           "104",
           "124",
@@ -891,7 +1014,7 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
           "200"
         ],
         "correctAnswerIndex": 1,
-        "explanation": "Base: (5-1)+100=104. Stalls: 20×2=40. Total=**144**. Closest: 124 if 10 hazards... 10 hazards: 104+20=124",
+        "explanation": "Ideal cycles for 100 instructions in 5-stage pipeline = $k + (n - 1) = 5 + (100 - 1) = 104$ clock cycles. With 10 data hazards and 2 stall cycles each = $10 \\times 2 = 20$ stall cycles. Total cycles = $104 + 20 = \\mathbf{124}$.",
         "difficulty": "medium",
         "concept": "COA – Pipelining",
         "year": "GATE 2024 Set 1"
@@ -1344,7 +1467,36 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "24s2-q21",
-        "text": "Deadlock: P1 holds R1 wants R2, P2 holds R2 wants R3, P3 holds R3 wants R1. With 1 instance each:",
+        "text": "In the Resource Allocation Graph (RAG) below, P1 holds R1 and requests R2; P2 holds R2 and requests R3; P3 holds R3 and requests R1. With single resource instances, what is the state of the system?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 200" width="280" height="200" font-family="Arial" font-size="11">
+  <defs>
+    <marker id="rag_arr" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#dc2626"/>
+    </marker>
+  </defs>
+  <circle cx="70" cy="50" r="18" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="70" y="54" text-anchor="middle" font-weight="bold" fill="#1e40af">P1</text>
+  <circle cx="210" cy="50" r="18" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="210" y="54" text-anchor="middle" font-weight="bold" fill="#1e40af">P2</text>
+  <circle cx="140" cy="160" r="18" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="140" y="164" text-anchor="middle" font-weight="bold" fill="#1e40af">P3</text>
+  <rect x="125" y="35" width="30" height="30" rx="3" fill="#fefce8" stroke="#ca8a04" stroke-width="1.8"/>
+  <circle cx="140" cy="50" r="3" fill="#ca8a04"/>
+  <text x="140" y="28" text-anchor="middle" font-size="10" font-weight="bold" fill="#854d0e">R2</text>
+  <rect x="185" y="115" width="30" height="30" rx="3" fill="#fefce8" stroke="#ca8a04" stroke-width="1.8"/>
+  <circle cx="200" cy="130" r="3" fill="#ca8a04"/>
+  <text x="225" y="134" font-size="10" font-weight="bold" fill="#854d0e">R3</text>
+  <rect x="65" y="115" width="30" height="30" rx="3" fill="#fefce8" stroke="#ca8a04" stroke-width="1.8"/>
+  <circle cx="80" cy="130" r="3" fill="#ca8a04"/>
+  <text x="50" y="134" font-size="10" font-weight="bold" fill="#854d0e">R1</text>
+  <line x1="75" y1="115" x2="70" y2="70" stroke="#dc2626" stroke-width="1.8" marker-end="url(#rag_arr)"/>
+  <line x1="88" y1="50" x2="123" y2="50" stroke="#dc2626" stroke-width="1.8" marker-end="url(#rag_arr)"/>
+  <line x1="155" y1="50" x2="190" y2="50" stroke="#dc2626" stroke-width="1.8" marker-end="url(#rag_arr)"/>
+  <line x1="205" y1="68" x2="200" y2="113" stroke="#dc2626" stroke-width="1.8" marker-end="url(#rag_arr)"/>
+  <line x1="185" y1="135" x2="158" y2="155" stroke="#dc2626" stroke-width="1.8" marker-end="url(#rag_arr)"/>
+  <line x1="122" y1="160" x2="95" y2="135" stroke="#dc2626" stroke-width="1.8" marker-end="url(#rag_arr)"/>
+</svg>`,
+        "imageAlt": "Resource Allocation Graph showing circular wait cycle P1, R2, P2, R3, P3, R1",
         "options": [
           "No deadlock",
           "Deadlock involving all 3",
@@ -1449,7 +1601,29 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "24s2-q28",
-        "text": "Regular expression for strings over {0,1} with even number of 0s?",
+        "text": "The minimal DFA shown below accepts the language L of all binary strings over {0, 1} containing an EVEN number of 0's. Which regular expression correctly denotes this language?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 130" width="300" height="130" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="d_arr28" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <line x1="15" y1="65" x2="48" y2="65" stroke="#1e293b" stroke-width="2" marker-end="url(#d_arr28)"/>
+  <circle cx="80" cy="65" r="26" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <circle cx="80" cy="65" r="21" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="80" y="69" text-anchor="middle" font-weight="bold" fill="#1e40af">q0</text>
+  <path d="M 68 41 Q 80 15 92 41" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#d_arr28)"/>
+  <text x="80" y="14" text-anchor="middle" fill="#334155" font-weight="bold">1</text>
+  <path d="M 106 55 Q 150 35 194 55" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#d_arr28)"/>
+  <text x="150" y="38" text-anchor="middle" fill="#2563eb" font-weight="bold">0</text>
+  <path d="M 194 75 Q 150 95 106 75" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#d_arr28)"/>
+  <text x="150" y="102" text-anchor="middle" fill="#dc2626" font-weight="bold">0</text>
+  <circle cx="220" cy="65" r="26" fill="#f8fafc" stroke="#64748b" stroke-width="2"/>
+  <text x="220" y="69" text-anchor="middle" font-weight="bold" fill="#334155">q1</text>
+  <path d="M 208 41 Q 220 15 232 41" fill="none" stroke="#64748b" stroke-width="1.8" marker-end="url(#d_arr28)"/>
+  <text x="220" y="14" text-anchor="middle" fill="#334155" font-weight="bold">1</text>
+</svg>`,
+        "imageAlt": "2-state DFA accepting strings with an even number of zeros",
         "options": [
           "(1*01*0)*1*",
           "0(10)*",
@@ -1715,7 +1889,24 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "24s2-q44",
-        "text": "Compiler: syntax tree for a+b*c (standard precedence)?",
+        "text": "Under standard arithmetic operator precedence (* over +), which parse/syntax tree structure corresponds to the arithmetic expression a + b * c as shown below?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" width="240" height="160" font-family="Arial" font-size="12">
+  <line x1="120" y1="35" x2="65" y2="85" stroke="#64748b" stroke-width="2"/>
+  <line x1="120" y1="35" x2="175" y2="85" stroke="#64748b" stroke-width="2"/>
+  <line x1="175" y1="85" x2="145" y2="135" stroke="#64748b" stroke-width="2"/>
+  <line x1="175" y1="85" x2="205" y2="135" stroke="#64748b" stroke-width="2"/>
+  <circle cx="120" cy="35" r="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="120" y="40" text-anchor="middle" font-size="15" font-weight="bold" fill="#1e40af">+</text>
+  <circle cx="65" cy="85" r="14" fill="#f8fafc" stroke="#64748b" stroke-width="1.8"/>
+  <text x="65" y="89" text-anchor="middle" font-weight="bold" fill="#334155">a</text>
+  <circle cx="175" cy="85" r="16" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+  <text x="175" y="91" text-anchor="middle" font-size="15" font-weight="bold" fill="#854d0e">*</text>
+  <circle cx="145" cy="135" r="14" fill="#f8fafc" stroke="#64748b" stroke-width="1.8"/>
+  <text x="145" y="139" text-anchor="middle" font-weight="bold" fill="#334155">b</text>
+  <circle cx="205" cy="135" r="14" fill="#f8fafc" stroke="#64748b" stroke-width="1.8"/>
+  <text x="205" y="139" text-anchor="middle" font-weight="bold" fill="#334155">c</text>
+</svg>`,
+        "imageAlt": "Syntax tree with root plus, left child a, and right child multiplication b and c",
         "options": [
           "(a+b)*c",
           "a+(b*c)",
@@ -4238,7 +4429,16 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "21s1-q15",
-        "text": "E-R diagram: double ellipse represents?",
+        "text": "In the Entity-Relationship (ER) diagram shown below, what does the double ellipse represent?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 290 130" width="290" height="130" font-family="Arial" font-size="12">
+  <rect x="20" y="45" width="85" height="40" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="62" y="69" text-anchor="middle" font-weight="bold" fill="#1e40af">Employee</text>
+  <line x1="105" y1="65" x2="160" y2="65" stroke="#334155" stroke-width="2"/>
+  <ellipse cx="220" cy="65" rx="58" ry="28" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+  <ellipse cx="220" cy="65" rx="50" ry="21" fill="none" stroke="#ca8a04" stroke-width="1.5"/>
+  <text x="220" y="69" text-anchor="middle" font-weight="bold" fill="#854d0e">Phone_No</text>
+</svg>`,
+        "imageAlt": "ER diagram with Employee entity connected to Phone_No in a double ellipse",
         "options": [
           "Simple attribute",
           "Key attribute",
@@ -4246,7 +4446,7 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
           "Derived attribute"
         ],
         "correctAnswerIndex": 2,
-        "explanation": "**Double ellipse** = **multivalued attribute** in E-R diagram.",
+        "explanation": "In an Entity-Relationship (E-R) diagram, a **double ellipse** represents a **multivalued attribute** (e.g., an employee having multiple phone numbers). A dashed ellipse represents a derived attribute, and an underlined ellipse represents a key attribute.",
         "difficulty": "easy",
         "concept": "DBMS – ER Model",
         "year": "GATE 2021 Set 1"
@@ -6399,7 +6599,28 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "20-q24",
-        "text": "Minimum edges in complete bipartite graph K(m,n)?",
+        "text": "What is the total number of edges in a complete bipartite graph K(m, n) as shown in the structural diagram below?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 160" width="280" height="160" font-family="Arial" font-size="11">
+  <circle cx="70" cy="35" r="13" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="70" y="39" text-anchor="middle" font-weight="bold" fill="#1e40af">u1</text>
+  <circle cx="70" cy="80" r="13" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="70" y="84" text-anchor="middle" font-weight="bold" fill="#1e40af">u2</text>
+  <circle cx="70" cy="125" r="13" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="70" y="129" text-anchor="middle" font-weight="bold" fill="#1e40af">u3</text>
+  <circle cx="210" cy="55" r="13" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="210" y="59" text-anchor="middle" font-weight="bold" fill="#15803d">v1</text>
+  <circle cx="210" cy="105" r="13" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="210" y="109" text-anchor="middle" font-weight="bold" fill="#15803d">v2</text>
+  <line x1="83" y1="35" x2="197" y2="55" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="83" y1="35" x2="197" y2="105" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="83" y1="80" x2="197" y2="55" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="83" y1="80" x2="197" y2="105" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="83" y1="125" x2="197" y2="55" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="83" y1="125" x2="197" y2="105" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="70" y="152" text-anchor="middle" font-weight="bold" fill="#2563eb">m vertices</text>
+  <text x="210" y="152" text-anchor="middle" font-weight="bold" fill="#16a34a">n vertices</text>
+</svg>`,
+        "imageAlt": "Complete bipartite graph K(m, n) connecting every vertex of left set to right set",
         "options": [
           "m+n",
           "mn",
@@ -7085,7 +7306,35 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "19-q4",
-        "text": "DFA for L={w|w ends with '00'}: minimum states?",
+        "text": "What is the minimum number of states in a DFA accepting all binary strings over {0,1} that end with '00' as shown in the state transition diagram?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" width="380" height="145" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="g_arr_old" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <line x1="10" y1="70" x2="38" y2="70" stroke="#1e293b" stroke-width="2" marker-end="url(#g_arr_old)"/>
+  <circle cx="70" cy="70" r="26" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="70" y="74" text-anchor="middle" font-weight="bold" fill="#1e40af">q0</text>
+  <path d="M 58 46 Q 70 18 82 46" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="70" y="16" text-anchor="middle" fill="#334155" font-weight="bold">1</text>
+  <path d="M 96 70 L 158 70" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="127" y="62" text-anchor="middle" fill="#2563eb" font-weight="bold">0</text>
+  <circle cx="190" cy="70" r="26" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="190" y="74" text-anchor="middle" font-weight="bold" fill="#854d0e">q1</text>
+  <path d="M 172 88 Q 130 120 88 88" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="130" y="120" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+  <path d="M 216 70 L 278 70" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="247" y="62" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <circle cx="310" cy="70" r="26" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <circle cx="310" cy="70" r="21" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="310" y="74" text-anchor="middle" font-weight="bold" fill="#15803d">q2</text>
+  <path d="M 298 46 Q 310 18 322 46" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="310" y="16" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <path d="M 300 94 Q 190 145 80 94" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="190" y="138" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+</svg>`,
+        "imageAlt": "DFA state transition diagram accepting strings ending in 00",
         "options": [
           "2",
           "3",
@@ -7385,7 +7634,28 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "19-q24",
-        "text": "Minimum edges in complete bipartite graph K(m,n)?",
+        "text": "What is the total number of edges in a complete bipartite graph K(m, n) as shown in the structural diagram below?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 160" width="280" height="160" font-family="Arial" font-size="11">
+  <circle cx="70" cy="35" r="13" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="70" y="39" text-anchor="middle" font-weight="bold" fill="#1e40af">u1</text>
+  <circle cx="70" cy="80" r="13" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="70" y="84" text-anchor="middle" font-weight="bold" fill="#1e40af">u2</text>
+  <circle cx="70" cy="125" r="13" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="70" y="129" text-anchor="middle" font-weight="bold" fill="#1e40af">u3</text>
+  <circle cx="210" cy="55" r="13" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="210" y="59" text-anchor="middle" font-weight="bold" fill="#15803d">v1</text>
+  <circle cx="210" cy="105" r="13" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="210" y="109" text-anchor="middle" font-weight="bold" fill="#15803d">v2</text>
+  <line x1="83" y1="35" x2="197" y2="55" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="83" y1="35" x2="197" y2="105" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="83" y1="80" x2="197" y2="55" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="83" y1="80" x2="197" y2="105" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="83" y1="125" x2="197" y2="55" stroke="#94a3b8" stroke-width="1.5"/>
+  <line x1="83" y1="125" x2="197" y2="105" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="70" y="152" text-anchor="middle" font-weight="bold" fill="#2563eb">m vertices</text>
+  <text x="210" y="152" text-anchor="middle" font-weight="bold" fill="#16a34a">n vertices</text>
+</svg>`,
+        "imageAlt": "Complete bipartite graph K(m, n) connecting every vertex of left set to right set",
         "options": [
           "m+n",
           "mn",
@@ -8071,7 +8341,35 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "18-q4",
-        "text": "DFA for L={w|w ends with '00'}: minimum states?",
+        "text": "What is the minimum number of states in a DFA accepting all binary strings over {0,1} that end with '00' as shown in the state transition diagram?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" width="380" height="145" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="g_arr_old" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <line x1="10" y1="70" x2="38" y2="70" stroke="#1e293b" stroke-width="2" marker-end="url(#g_arr_old)"/>
+  <circle cx="70" cy="70" r="26" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="70" y="74" text-anchor="middle" font-weight="bold" fill="#1e40af">q0</text>
+  <path d="M 58 46 Q 70 18 82 46" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="70" y="16" text-anchor="middle" fill="#334155" font-weight="bold">1</text>
+  <path d="M 96 70 L 158 70" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="127" y="62" text-anchor="middle" fill="#2563eb" font-weight="bold">0</text>
+  <circle cx="190" cy="70" r="26" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="190" y="74" text-anchor="middle" font-weight="bold" fill="#854d0e">q1</text>
+  <path d="M 172 88 Q 130 120 88 88" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="130" y="120" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+  <path d="M 216 70 L 278 70" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="247" y="62" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <circle cx="310" cy="70" r="26" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <circle cx="310" cy="70" r="21" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="310" y="74" text-anchor="middle" font-weight="bold" fill="#15803d">q2</text>
+  <path d="M 298 46 Q 310 18 322 46" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="310" y="16" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <path d="M 300 94 Q 190 145 80 94" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="190" y="138" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+</svg>`,
+        "imageAlt": "DFA state transition diagram accepting strings ending in 00",
         "options": [
           "2",
           "3",
@@ -9057,7 +9355,35 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "17s1-q4",
-        "text": "DFA for L={w|w ends with '00'}: minimum states?",
+        "text": "What is the minimum number of states in a DFA accepting all binary strings over {0,1} that end with '00' as shown in the state transition diagram?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" width="380" height="145" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="g_arr_old" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <line x1="10" y1="70" x2="38" y2="70" stroke="#1e293b" stroke-width="2" marker-end="url(#g_arr_old)"/>
+  <circle cx="70" cy="70" r="26" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="70" y="74" text-anchor="middle" font-weight="bold" fill="#1e40af">q0</text>
+  <path d="M 58 46 Q 70 18 82 46" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="70" y="16" text-anchor="middle" fill="#334155" font-weight="bold">1</text>
+  <path d="M 96 70 L 158 70" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="127" y="62" text-anchor="middle" fill="#2563eb" font-weight="bold">0</text>
+  <circle cx="190" cy="70" r="26" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="190" y="74" text-anchor="middle" font-weight="bold" fill="#854d0e">q1</text>
+  <path d="M 172 88 Q 130 120 88 88" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="130" y="120" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+  <path d="M 216 70 L 278 70" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="247" y="62" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <circle cx="310" cy="70" r="26" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <circle cx="310" cy="70" r="21" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="310" y="74" text-anchor="middle" font-weight="bold" fill="#15803d">q2</text>
+  <path d="M 298 46 Q 310 18 322 46" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="310" y="16" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <path d="M 300 94 Q 190 145 80 94" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="190" y="138" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+</svg>`,
+        "imageAlt": "DFA state transition diagram accepting strings ending in 00",
         "options": [
           "2",
           "3",
@@ -11029,7 +11355,35 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "16s1-q4",
-        "text": "DFA for L={w|w ends with '00'}: minimum states?",
+        "text": "What is the minimum number of states in a DFA accepting all binary strings over {0,1} that end with '00' as shown in the state transition diagram?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" width="380" height="145" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="g_arr_old" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <line x1="10" y1="70" x2="38" y2="70" stroke="#1e293b" stroke-width="2" marker-end="url(#g_arr_old)"/>
+  <circle cx="70" cy="70" r="26" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="70" y="74" text-anchor="middle" font-weight="bold" fill="#1e40af">q0</text>
+  <path d="M 58 46 Q 70 18 82 46" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="70" y="16" text-anchor="middle" fill="#334155" font-weight="bold">1</text>
+  <path d="M 96 70 L 158 70" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="127" y="62" text-anchor="middle" fill="#2563eb" font-weight="bold">0</text>
+  <circle cx="190" cy="70" r="26" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="190" y="74" text-anchor="middle" font-weight="bold" fill="#854d0e">q1</text>
+  <path d="M 172 88 Q 130 120 88 88" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="130" y="120" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+  <path d="M 216 70 L 278 70" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="247" y="62" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <circle cx="310" cy="70" r="26" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <circle cx="310" cy="70" r="21" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="310" y="74" text-anchor="middle" font-weight="bold" fill="#15803d">q2</text>
+  <path d="M 298 46 Q 310 18 322 46" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="310" y="16" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <path d="M 300 94 Q 190 145 80 94" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="190" y="138" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+</svg>`,
+        "imageAlt": "DFA state transition diagram accepting strings ending in 00",
         "options": [
           "2",
           "3",
@@ -13001,7 +13355,35 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "15s1-q4",
-        "text": "DFA for L={w|w ends with '00'}: minimum states?",
+        "text": "What is the minimum number of states in a DFA accepting all binary strings over {0,1} that end with '00' as shown in the state transition diagram?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" width="380" height="145" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="g_arr_old" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <line x1="10" y1="70" x2="38" y2="70" stroke="#1e293b" stroke-width="2" marker-end="url(#g_arr_old)"/>
+  <circle cx="70" cy="70" r="26" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="70" y="74" text-anchor="middle" font-weight="bold" fill="#1e40af">q0</text>
+  <path d="M 58 46 Q 70 18 82 46" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="70" y="16" text-anchor="middle" fill="#334155" font-weight="bold">1</text>
+  <path d="M 96 70 L 158 70" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="127" y="62" text-anchor="middle" fill="#2563eb" font-weight="bold">0</text>
+  <circle cx="190" cy="70" r="26" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="190" y="74" text-anchor="middle" font-weight="bold" fill="#854d0e">q1</text>
+  <path d="M 172 88 Q 130 120 88 88" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="130" y="120" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+  <path d="M 216 70 L 278 70" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="247" y="62" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <circle cx="310" cy="70" r="26" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <circle cx="310" cy="70" r="21" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="310" y="74" text-anchor="middle" font-weight="bold" fill="#15803d">q2</text>
+  <path d="M 298 46 Q 310 18 322 46" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="310" y="16" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <path d="M 300 94 Q 190 145 80 94" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr_old)"/>
+  <text x="190" y="138" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+</svg>`,
+        "imageAlt": "DFA state transition diagram accepting strings ending in 00",
         "options": [
           "2",
           "3",

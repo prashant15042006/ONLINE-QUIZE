@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
@@ -111,12 +111,15 @@ export async function POST(req: NextRequest) {
 STRICT RULES:
 - Output ONLY a valid raw JSON array. No markdown, no code fences, no extra text.
 - correctAnswerIndex must be 0, 1, 2, or 3 (integer).
+- For visual/graphical topics (e.g., Automata/DFA/NFA, Logic Gates, Trees, Graphs, ER diagrams, Network topologies, Pipeline timing, Memory/Cache layout), you MAY optionally include an "imageUrl" field containing a compact, self-contained, high-contrast inline SVG string (<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ...">...</svg>) and an "imageAlt" description. For non-visual questions, omit imageUrl.
 
 Required JSON schema:
 [
   {
     "id": "gen-1",
     "text": "Question text?",
+    "imageUrl": "<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 260 120\\">...</svg>",
+    "imageAlt": "Diagram description",
     "options": ["A", "B", "C", "D"],
     "correctAnswerIndex": 0,
     "explanation": "### Solution\\nStep-by-step explanation.",
@@ -200,6 +203,8 @@ Required JSON schema:
       .map((q, i) => ({
         id: `gen-${Date.now()}-${i}`,
         text: q.text,
+        imageUrl: typeof q.imageUrl === "string" && q.imageUrl.trim().length > 0 ? q.imageUrl.trim() : undefined,
+        imageAlt: typeof q.imageAlt === "string" ? q.imageAlt : undefined,
         options: q.options,
         correctAnswerIndex: q.correctAnswerIndex,
         explanation: q.explanation || "Review the correct answer and related concepts.",
