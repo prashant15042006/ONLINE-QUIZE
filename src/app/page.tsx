@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { EXAMS_DATA, Exam, Branch, Subject, Chapter, Question, getChapterQuestions } from "../data/quizData";
-import { fetchLiveSearchQuestions } from "../lib/liveSearchQuizEngine";
 import { addQuizResultToBlockchain } from "../lib/blockchain";
 import {
   recordQuizAttempt,
@@ -294,24 +293,10 @@ export default function Home() {
     setIsRetrySession(false);
     setFirstAttemptAccuracy(undefined);
 
-    let questions: Question[] = [];
-    try {
-      questions = await fetchLiveSearchQuestions({
-        topic: `${selectedChapter.name} ${selectedSubject?.name || ""}`,
-        examName: selectedExam.name,
-        subjectName: selectedSubject?.name || "",
-        difficulty,
-        count: questionCount,
-      });
-    } catch (e) {
-      questions = getChapterQuestions(selectedChapter, difficulty, questionCount);
-    } finally {
-      setIsPreparingQuiz(false);
-    }
-
-    if (!questions || questions.length === 0) {
-      questions = getChapterQuestions(selectedChapter, difficulty, questionCount);
-    }
+    // Use curated local questions directly (which include diagrams/SVGs)
+    // instead of the live-questions API which returns generic placeholder questions
+    const questions: Question[] = getChapterQuestions(selectedChapter, difficulty, questionCount);
+    setIsPreparingQuiz(false);
 
     const cleaned = questions.map((q) => ({ ...q, text: cleanQuestionText(q.text) }));
     setActiveQuestions(cleaned);
