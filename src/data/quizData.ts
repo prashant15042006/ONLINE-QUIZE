@@ -1904,6 +1904,10 @@ export const EXAMS_DATA: Exam[] = [
 // AUTOMATIC QUESTION BANK ENRICHMENT
 // Enriches all chapters with authentic GATE PYQs and curated questions
 // ─────────────────────────────────────────────────────────────────────────────
+function normalizeQuestionText(text: string): string {
+  return text.toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 80);
+}
+
 function enrichAllChapters() {
   const allSubjects: Subject[] = [
     gateCS_EM, gateCS_DL, gateCS_COA, gateCS_DS, gateCS_Algo, gateCS_TOC,
@@ -1915,19 +1919,40 @@ function enrichAllChapters() {
 
   for (const sub of allSubjects) {
     for (const chap of sub.chapters) {
-      const existingIds = new Set(chap.questions.map(q => q.id));
-      const curated = CURATED_QUESTIONS[chap.id] || [];
-      for (const q of curated) {
-        if (!existingIds.has(q.id)) {
-          chap.questions.push(q);
+      const existingIds = new Set<string>();
+      const existingTexts = new Set<string>();
+
+      // Filter existing questions to eliminate any duplicates
+      const uniqueExisting: Question[] = [];
+      for (const q of chap.questions) {
+        const norm = normalizeQuestionText(q.text);
+        if (!existingIds.has(q.id) && !existingTexts.has(norm)) {
           existingIds.add(q.id);
+          existingTexts.add(norm);
+          uniqueExisting.push(q);
         }
       }
-      const pyqs = PYQ_BY_CHAPTER[chap.id] || [];
-      for (const q of pyqs) {
-        if (!existingIds.has(q.id)) {
+      chap.questions = uniqueExisting;
+
+      // Add curated questions
+      const curated = CURATED_QUESTIONS[chap.id] || [];
+      for (const q of curated) {
+        const norm = normalizeQuestionText(q.text);
+        if (!existingIds.has(q.id) && !existingTexts.has(norm)) {
           chap.questions.push(q);
           existingIds.add(q.id);
+          existingTexts.add(norm);
+        }
+      }
+
+      // Add mapped PYQ questions with deduplication across years
+      const pyqs = PYQ_BY_CHAPTER[chap.id] || [];
+      for (const q of pyqs) {
+        const norm = normalizeQuestionText(q.text);
+        if (!existingIds.has(q.id) && !existingTexts.has(norm)) {
+          chap.questions.push(q);
+          existingIds.add(q.id);
+          existingTexts.add(norm);
         }
       }
     }
@@ -1935,6 +1960,7 @@ function enrichAllChapters() {
 }
 
 enrichAllChapters();
+
 
 export function getChapterQuestions(chapter: Chapter, difficulty: Difficulty, count: number): Question[] {
   const matchDifficulty = chapter.questions.filter(q => q.difficulty === difficulty);
