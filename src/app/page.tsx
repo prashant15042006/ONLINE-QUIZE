@@ -1209,9 +1209,34 @@ export default function Home() {
                   }`}>{currentQ.difficulty}</span>
                 </div>
 
-                <div className="text-base sm:text-lg font-extrabold text-white leading-relaxed mb-6">
+                <div className="text-base sm:text-lg font-extrabold text-white leading-relaxed mb-4">
                   {renderTextWithMath(cleanQuestionText(currentQ.text))}
                 </div>
+
+                {/* Figure / Diagram Image for DFA, NFA, Graph, Circuit questions */}
+                {currentQ.imageUrl && (
+                  <div className="mb-6 flex justify-center">
+                    <div className="bg-white rounded-2xl p-3 border-2 border-indigo-500/40 shadow-lg shadow-indigo-950/30 max-w-full overflow-x-auto">
+                      {currentQ.imageUrl.trim().startsWith('<svg') ? (
+                        <div
+                          className="w-full"
+                          dangerouslySetInnerHTML={{ __html: currentQ.imageUrl }}
+                          aria-label={currentQ.imageAlt ?? 'Question diagram'}
+                        />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={currentQ.imageUrl}
+                          alt={currentQ.imageAlt ?? 'Question diagram'}
+                          className="max-w-full max-h-72 object-contain mx-auto"
+                        />
+                      )}
+                    </div>
+                    {currentQ.imageAlt && (
+                      <p className="text-[10px] text-slate-500 text-center mt-1">{currentQ.imageAlt}</p>
+                    )}
+                  </div>
+                )}
 
                 <div className="space-y-3 mb-6">
                   {currentQ.options.map((opt, idx) => {

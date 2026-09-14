@@ -9,6 +9,8 @@ export interface Question {
   difficulty: Difficulty;
   concept?: string;
   year?: string;
+  imageUrl?: string;   // SVG string or public path for figure-based questions (DFA/NFA diagrams etc.)
+  imageAlt?: string;   // Alt text for the image
 }
 
 export interface Chapter {
@@ -198,6 +200,34 @@ const gateCS_EM: Subject = {
           correctAnswerIndex: 1,
           explanation: '### Solution\n$$E[X] = \\sum_{x=1}^{6} x \\cdot \\frac{1}{6} = \\frac{1+2+3+4+5+6}{6} = \\frac{21}{6} = \\mathbf{3.5}$$'
         },
+        {
+          id:'prob-05', difficulty:'medium', concept:'Binomial Distribution', year:'GATE 2021',
+          text: 'A fair coin is tossed 6 times. Probability of getting exactly 4 heads is:',
+          options: ['15/64', '6/64', '1/64', '20/64'],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\n$$P(X=4) = \\binom{6}{4} \\left(\\frac{1}{2}\\right)^4 \\left(\\frac{1}{2}\\right)^2 = 15 \\cdot \\frac{1}{64} = \\mathbf{\\frac{15}{64}}$$'
+        },
+        {
+          id:'prob-06', difficulty:'hard', concept:'Random Variables', year:'GATE 2019',
+          text: 'Two random variables X and Y are independent with E[X]=3, E[Y]=4, Var(X)=2, Var(Y)=5. Var(2X + 3Y) is:',
+          options: ['53', '63', '8+45=53', '47'],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nFor independent X, Y:\n$$\\text{Var}(aX + bY) = a^2 \\text{Var}(X) + b^2 \\text{Var}(Y)$$\n$$= 4 \\times 2 + 9 \\times 5 = 8 + 45 = \\mathbf{53}$$'
+        },
+        {
+          id:'prob-07', difficulty:'easy', concept:'Normal Distribution',
+          text: 'In a normal distribution N(μ, σ²), approximately what percentage of data lies within μ ± 2σ?',
+          options: ['68%', '95%', '99.7%', '50%'],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\n**68-95-99.7 Rule (Empirical Rule):**\n| Range | Coverage |\n|---|---|\n| μ ± 1σ | ~68% |\n| **μ ± 2σ** | **~95%** |\n| μ ± 3σ | ~99.7% |\n\nApproximately **95%** of data lies within 2 standard deviations of the mean.'
+        },
+        {
+          id:'prob-08', difficulty:'medium', concept:'Geometric Distribution', year:'GATE 2018',
+          text: 'In repeated independent Bernoulli trials with success probability p=0.3, expected number of trials until FIRST success is:',
+          options: ['3', '0.3', '7', '1/0.3 ≈ 3.33'],
+          correctAnswerIndex: 3,
+          explanation: '### Solution\nGeometric distribution: X = number of trials until first success.\n$$E[X] = \\frac{1}{p} = \\frac{1}{0.3} \\approx \\mathbf{3.33}$$\n\nIntuitively, if each trial has 30% success chance, on average we need ~3.33 trials to get first success.'
+        },
       ]
     }
   ]
@@ -247,6 +277,32 @@ const gateCS_DL: Subject = {
           correctAnswerIndex: 0,
           explanation: '### Solution\n**Static-1 Hazard**: Output should remain at 1 during a transition in input, but temporarily **glitches to 0** due to unequal propagation delays along different circuit paths.\n\nFix: Add a **redundant consensus term** in the SOP expression to cover the hazard group in K-map.'
         },
+        {
+          id:'dl-05', difficulty:'medium', concept:'4:1 Multiplexer', year:'GATE 2022',
+          text: 'In the 4:1 Multiplexer shown, select lines are $S_1 = A$ (MSB), $S_0 = B$ (LSB). The inputs are $I_0 = 0$, $I_1 = C$, $I_2 = \\overline{C}$, $I_3 = 1$. The minimal SOP expression realized by output Y is:',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 170" width="280" height="170" font-family="Arial" font-size="12">
+  <polygon points="90,20 180,40 180,130 90,150" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+  <text x="135" y="90" text-anchor="middle" font-weight="bold" fill="#1e40af">4:1 MUX</text>
+  <line x1="30" y1="50" x2="90" y2="50" stroke="#334155" stroke-width="2"/><text x="15" y="54" fill="#334155" font-weight="bold">I0=0</text>
+  <line x1="30" y1="75" x2="90" y2="75" stroke="#334155" stroke-width="2"/><text x="15" y="79" fill="#334155" font-weight="bold">I1=C</text>
+  <line x1="30" y1="100" x2="90" y2="100" stroke="#334155" stroke-width="2"/><text x="15" y="104" fill="#334155" font-weight="bold">I2=C\'</text>
+  <line x1="30" y1="125" x2="90" y2="125" stroke="#334155" stroke-width="2"/><text x="15" y="129" fill="#334155" font-weight="bold">I3=1</text>
+  <line x1="180" y1="85" x2="240" y2="85" stroke="#16a34a" stroke-width="2"/><text x="250" y="89" fill="#16a34a" font-weight="bold">Y</text>
+  <line x1="120" y1="143" x2="120" y2="165" stroke="#d97706" stroke-width="2"/><text x="120" y="168" text-anchor="middle" font-size="11" fill="#d97706" font-weight="bold">S1=A</text>
+  <line x1="150" y1="137" x2="150" y2="165" stroke="#d97706" stroke-width="2"/><text x="150" y="168" text-anchor="middle" font-size="11" fill="#d97706" font-weight="bold">S0=B</text>
+</svg>`,
+          imageAlt: "4:1 Mux with inputs I0=0, I1=C, I2=C', I3=1 and select lines A, B",
+          options: ['$A \\oplus B \\oplus C$', '$AB + BC + AC$', '$A\\overline{B}C + \\overline{A}B\\overline{C} + AB$', '$B \\oplus C$'],
+          correctAnswerIndex: 2,
+          explanation: '### Solution\nMUX output equation:\n$$Y = \\overline{A}\\,\\overline{B}\\,I_0 + \\overline{A}\\,B\\,I_1 + A\\,\\overline{B}\\,I_2 + A\\,B\\,I_3$$\nSubstitute inputs:\n$$Y = \\overline{A}\\,\\overline{B}\\,(0) + \\overline{A}\\,B\\,(C) + A\\,\\overline{B}\\,(\\overline{C}) + A\\,B\\,(1)$$\n$$Y = \\overline{A}BC + A\\overline{B}\\,\\overline{C} + AB$$\n\n**Option C is correct!**'
+        },
+        {
+          id:'dl-06', difficulty:'easy', concept:'Full Adder Gates', year:'GATE 2020',
+          text: 'How many 2-input NAND gates are required to implement a 1-bit Full Adder?',
+          options: ['5', '7', '9', '12'],
+          correctAnswerIndex: 2,
+          explanation: '### Solution\n- 1 Half Adder requires **5** NAND gates.\n- A Full Adder built from two Half Adders and an OR gate requires $2 \\times 5 - 1 = \\mathbf{9}$ NAND gates (sharing one NAND gate between the OR and XOR).'
+        },
       ]
     },
     {
@@ -278,6 +334,51 @@ const gateCS_DL: Subject = {
           ],
           correctAnswerIndex: 1,
           explanation: '### Solution\n| Machine | Output depends on |\n|---|---|\n| **Moore** | Current **state** only |\n| **Mealy** | Current **state + input** |\n\nMealy machines typically require **fewer states** than Moore for the same specification.'
+        },
+        {
+          id:'seq-04', difficulty:'medium', concept:'D Flip-Flop Circuit', year:'GATE 2023',
+          text: 'For the sequential circuit shown with a D flip-flop and an XOR gate, $D = X \\oplus Q$. If initial state $Q = 0$ and input sequence $X = 1, 0, 1, 1$ is applied on consecutive clock pulses, what is the sequence of state $Q$ after each clock edge?',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 135" width="320" height="135" font-family="Arial" font-size="12">
+  <rect x="140" y="25" width="80" height="75" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="180" y="65" text-anchor="middle" font-weight="bold" fill="#1e40af">D-FF</text>
+  <text x="150" y="50" fill="#334155" font-size="11" font-weight="bold">D</text>
+  <text x="205" y="50" fill="#16a34a" font-size="11" font-weight="bold">Q</text>
+  <line x1="220" y1="45" x2="275" y2="45" stroke="#16a34a" stroke-width="2"/>
+  <path d="M 255 45 L 255 115 L 60 115 L 60 52 L 80 52" fill="none" stroke="#64748b" stroke-width="1.8"/>
+  <circle cx="95" cy="50" r="14" fill="#fefce8" stroke="#ca8a04" stroke-width="1.8"/>
+  <text x="95" y="54" text-anchor="middle" font-weight="bold" fill="#ca8a04">⊕</text>
+  <line x1="109" y1="50" x2="140" y2="50" stroke="#2563eb" stroke-width="2"/>
+  <line x1="30" y1="40" x2="81" y2="40" stroke="#334155" stroke-width="2"/>
+  <text x="20" y="44" fill="#334155" font-weight="bold">X</text>
+</svg>`,
+          imageAlt: "D flip-flop with input D driven by X XOR Q feedback",
+          options: [
+            '1, 1, 0, 1',
+            '1, 0, 1, 0',
+            '0, 1, 1, 0',
+            '1, 1, 1, 0'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nInitial $Q_0 = 0$.\n\n| Clock | Input X | Current Q | Next state $D = X \\oplus Q$ |\n|---|---|---|---|\n| 1 | 1 | 0 | $1 \\oplus 0 = \\mathbf{1}$ |\n| 2 | 0 | 1 | $0 \\oplus 1 = \\mathbf{1}$ |\n| 3 | 1 | 1 | $1 \\oplus 1 = \\mathbf{0}$ |\n| 4 | 1 | 0 | $1 \\oplus 0 = \\mathbf{1}$ |\n\nSequence of states: **1, 1, 0, 1**.'
+        },
+        {
+          id:'seq-05', difficulty:'medium', concept:'Johnson Counter', year:'GATE 2019',
+          text: 'A 4-bit Johnson (twisted ring) counter counts through how many distinct states before repeating?',
+          options: ['4', '8', '16', '15'],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\nFor an $n$-bit counter:\n- **Ring Counter**: $n$ states\n- **Johnson Counter**: $2n$ states\n- Binary Counter: $2^n$ states\n\nFor $n = 4$, Johnson counter has $2 \\times 4 = \\mathbf{8}$ states.'
+        },
+        {
+          id:'seq-06', difficulty:'hard', concept:'Race-Around Condition', year:'GATE 2017',
+          text: 'The race-around condition in a level-triggered JK flip-flop occurs when:',
+          options: [
+            '$J=0, K=0$ and clock pulse width $t_p < t_{pd}$',
+            '$J=1, K=1$ and clock pulse width $t_p > t_{pd}$ (propagation delay)',
+            '$J=1, K=0$ and clock is absent',
+            'Clock frequency is too low'
+          ],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\n**Race-around condition** occurs in level-triggered JK flip-flop when $J=1, K=1$ and clock duration $t_p > t_{pd}$. The output continuously toggles between 0 and 1 multiple times during a single clock pulse.\n\nRemedies: Master-Slave JK flip-flop, Edge-triggered flip-flop, or ensuring $t_p < t_{pd}$.'
         },
       ]
     }
@@ -323,6 +424,34 @@ const gateCS_COA: Subject = {
           correctAnswerIndex: 1,
           explanation: '### Solution\nBranch penalty = stage where branch is resolved − 1 = 3 − 1 = **2 cycles**\n\n2 instructions already fetched after the branch need to be flushed/discarded.'
         },
+        {
+          id:'pipe-05', difficulty:'medium', concept:'Pipeline Data Hazard Stall', year:'GATE 2023',
+          text: 'Consider two instructions:\n$I_1$: `ADD R1, R2, R3` (writes R1 in WB stage)\n$I_2$: `SUB R4, R1, R5` (reads R1 in ID stage)\nIn the 5-stage pipeline without operand forwarding shown in the timing chart, how many stall cycles are inserted between $I_1$ and $I_2$?',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 350 120" width="350" height="120" font-family="Arial" font-size="11">
+  <rect x="50" y="15" width="36" height="20" fill="#dbeafe" stroke="#3b82f6"/><text x="68" y="29" text-anchor="middle" fill="#1e40af">IF</text>
+  <rect x="86" y="15" width="36" height="20" fill="#dbeafe" stroke="#3b82f6"/><text x="104" y="29" text-anchor="middle" fill="#1e40af">ID</text>
+  <rect x="122" y="15" width="36" height="20" fill="#dbeafe" stroke="#3b82f6"/><text x="140" y="29" text-anchor="middle" fill="#1e40af">EX</text>
+  <rect x="158" y="15" width="36" height="20" fill="#dbeafe" stroke="#3b82f6"/><text x="176" y="29" text-anchor="middle" fill="#1e40af">MEM</text>
+  <rect x="194" y="15" width="36" height="20" fill="#dbeafe" stroke="#3b82f6"/><text x="212" y="29" text-anchor="middle" fill="#1e40af">WB</text>
+  <text x="35" y="29" text-anchor="end" font-weight="bold" fill="#334155">I1</text>
+  <text x="35" y="64" text-anchor="end" font-weight="bold" fill="#334155">I2</text>
+  <rect x="86" y="50" width="36" height="20" fill="#fef3c7" stroke="#d97706"/><text x="104" y="64" text-anchor="middle" fill="#92400e">IF</text>
+  <rect x="122" y="50" width="36" height="20" fill="#fee2e2" stroke="#dc2626"/><text x="140" y="64" text-anchor="middle" fill="#991b1b">stall</text>
+  <rect x="158" y="50" width="36" height="20" fill="#fee2e2" stroke="#dc2626"/><text x="176" y="64" text-anchor="middle" fill="#991b1b">stall</text>
+  <rect x="194" y="50" width="36" height="20" fill="#fee2e2" stroke="#dc2626"/><text x="212" y="64" text-anchor="middle" fill="#991b1b">stall</text>
+  <rect x="230" y="50" width="36" height="20" fill="#fef3c7" stroke="#d97706"/><text x="248" y="64" text-anchor="middle" fill="#92400e">ID</text>
+  <text x="68" y="98" text-anchor="middle" font-size="10" fill="#64748b">C1</text>
+  <text x="104" y="98" text-anchor="middle" font-size="10" fill="#64748b">C2</text>
+  <text x="140" y="98" text-anchor="middle" font-size="10" fill="#64748b">C3</text>
+  <text x="176" y="98" text-anchor="middle" font-size="10" fill="#64748b">C4</text>
+  <text x="212" y="98" text-anchor="middle" font-size="10" fill="#64748b">C5</text>
+  <text x="248" y="98" text-anchor="middle" font-size="10" fill="#64748b">C6</text>
+</svg>`,
+          imageAlt: "Pipeline timing diagram showing stall cycles between I1 and I2",
+          options: ['1 cycle', '2 cycles', '3 cycles', '0 cycles'],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\nAssuming register file supports internal forwarding (write in first half of cycle, read in second half):\n- $I_1$ writes to R1 during clock cycle 5 (WB).\n- $I_2$ can read R1 in ID stage during cycle 5.\n- Thus $I_2$ is delayed by **2 stall cycles** (cycles 3 and 4).\n\nWithout internal register forwarding, it would need 3 stalls.'
+        },
       ]
     },
     {
@@ -349,6 +478,18 @@ const gateCS_COA: Subject = {
           options: ['Cache line 5', 'Cache line 3', 'Cache line 5', 'Cache line 4'],
           correctAnswerIndex: 0,
           explanation: '### Solution\nDirect-mapped: Block $i$ maps to cache line $i \\mod \\text{(cache lines)}$\n$$5 \\mod 8 = 5,\\quad 13 \\mod 8 = 5,\\quad 21 \\mod 8 = 5,\\quad 29 \\mod 8 = 5$$\n→ All map to **Cache line 5**. This causes **conflict misses** (thrashing).'
+        },
+        {
+          id:'cache-04', difficulty:'medium', concept:'Set-Associative Tag Bits', year:'GATE 2021',
+          text: 'A 32-bit physical address space system has a 64 KB, 4-way set-associative cache with block size of 32 bytes. The number of bits in Tag, Set Index, and Word Offset fields are:',
+          options: [
+            'Tag: 18, Set: 9, Offset: 5',
+            'Tag: 17, Set: 10, Offset: 5',
+            'Tag: 16, Set: 11, Offset: 5',
+            'Tag: 19, Set: 8, Offset: 5'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\n1. **Word Offset bits**: Block size = 32 B = $2^5$ B → **Offset = 5 bits**.\n2. Total cache lines = Cache size / Block size = $64\\text{ KB} / 32\\text{ B} = 2048$ lines.\n3. **Number of sets** = $2048 / 4 = 512 = 2^9$ sets → **Set Index = 9 bits**.\n4. **Tag bits** = Address bits − (Set + Offset) = $32 - (9 + 5) = \\mathbf{18 \\text{ bits}}$.'
         },
       ]
     }
@@ -394,6 +535,27 @@ const gateCS_DS: Subject = {
           correctAnswerIndex: 1,
           explanation: '### Solution\nInorder of BST always gives **sorted** (ascending) sequence. The root can be any element — but for balanced BST the root is typically the middle element.\nFor this sequence (1,3,4,**6**,7,8,10), middle element = **6** is the balanced root.'
         },
+        {
+          id:'tree-05', difficulty:'medium', concept:'BST Inorder Successor', year:'GATE 2024',
+          text: 'In the Binary Search Tree (BST) shown below, what is the in-order successor of node 40?',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 150" width="280" height="150" font-family="Arial" font-size="12">
+  <line x1="140" y1="25" x2="80" y2="65" stroke="#64748b" stroke-width="2"/>
+  <line x1="140" y1="25" x2="200" y2="65" stroke="#64748b" stroke-width="2"/>
+  <line x1="80" y1="65" x2="50" y2="110" stroke="#64748b" stroke-width="2"/>
+  <line x1="80" y1="65" x2="110" y2="110" stroke="#64748b" stroke-width="2"/>
+  <line x1="200" y1="65" x2="230" y2="110" stroke="#64748b" stroke-width="2"/>
+  <circle cx="140" cy="25" r="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/><text x="140" y="29" text-anchor="middle" font-weight="bold" fill="#1e40af">50</text>
+  <circle cx="80" cy="65" r="16" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/><text x="80" y="69" text-anchor="middle" font-weight="bold" fill="#854d0e">30</text>
+  <circle cx="200" cy="65" r="16" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/><text x="200" y="69" text-anchor="middle" font-weight="bold" fill="#854d0e">70</text>
+  <circle cx="50" cy="110" r="15" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/><text x="50" y="114" text-anchor="middle" font-weight="bold" fill="#15803d">20</text>
+  <circle cx="110" cy="110" r="15" fill="#fdf2f8" stroke="#db2777" stroke-width="2"/><text x="110" y="114" text-anchor="middle" font-weight="bold" fill="#9d174d">40</text>
+  <circle cx="230" cy="110" r="15" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/><text x="230" y="114" text-anchor="middle" font-weight="bold" fill="#15803d">80</text>
+</svg>`,
+          imageAlt: "Binary Search Tree with root 50, left subtree {20, 30, 40} and right subtree {70, 80}",
+          options: ['30', '50', '70', '80'],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\nIn-order traversal (Left, Root, Right):\n$$20, 30, 40, \\mathbf{50}, 70, 80$$\nThe node immediately following 40 is **50** (the root/ancestor).\nTherefore, the in-order successor of 40 is **50**.'
+        },
       ]
     },
     {
@@ -411,8 +573,32 @@ const gateCS_DS: Subject = {
           id:'lin-02', difficulty:'hard', concept:'Hashing', year:'GATE 2022',
           text: 'Hash table size = 7, hash function h(k) = k mod 7. Keys 50, 700, 76, 85, 92 are inserted with linear probing. Position of key 76 is:',
           options: ['6', '0', '1', '2'],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nh(50) = 50 mod 7 = 1\nh(700) = 700 mod 7 = 0\nh(76) = 76 mod 7 = 6\nh(85) = 85 mod 7 = 1 (collision → 2)\nh(92) = 92 mod 7 = 1 (collision → 2, collision → 3)\n\nSlot 6 is initially empty, so 76 goes directly into **slot 6**.'
+        },
+        {
+          id:'lin-03', difficulty:'easy', concept:'Circular Queue', year:'GATE 2020',
+          text: 'In a circular queue implemented using an array of size N, the condition for the queue to be full (with one empty slot reserved to distinguish full from empty) is:',
+          options: [
+            '(rear + 1) % N == front',
+            'rear == front',
+            'rear == N - 1',
+            '(front + 1) % N == rear'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nIn a circular queue of capacity $N$:\n- **Empty condition**: `front == rear`\n- **Full condition**: `(rear + 1) % N == front`'
+        },
+        {
+          id:'lin-04', difficulty:'medium', concept:'Stack Permutation', year:'GATE 2018',
+          text: 'Given input sequence 1, 2, 3, 4 into a stack, which of the following output permutations CANNOT be obtained?',
+          options: [
+            '2, 4, 3, 1',
+            '4, 3, 2, 1',
+            '3, 1, 2, 4',
+            '1, 2, 3, 4'
+          ],
           correctAnswerIndex: 2,
-          explanation: '### Solution\nh(50)=1, h(700)=0, h(76)=6, h(85)=1(collision→2), h(92)=1(collision→2,collision→3)\n\nInsertion order:\n- 700 → slot 0\n- 50 → slot 1\n- 76 → slot 6 (h(76)=6, free)\n- 85 → slot 1 (collision) → slot 2\n- 92 → slot 1,2 (collision) → slot 3\n\nSlot of 76 = **6**? Wait: h(76)=76 mod 7 = 6. Slot 6 is free → 76 goes to slot **6**.\n\nCorrect: slot 6. But let me recheck options — the answer in option index 0 = 6. **Position = slot 6**'
+          explanation: '### Solution\nTo get 3 first, elements 1, 2, 3 must be pushed. 3 is popped. Next element in stack is 2 (on top), so 1 cannot be popped before 2! Therefore **3, 1, 2, 4** is an impossible stack permutation.'
         },
       ]
     }
@@ -451,6 +637,13 @@ const gateCS_Algo: Subject = {
           correctAnswerIndex: 1,
           explanation: '### Solution\nDecision tree lower bound: $\\lceil \\log_2(n!) \\rceil$\n$$\\lceil \\log_2(4!) \\rceil = \\lceil \\log_2(24) \\rceil = \\lceil 4.58 \\rceil = \\mathbf{5}$$\nInsertion sort on 4 elements can do it in exactly 5 comparisons in worst case.'
         },
+        {
+          id:'sort-04', difficulty:'medium', concept:'Heap Build Time', year:'GATE 2023',
+          text: 'Building a binary heap from an unordered array of n elements using the bottom-up `BuildHeap` algorithm takes time:',
+          options: ['$O(n)$', '$O(n \\log n)$', '$O(n^2)$', '$O(\\log n)$'],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nBottom-up `BuildHeap` takes:\n$$\\sum_{h=0}^{\\lfloor \\log n \\rfloor} \\frac{n}{2^{h+1}} O(h) = O\\left(n \\sum_{h=0}^{\\infty} \\frac{h}{2^h}\\right) = \\mathbf{O(n)}$$\nAlthough each `Heapify` is $O(\\log n)$, most nodes are near the leaves with small heights.'
+        },
       ]
     },
     {
@@ -478,6 +671,36 @@ const gateCS_Algo: Subject = {
           correctAnswerIndex: 0,
           explanation: '### Solution\nBFS levels:\n- Level 0: S (1 vertex)\n- Level 1: 3 neighbors of S\n- Level 2: Each of 3 level-1 vertices has 4 new neighbors = $3 \\times 4 = \\mathbf{12}$ vertices'
         },
+        {
+          id:'graph-04', difficulty:'medium', concept:'Topological Sorting', year:'GATE 2020',
+          text: 'For the Directed Acyclic Graph (DAG) shown below, which of the following is a VALID topological sorting order?',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 130" width="320" height="130" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="dag_arr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <circle cx="50" cy="35" r="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/><text x="50" y="39" text-anchor="middle" font-weight="bold" fill="#1e40af">A</text>
+  <circle cx="50" cy="95" r="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/><text x="50" y="99" text-anchor="middle" font-weight="bold" fill="#1e40af">B</text>
+  <circle cx="160" cy="65" r="16" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/><text x="160" y="69" text-anchor="middle" font-weight="bold" fill="#854d0e">C</text>
+  <circle cx="270" cy="35" r="16" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/><text x="270" y="39" text-anchor="middle" font-weight="bold" fill="#15803d">D</text>
+  <circle cx="270" cy="95" r="16" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/><text x="270" y="99" text-anchor="middle" font-weight="bold" fill="#15803d">E</text>
+  <line x1="66" y1="39" x2="144" y2="61" stroke="#334155" stroke-width="1.8" marker-end="url(#dag_arr)"/>
+  <line x1="66" y1="91" x2="144" y2="69" stroke="#334155" stroke-width="1.8" marker-end="url(#dag_arr)"/>
+  <line x1="176" y1="61" x2="254" y2="39" stroke="#334155" stroke-width="1.8" marker-end="url(#dag_arr)"/>
+  <line x1="176" y1="69" x2="254" y2="91" stroke="#334155" stroke-width="1.8" marker-end="url(#dag_arr)"/>
+  <line x1="50" y1="51" x2="50" y2="79" stroke="#334155" stroke-width="1.8" marker-end="url(#dag_arr)"/>
+</svg>`,
+          imageAlt: "DAG with edges A->B, A->C, B->C, C->D, C->E",
+          options: [
+            'A, B, C, D, E',
+            'B, A, C, D, E',
+            'C, A, B, D, E',
+            'A, C, B, E, D'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nEdges in DAG: $A \\to B$, $A \\to C$, $B \\to C$, $C \\to D$, $C \\to E$.\n- $A$ has in-degree 0 → must come before $B$ and $C$.\n- $B$ has edge to $C$ → $B$ must come before $C$.\n- $C$ has edges to $D$ and $E$ → $C$ must come before $D, E$.\n\nValid topological order: **A, B, C, D, E**.'
+        },
       ]
     },
     {
@@ -498,6 +721,13 @@ const gateCS_Algo: Subject = {
           correctAnswerIndex: 1,
           explanation: '### Solution\nLCS("ABCBDAB", "BDCAB") using DP:\nLCS = "BCAB" or "BDAB" → length = **4**\n\nFormula: $LCS(m,n)$ uses $O(mn)$ table. Answer: **4**'
         },
+        {
+          id:'dp-03', difficulty:'hard', concept:'Matrix Chain Multiplication', year:'GATE 2021',
+          text: 'Four matrices have dimensions: $A_1(10 \\times 20)$, $A_2(20 \\times 30)$, $A_3(30 \\times 40)$, $A_4(40 \\times 30)$. The minimum number of scalar multiplications needed to compute $A_1 A_2 A_3 A_4$ is:',
+          options: ['30,000', '26,000', '32,000', '36,000'],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nUsing DP for Matrix Chain Multiplication:\nOptimal parenthesization is $((A_1 A_2) A_3) A_4$ or $(A_1 (A_2 A_3)) A_4$:\n1. $A_1 A_2 = 10 \\times 20 \\times 30 = 6,000$\n2. $(A_1 A_2) A_3 = 6,000 + 10 \\times 30 \\times 40 = 6,000 + 12,000 = 18,000$\n3. $((A_1 A_2) A_3) A_4 = 18,000 + 10 \\times 40 \\times 30 = 18,000 + 12,000 = \\mathbf{30,000}$.'
+        },
       ]
     }
   ]
@@ -512,7 +742,7 @@ const gateCS_TOC: Subject = {
   chapters: [
     {
       id: 'toc-fa', name: 'Finite Automata & Regular Languages',
-      description: 'DFA, NFA, Regular Expressions, Pumping Lemma',
+      description: 'DFA, NFA, Regular Expressions, Pumping Lemma, State Diagrams',
       questions: [
         {
           id:'fa-01', difficulty:'medium', concept:'DFA — Minimum States', year:'GATE 2022',
@@ -539,6 +769,237 @@ const gateCS_TOC: Subject = {
           options: ['3', '6', '8', '9'],
           correctAnswerIndex: 2,
           explanation: '### Solution\nSubset construction: DFA states = power set of NFA states = $2^n$ where n = NFA states.\n$$2^3 = \\mathbf{8} \\text{ states maximum}$$\n(In practice, many states may be unreachable and can be eliminated.)'
+        },
+        {
+          id:'fa-04', difficulty:'medium', concept:'DFA — State Diagram', year:'GATE 2020',
+          text: 'The DFA shown below accepts strings over {a, b}. The language accepted by this DFA is:\n\n(Start → q0 on b→q0, on a→q1; q1 on a→q1, on b→q2(final); q2 on a→q1, on b→q0)',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 160" width="420" height="160" font-family="Arial" font-size="13">
+  <!-- q0 start state -->
+  <circle cx="70" cy="80" r="28" fill="#e8f4fd" stroke="#2563eb" stroke-width="2"/>
+  <text x="70" y="85" text-anchor="middle" fill="#1e40af" font-weight="bold">q0</text>
+  <!-- start arrow -->
+  <line x1="10" y1="80" x2="38" y2="80" stroke="#374151" stroke-width="2" marker-end="url(#arr)"/>
+  <!-- q1 state -->
+  <circle cx="210" cy="80" r="28" fill="#fef9e7" stroke="#d97706" stroke-width="2"/>
+  <text x="210" y="85" text-anchor="middle" fill="#92400e" font-weight="bold">q1</text>
+  <!-- q2 final state (double circle) -->
+  <circle cx="350" cy="80" r="28" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <circle cx="350" cy="80" r="22" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="350" y="85" text-anchor="middle" fill="#14532d" font-weight="bold">q2</text>
+  <!-- q0 -> q1 on 'a' -->
+  <path d="M 98 72 Q 154 48 182 72" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="140" y="52" text-anchor="middle" fill="#2563eb" font-size="12">a</text>
+  <!-- q0 -> q0 on 'b' (self loop) -->
+  <path d="M 55 53 Q 70 20 85 53" fill="none" stroke="#374151" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="70" y="22" text-anchor="middle" fill="#374151" font-size="12">b</text>
+  <!-- q1 -> q1 on 'a' (self loop) -->
+  <path d="M 195 53 Q 210 20 225 53" fill="none" stroke="#374151" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="210" y="22" text-anchor="middle" fill="#374151" font-size="12">a</text>
+  <!-- q1 -> q2 on 'b' -->
+  <path d="M 238 72 Q 294 48 322 72" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="280" y="52" text-anchor="middle" fill="#16a34a" font-size="12">b</text>
+  <!-- q2 -> q1 on 'a' -->
+  <path d="M 322 88 Q 266 112 238 88" fill="none" stroke="#d97706" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="280" y="115" text-anchor="middle" fill="#d97706" font-size="12">a</text>
+  <!-- q2 -> q0 on 'b' -->
+  <path d="M 325 98 Q 210 148 95 98" fill="none" stroke="#9333ea" stroke-width="1.8" marker-end="url(#arr)"/>
+  <text x="210" y="148" text-anchor="middle" fill="#9333ea" font-size="12">b</text>
+  <!-- arrowhead marker -->
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#374151"/>
+    </marker>
+  </defs>
+</svg>`,
+          imageAlt: 'DFA state diagram with 3 states q0 (start), q1, q2 (final)',
+          correctAnswerIndex: 2,
+          options: [
+            'All strings ending with aa',
+            'All strings ending with bb',
+            'All strings ending with ab',
+            'All strings containing at least one b'
+          ],
+          explanation: '### Solution\nTrace the DFA:\n- q0 is start state\n- q2 is the only accepting (final) state\n- q2 is reached from q1 on input **b**\n- q1 is reached from q0 (or q2) on input **a**\n\nSo to reach q2 we need the sequence: ...→a→q1→b→q2\n\nThe DFA accepts all strings that **end with "ab"**.\n\n**Answer: All strings ending with ab ✓**'
+        },
+        {
+          id:'fa-05', difficulty:'hard', concept:'DFA — Minimization', year:'GATE 2019',
+          text: 'The DFA shown has states {q0,q1,q2,q3}. After minimization using table-filling algorithm, how many states does the minimal DFA have?\n\n(q0=start, q3=final; transitions: q0→a→q1, q0→b→q2; q1→a→q1, q1→b→q3; q2→a→q2, q2→b→q3; q3→a→q3, q3→b→q3)',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 200" width="440" height="200" font-family="Arial" font-size="13">
+  <defs>
+    <marker id="ar2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#374151"/>
+    </marker>
+  </defs>
+  <!-- q0 -->
+  <circle cx="70" cy="100" r="28" fill="#e8f4fd" stroke="#2563eb" stroke-width="2"/>
+  <text x="70" y="105" text-anchor="middle" fill="#1e40af" font-weight="bold">q0</text>
+  <line x1="10" y1="100" x2="38" y2="100" stroke="#374151" stroke-width="2" marker-end="url(#ar2)"/>
+  <!-- q1 -->
+  <circle cx="210" cy="45" r="28" fill="#fef9e7" stroke="#d97706" stroke-width="2"/>
+  <text x="210" y="50" text-anchor="middle" fill="#92400e" font-weight="bold">q1</text>
+  <!-- q2 -->
+  <circle cx="210" cy="155" r="28" fill="#fdf2f8" stroke="#9333ea" stroke-width="2"/>
+  <text x="210" y="160" text-anchor="middle" fill="#6b21a8" font-weight="bold">q2</text>
+  <!-- q3 final -->
+  <circle cx="360" cy="100" r="28" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <circle cx="360" cy="100" r="22" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="360" y="105" text-anchor="middle" fill="#14532d" font-weight="bold">q3</text>
+  <!-- q0->q1 on a -->
+  <path d="M 90 78 L 190 58" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar2)"/>
+  <text x="130" y="58" fill="#2563eb" font-size="12">a</text>
+  <!-- q0->q2 on b -->
+  <path d="M 90 120 L 190 148" fill="none" stroke="#9333ea" stroke-width="1.8" marker-end="url(#ar2)"/>
+  <text x="128" y="148" fill="#9333ea" font-size="12">b</text>
+  <!-- q1 self on a -->
+  <path d="M 195 18 Q 210 0 225 18" fill="none" stroke="#374151" stroke-width="1.8" marker-end="url(#ar2)"/>
+  <text x="210" y="4" text-anchor="middle" fill="#374151" font-size="12">a</text>
+  <!-- q2 self on a -->
+  <path d="M 195 182 Q 210 198 225 182" fill="none" stroke="#374151" stroke-width="1.8" marker-end="url(#ar2)"/>
+  <text x="210" y="200" text-anchor="middle" fill="#374151" font-size="12">a</text>
+  <!-- q1->q3 on b -->
+  <path d="M 236 58 L 336 88" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#ar2)"/>
+  <text x="295" y="65" fill="#16a34a" font-size="12">b</text>
+  <!-- q2->q3 on b -->
+  <path d="M 236 142 L 336 112" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#ar2)"/>
+  <text x="295" y="138" fill="#16a34a" font-size="12">b</text>
+  <!-- q3 self on a,b -->
+  <path d="M 375 73 Q 410 60 388 85" fill="none" stroke="#374151" stroke-width="1.8" marker-end="url(#ar2)"/>
+  <text x="415" y="72" fill="#374151" font-size="12">a,b</text>
+</svg>`,
+          imageAlt: 'DFA with 4 states: q0 start, q1, q2, q3 final',
+          options: ['2', '3', '4', '5'],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\nUsing table-filling (Myhill-Nerode minimization):\n\n**Step 1:** Mark (q3, qx) for all non-final qx → mark pairs (q0,q3), (q1,q3), (q2,q3)\n\n**Step 2:** Check distinguishability:\n- q1 and q2: on input a → (q1,q2) unmarked; on input b → (q3,q3) same — NOT distinguishable!\n- So q1 ≡ q2 → merge them\n\n**After merging q1 and q2:**\n- State A = {q0}, State B = {q1, q2}, State C = {q3}\n\n**Minimal DFA has 3 states ✓**'
+        },
+        {
+          id:'fa-06', difficulty:'easy', concept:'Regular Expression', year:'GATE 2018',
+          text: 'Which regular expression denotes the language of all strings over {0,1} that do NOT contain "11" as a substring?',
+          options: [
+            '(0+10)*',
+            '(0+10)*(1+ε)',
+            '(0+1)*11(0+1)*',
+            '0*10*'
+          ],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\nStrings without "11": after each 1, must be followed by 0 or end.\n\nPattern: blocks of (0 or 10) repeated, optionally ending with a single 1.\n\nRegex: **(0+10)*(1+ε)**\n\n- (0+10)* → any number of (lone 0) or (10 pair)\n- (1+ε) → optionally one trailing 1\n\nThis ensures no two consecutive 1s appear.'
+        },
+        {
+          id:'fa-07', difficulty:'hard', concept:'NFA — State Diagram', year:'GATE 2023',
+          text: 'The NFA shown accepts strings over {0,1}. What is the language L accepted by this NFA?\n\n(q0=start,final; on ε→q1 from q0; q1 on 0→q2; q2 on 1→q1; q2 on 0→q2)',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 160" width="380" height="160" font-family="Arial" font-size="13">
+  <defs>
+    <marker id="ar3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#374151"/>
+    </marker>
+  </defs>
+  <!-- q0 start and final (double circle) -->
+  <circle cx="70" cy="80" r="28" fill="#e8f4fd" stroke="#2563eb" stroke-width="2"/>
+  <circle cx="70" cy="80" r="22" fill="none" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="70" y="85" text-anchor="middle" fill="#1e40af" font-weight="bold">q0</text>
+  <line x1="10" y1="80" x2="38" y2="80" stroke="#374151" stroke-width="2" marker-end="url(#ar3)"/>
+  <!-- q1 -->
+  <circle cx="200" cy="80" r="28" fill="#fef9e7" stroke="#d97706" stroke-width="2"/>
+  <text x="200" y="85" text-anchor="middle" fill="#92400e" font-weight="bold">q1</text>
+  <!-- q2 -->
+  <circle cx="320" cy="80" r="28" fill="#fdf2f8" stroke="#9333ea" stroke-width="2"/>
+  <text x="320" y="85" text-anchor="middle" fill="#6b21a8" font-weight="bold">q2</text>
+  <!-- q0->q1 on ε -->
+  <path d="M 98 72 L 172 72" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#ar3)"/>
+  <text x="135" y="62" text-anchor="middle" fill="#2563eb" font-size="12">ε</text>
+  <!-- q1->q2 on 0 -->
+  <path d="M 228 72 L 292 72" fill="none" stroke="#9333ea" stroke-width="1.8" marker-end="url(#ar3)"/>
+  <text x="260" y="62" text-anchor="middle" fill="#9333ea" font-size="12">0</text>
+  <!-- q2->q1 on 1 -->
+  <path d="M 292 90 Q 260 118 228 90" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#ar3)"/>
+  <text x="260" y="118" text-anchor="middle" fill="#16a34a" font-size="12">1</text>
+  <!-- q2 self on 0 -->
+  <path d="M 305 53 Q 320 30 335 53" fill="none" stroke="#374151" stroke-width="1.8" marker-end="url(#ar3)"/>
+  <text x="320" y="28" text-anchor="middle" fill="#374151" font-size="12">0</text>
+</svg>`,
+          imageAlt: 'NFA with 3 states: q0 (start, final), q1, q2',
+          options: [
+            'Strings of the form (01)*',
+            'Strings containing 01 as substring',
+            'ε ∪ {strings of the form 0+1(0+1)*}',
+            'All strings ending in 0'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nq0 is both start and final (accepts ε via ε-closure).\n\nFrom q0, ε-move to q1, then:\n- q1 → 0 → q2 → 1 → q1 (cycle: 01 repeated)\n\nAccepting paths:\n- ε (stay at q0)\n- Take ε→q1, read (01)+ and return to q1 reaching final via ε-closure back to q0\n\nSo L = **(01)*** — empty string and repetitions of "01" ✓'
+        },
+        {
+          id:'fa-08', difficulty:'medium', concept:'DFA — Complement', year:'GATE 2017',
+          text: 'If L is a regular language accepted by DFA M, then which of the following is TRUE about the complement language $\\bar{L}$?',
+          options: [
+            '$\\bar{L}$ may or may not be regular',
+            '$\\bar{L}$ is always regular — swap final and non-final states in M',
+            '$\\bar{L}$ is context-free but not regular',
+            'Complement of a regular language is always infinite'
+          ],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\n**Regular languages are closed under complement.**\n\nTo build DFA for $\\bar{L}$:\n1. Take DFA M for L\n2. **Swap** accepting states ↔ non-accepting states\n3. This DFA accepts exactly those strings NOT in L\n\nSo $\\bar{L}$ is **always regular**.\n\nKey closure properties of regular languages: union, intersection, complement, concatenation, Kleene star.'
+        },
+        {
+          id:'fa-09', difficulty:'hard', concept:'DFA — End Pattern', year:'GATE 2016',
+          text: 'What is the minimum number of states in a DFA that accepts all binary strings ending with "101"?',
+          options: ['3', '4', '5', '6'],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\nWe track the longest suffix of "101" matched so far:\n\n| State | Meaning | On 0 | On 1 |\n|---|---|---|---|\n| q0 | matched "" | q0 | q1 |\n| q1 | matched "1" | q2 | q1 |\n| q2 | matched "10" | q0 | q3 |\n| q3 (final) | matched "101" | q2 | q1 |\n\nMinimum = **4 states** ✓\n\nq3 is the only accepting state (string ends with "101").'
+        },
+        {
+          id:'fa-10', difficulty:'medium', concept:'ε-NFA', year:'GATE 2024',
+          text: 'An ε-NFA has the following ε-closures: ε-closure(q0)={q0,q1,q2}. On input "a", δ(q1,a)={q3}. The ε-closure(q3)={q3,q4}. If q4 is the only final state, does the ε-NFA accept the string "a"?',
+          options: [
+            'No, because q0 is the start state not q4',
+            'Yes, because q4 ∈ ε-closure(δ(ε-closure(q0), a)) and q4 is final',
+            'No, because ε-transitions are not allowed on input symbols',
+            'Yes, but only if q3 is also a final state'
+          ],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\nε-NFA processing of "a" from q0:\n\n**Step 1:** ε-closure(q0) = {q0, q1, q2}\n\n**Step 2:** Read "a" from each state in {q0,q1,q2}:\n- δ(q1, a) = {q3} (only q1 has "a"-transition)\n\n**Step 3:** ε-closure({q3}) = {q3, q4}\n\n**Step 4:** q4 is final AND q4 ∈ {q3,q4} → **Accept!**\n\n**Answer: YES ✓** — ε-NFA accepts "a"'
+        },
+      ]
+    },
+    {
+      id: 'toc-cfg', name: 'Context-Free Grammars & PDAs',
+      description: 'CFG derivations, CNF, PDA, CFL Pumping Lemma',
+      questions: [
+        {
+          id:'cfg-01', difficulty:'medium', concept:'CFG — Derivation', year:'GATE 2022',
+          text: 'Given CFG: S → aSb | ab. Which string is NOT in the language generated by this grammar?',
+          options: ['ab', 'aabb', 'aaabbb', 'aab'],
+          correctAnswerIndex: 3,
+          explanation: '### Solution\nGrammar S → aSb | ab generates: $\\{a^n b^n \\mid n \\geq 1\\}$\n\n- ab: S → ab ✓ (n=1)\n- aabb: S → aSb → a(ab)b = aabb ✓ (n=2)\n- aaabbb: S → aSb → a(aSb)b → a(a(ab)b)b = aaabbb ✓ (n=3)\n- **aab: has 2 a\'s and 1 b → NOT in $a^n b^n$** ✗\n\n**Answer: aab ✓**'
+        },
+        {
+          id:'cfg-02', difficulty:'hard', concept:'CNF Conversion', year:'GATE 2021',
+          text: 'To convert CFG to Chomsky Normal Form (CNF), which of the following steps is performed FIRST?',
+          options: [
+            'Eliminate unit productions (A → B)',
+            'Eliminate ε-productions (A → ε)',
+            'Break long productions (A → BCD → ...)',
+            'Substitute terminal symbols in mixed rules'
+          ],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\n**CNF Conversion Steps (in order):**\n\n1. **Eliminate ε-productions** (A → ε) for non-start variables\n2. **Eliminate unit productions** (A → B)\n3. **Break long bodies** (A → B₁B₂...Bₙ where n>2 into binary rules)\n4. **Convert terminals** in mixed rules (A → aB becomes A → XaB with Xa → a)\n\n**First step = Eliminate ε-productions ✓**'
+        },
+        {
+          id:'cfg-03', difficulty:'medium', concept:'PDA', year:'GATE 2020',
+          text: 'Which language can be accepted by a Pushdown Automaton (PDA) but NOT by any DFA?',
+          options: [
+            '$\\{a^n b^m \\mid n,m \\geq 0\\}$',
+            '$\\{ww^R \\mid w \\in \\{a,b\\}^*\\}$ (palindromes)',
+            '$\\{a^n b^n c^n \\mid n \\geq 0\\}$',
+            '$\\{(ab)^n \\mid n \\geq 0\\}$'
+          ],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\n- $a^n b^m$: regular (DFA can handle) ✗\n- **$ww^R$ (even-length palindromes): context-free, PDA uses stack to match** ✓\n- $a^n b^n c^n$: requires 2 stacks — NOT even context-free (CSL)\n- $(ab)^n$: regular ✗\n\n**PDA accepts CFL = Context-Free Languages.**\nPalindromes are CFL but not regular → **ww^R ✓**'
+        },
+        {
+          id:'cfg-04', difficulty:'easy', concept:'CFL Closure Properties', year:'GATE 2019',
+          text: 'Which operation is NOT closed under Context-Free Languages (CFL)?',
+          options: ['Union', 'Concatenation', 'Kleene Star', 'Intersection'],
+          correctAnswerIndex: 3,
+          explanation: '### Solution\n**CFL Closure Properties:**\n\n| Operation | Closed? |\n|---|---|\n| Union | ✅ Yes |\n| Concatenation | ✅ Yes |\n| Kleene Star | ✅ Yes |\n| **Intersection** | ❌ **No** |\n| Complement | ❌ No |\n\nCounter-example: $L_1 = \\{a^n b^n c^m\\}$ and $L_2 = \\{a^m b^n c^n\\}$ are both CFL, but $L_1 \\cap L_2 = \\{a^n b^n c^n\\}$ is NOT CFL.\n\n**Answer: Intersection ✓**'
         },
       ]
     },
@@ -569,6 +1030,30 @@ const gateCS_TOC: Subject = {
           ],
           correctAnswerIndex: 1,
           explanation: "### Solution\n**Rice's Theorem**: ALL **non-trivial semantic** properties of Turing machines are undecidable.\n\n- Semantic = about the **language** L(M)\n- Structural = about the **machine** M itself\n\n'Has > 5 states' is a **structural property** of M (not about L(M)) → **DECIDABLE** (just count states in M's description).\n\nOptions A, C, D are all semantic → undecidable."
+        },
+        {
+          id:'tm-03', difficulty:'medium', concept:'Turing Machine — Tape', year:'GATE 2021',
+          text: 'A Turing Machine is more powerful than a Pushdown Automaton because:',
+          options: [
+            'TM can read input faster',
+            'TM has a two-way infinite tape (read-write) while PDA has a stack (LIFO only)',
+            'TM has more states than PDA',
+            'TM uses multiple alphabets while PDA uses one'
+          ],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\n**Key difference — memory model:**\n\n| Feature | PDA | TM |\n|---|---|---|\n| Memory | Stack (LIFO) | Infinite R/W tape |\n| Access | Top of stack only | Any cell (random access) |\n| Power | CFL | Recursively Enumerable |\n\nTM can simulate any computation that PDA can do, plus much more. The **two-way infinite read-write tape** is the critical advantage.\n\n**Answer: B ✓**'
+        },
+        {
+          id:'tm-04', difficulty:'hard', concept:'Undecidability — Reduction', year:'GATE 2020',
+          text: 'To prove problem P is undecidable, we typically:',
+          options: [
+            'Show P cannot be solved in polynomial time',
+            'Reduce a known undecidable problem (like Halting) to P',
+            'Show P requires exponential space',
+            'Prove P is NP-Complete'
+          ],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\n**Reduction-based undecidability proof:**\n\nTo show P is undecidable:\n1. Take known undecidable problem H (e.g., Halting Problem)\n2. Show: **if P were decidable, then H would also be decidable** (contradiction)\n3. Formally: reduce H ≤ₘ P (map instances of H to instances of P)\n\nThis is a **many-one reduction** (mapping reduction).\n\nPolynomial time and NP-Completeness are about **complexity** (decidable problems), not undecidability.\n\n**Answer: B ✓**'
         },
       ]
     }
@@ -644,6 +1129,38 @@ const gateCS_OS: Subject = {
           correctAnswerIndex: 3,
           explanation: '### Solution\n**Circular Wait** prevention: Impose a **total ordering** on resource types and require processes to request resources in increasing order.\n- Practical to implement\n- Minimal performance overhead\n- Mutual exclusion cannot be removed (needed for correctness)\n- Hold-and-Wait prevention leads to low resource utilization\n- Preemption can cause data inconsistency'
         },
+        {
+          id:'dl-04', difficulty:'medium', concept:'Resource Allocation Graph', year:'GATE 2024',
+          text: 'In the single-instance Resource Allocation Graph (RAG) shown below, where each resource R1 and R2 has 1 instance, does a deadlock exist?',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 140" width="300" height="140" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="rag_arr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <circle cx="60" cy="70" r="22" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="60" y="74" text-anchor="middle" font-weight="bold" fill="#1e40af">P1</text>
+  <circle cx="240" cy="70" r="22" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="240" y="74" text-anchor="middle" font-weight="bold" fill="#1e40af">P2</text>
+  <rect x="130" y="15" width="40" height="35" rx="4" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+  <text x="150" y="37" text-anchor="middle" font-weight="bold" fill="#854d0e">R1</text>
+  <rect x="130" y="90" width="40" height="35" rx="4" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+  <text x="150" y="112" text-anchor="middle" font-weight="bold" fill="#854d0e">R2</text>
+  <line x1="130" y1="32" x2="82" y2="58" stroke="#16a34a" stroke-width="1.8" marker-end="url(#rag_arr)"/>
+  <line x1="80" y1="82" x2="130" y2="100" stroke="#dc2626" stroke-width="1.8" marker-end="url(#rag_arr)"/>
+  <line x1="170" y1="108" x2="218" y2="82" stroke="#16a34a" stroke-width="1.8" marker-end="url(#rag_arr)"/>
+  <line x1="220" y1="58" x2="170" y2="32" stroke="#dc2626" stroke-width="1.8" marker-end="url(#rag_arr)"/>
+</svg>`,
+          imageAlt: "Resource allocation graph with cycle: R1 allocated to P1, P1 requests R2, R2 allocated to P2, P2 requests R1",
+          options: [
+            'Yes — single instance resource cycle is a necessary and sufficient condition for deadlock',
+            'No — a cycle does not imply deadlock in any RAG',
+            'Cannot be determined without safe sequence calculation',
+            'Deadlock can be resolved by preemption of R1'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nIn a Resource Allocation Graph where **each resource type has only a single instance**, a cycle is both **necessary AND sufficient** condition for deadlock.\nHere we have a cycle: $P_1 \\to R_2 \\to P_2 \\to R_1 \\to P_1$. Both processes are waiting on each other indefinitely → **Deadlock exists!**'
+        },
       ]
     },
     {
@@ -669,6 +1186,13 @@ const gateCS_OS: Subject = {
           correctAnswerIndex: 1,
           explanation: "### Solution\n**Belady's Anomaly**: FIFO page replacement can exhibit the **counterintuitive behavior** of more page faults with more frames.\n\nThis does NOT occur with LRU or Optimal (they are **stack algorithms**).\nFIFO is NOT a stack algorithm → susceptible to Belady's Anomaly."
         },
+        {
+          id:'mem-03', difficulty:'hard', concept:'TLB Effective Memory Access Time', year:'GATE 2023',
+          text: 'TLB hit ratio = 0.8, TLB lookup time = 20 ns, Main memory access time = 100 ns. Under single-level paging, effective memory access time (EMAT) is:',
+          options: ['120 ns', '140 ns', '160 ns', '220 ns'],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\n- On TLB hit: $T_{hit} = TLB + MM = 20 + 100 = 120$ ns.\n- On TLB miss: $T_{miss} = TLB + MM (\\text{page table}) + MM (\\text{data}) = 20 + 100 + 100 = 220$ ns.\n$$\\text{EMAT} = (0.8 \\times 120) + (0.2 \\times 220) = 96 + 44 = \\mathbf{140 \\text{ ns}}$$.'
+        },
       ]
     }
   ]
@@ -693,7 +1217,27 @@ const gateCS_DBMS: Subject = {
           explanation: '### Solution\nNATURAL JOIN keeps only tuples where the common attribute values match.\nIf no R.A value equals any S.A value → **no matches** → result is empty.\n$$|R \\bowtie S| = \\mathbf{0 \\text{ tuples}}$$'
         },
         {
-          id:'sql-02', difficulty:'hard', concept:'SQL — Query Output', year:'GATE 2023',
+          id:'sql-02', difficulty:'medium', concept:'ER Diagram Cardinality', year:'GATE 2022',
+          text: 'In the Entity-Relationship (ER) diagram shown below with Many-to-Many (M:N) relationship `Enrolls` between `Student` and `Course`, what is the MINIMUM number of tables required in the relational schema to represent this without redundancy?',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" width="320" height="110" font-family="Arial" font-size="12">
+  <rect x="20" y="35" width="75" height="40" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="57" y="59" text-anchor="middle" font-weight="bold" fill="#1e40af">Student</text>
+  <polygon points="160,25 200,55 160,85 120,55" fill="#fefce8" stroke="#ca8a04" stroke-width="2"/>
+  <text x="160" y="59" text-anchor="middle" font-weight="bold" fill="#854d0e">Enrolls</text>
+  <rect x="225" y="35" width="75" height="40" rx="4" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="262" y="59" text-anchor="middle" font-weight="bold" fill="#1e40af">Course</text>
+  <line x1="95" y1="55" x2="120" y2="55" stroke="#334155" stroke-width="2"/>
+  <text x="107" y="47" fill="#334155" font-weight="bold">M</text>
+  <line x1="200" y1="55" x2="225" y2="55" stroke="#334155" stroke-width="2"/>
+  <text x="212" y="47" fill="#334155" font-weight="bold">N</text>
+</svg>`,
+          imageAlt: "ER Diagram with Student and Course having Many-to-Many Enrolls relationship",
+          options: ['1 table', '2 tables', '3 tables', '4 tables'],
+          correctAnswerIndex: 2,
+          explanation: '### Solution\nFor an M:N (Many-to-Many) relationship:\n1. One table for Entity 1: `Student(student_id, name, ...)`\n2. One table for Entity 2: `Course(course_id, course_name, ...)`\n3. One cross-reference relationship table: `Enrolls(student_id, course_id, ...)`\n\nTherefore, minimum **3 tables** are required.'
+        },
+        {
+          id:'sql-03', difficulty:'hard', concept:'SQL — Query Output', year:'GATE 2023',
           text: 'SELECT deptno, COUNT(*) FROM emp GROUP BY deptno HAVING COUNT(*) > 2. This query returns:',
           options: [
             'Total count of all employees',
@@ -705,7 +1249,7 @@ const gateCS_DBMS: Subject = {
           explanation: '### Solution\nSQL execution order: FROM → WHERE → GROUP BY → **HAVING** → SELECT → ORDER BY\n\n1. `GROUP BY deptno` → groups employees by department\n2. `HAVING COUNT(*) > 2` → filters groups with more than 2 employees\n3. `SELECT deptno, COUNT(*)` → returns dept number and count\n\nResult: **Departments (with count) that have more than 2 employees**'
         },
         {
-          id:'sql-03', difficulty:'medium', concept:'Relational Algebra — Selection', year:'GATE 2020',
+          id:'sql-04', difficulty:'medium', concept:'Relational Algebra — Selection', year:'GATE 2020',
           text: 'Relational algebra expression $\\sigma_{age>25}(\\pi_{name,age}(Employee))$ returns:',
           options: [
             'Names and ages of employees over 25',
@@ -785,6 +1329,18 @@ const gateCS_CN: Subject = {
           correctAnswerIndex: 0,
           explanation: '### Solution\n**Binary Exponential Backoff**: After $k$-th collision, station waits a random time in $[0, 2^k - 1]$ slot times before retrying.\n\nAfter 1st collision: wait 0 or 1 slot\nAfter 2nd collision: wait 0,1,2, or 3 slots\nAfter $k$th collision: wait randomly in $[0, 2^k-1]$ slots'
         },
+        {
+          id:'dll-04', difficulty:'medium', concept:'Sliding Window Protocol', year:'GATE 2021',
+          text: 'In a Selective Repeat ARQ protocol using $n$-bit sequence numbers, the maximum sender window size $W_s$ and receiver window size $W_r$ must satisfy:',
+          options: [
+            '$W_s + W_r \\leq 2^n$ (with $W_s = W_r = 2^{n-1}$)',
+            '$W_s + W_r \\leq 2^n - 1$',
+            '$W_s = 2^n - 1, W_r = 1$',
+            '$W_s = 2^n, W_r = 2^n$'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nTo prevent ambiguity between new and duplicate frames in Selective Repeat:\n$$W_s + W_r \\leq 2^n$$\nTypically $W_s = W_r = \\mathbf{2^{n-1}}$.\n(In Go-Back-N, $W_s = 2^n - 1$ and $W_r = 1$).'
+        },
       ]
     },
     {
@@ -816,6 +1372,36 @@ const gateCS_CN: Subject = {
           ],
           correctAnswerIndex: 1,
           explanation: '### Solution\n| Protocol | Type | Algorithm |\n|---|---|---|\n| RIP | Distance Vector | Bellman-Ford |\n| **OSPF** | **Link State** | **Dijkstra\'s** |\n| BGP | Path Vector | Custom |\n\nOSPF: Each router knows **full topology** → runs Dijkstra\'s to find shortest paths.'
+        },
+        {
+          id:'net-04', difficulty:'medium', concept:'TCP 3-Way Handshake', year:'GATE 2024',
+          text: 'In the TCP 3-way connection establishment diagram shown below, Client sends SYN with seq = 1000. Server responds with SYN+ACK with seq = 5000. What are the acknowledgment numbers in the Server response and the final Client ACK packet respectively?',
+          imageUrl: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 135" width="340" height="135" font-family="Arial" font-size="11">
+  <defs>
+    <marker id="tcp_arr" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <line x1="60" y1="20" x2="60" y2="125" stroke="#3b82f6" stroke-width="2"/>
+  <line x1="280" y1="20" x2="280" y2="125" stroke="#3b82f6" stroke-width="2"/>
+  <text x="60" y="15" text-anchor="middle" font-weight="bold" fill="#1e40af">Client</text>
+  <text x="280" y="15" text-anchor="middle" font-weight="bold" fill="#1e40af">Server</text>
+  <line x1="60" y1="38" x2="280" y2="60" stroke="#2563eb" stroke-width="1.8" marker-end="url(#tcp_arr)"/>
+  <text x="170" y="42" text-anchor="middle" fill="#1e40af" font-weight="bold">SYN (seq=1000)</text>
+  <line x1="280" y1="70" x2="60" y2="92" stroke="#16a34a" stroke-width="1.8" marker-end="url(#tcp_arr)"/>
+  <text x="170" y="75" text-anchor="middle" fill="#15803d" font-weight="bold">SYN+ACK (seq=5000, ack=?)</text>
+  <line x1="60" y1="102" x2="280" y2="124" stroke="#ca8a04" stroke-width="1.8" marker-end="url(#tcp_arr)"/>
+  <text x="170" y="108" text-anchor="middle" fill="#854d0e" font-weight="bold">ACK (ack=?)</text>
+</svg>`,
+          imageAlt: "TCP 3-way handshake diagram with Client and Server exchanging SYN, SYN-ACK, ACK",
+          options: [
+            '1001 and 5001',
+            '1000 and 5000',
+            '1001 and 5000',
+            '1000 and 5001'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\n1. Client SYN consumes 1 sequence number: `seq = 1000`.\n2. Server acknowledges next expected byte: `ack = 1000 + 1 = 1001` and sends its own initial sequence: `seq = 5000`.\n3. Server SYN also consumes 1 sequence number, so Client final ACK acknowledges: `ack = 5000 + 1 = 5001`.\n\n**Answer: 1001 and 5001**.'
         },
       ]
     }
@@ -858,6 +1444,18 @@ const gateCS_CD: Subject = {
           options: ['LL(1)', 'LR(0)', 'SLR(1)', 'CLR(1)'],
           correctAnswerIndex: 3,
           explanation: '### Solution\nParser power (subset relationship):\n$$LL(1) \\subset LR(0) \\subset SLR(1) \\subset LALR(1) \\subset \\mathbf{CLR(1)}$$\n\nCLR(1) = Canonical LR(1) is the most powerful of deterministic parsers.\nIt uses full LR(1) items with full lookahead sets → handles largest class of grammars.'
+        },
+        {
+          id:'parse-04', difficulty:'hard', concept:'Shift-Reduce Conflict', year:'GATE 2023',
+          text: 'In an LR(0) parsing table, a state contains the items $[A \\to \\alpha \\cdot b \\beta]$ and $[B \\to \\gamma \\cdot]$. This causes:',
+          options: [
+            'Shift-Reduce (S/R) conflict',
+            'Reduce-Reduce (R/R) conflict',
+            'Shift-Shift conflict',
+            'No conflict if grammar is operator precedence'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\n- Item $[A \\to \\alpha \\cdot b \\beta]$ where $b$ is a terminal indicates a **Shift** action on input $b$.\n- Item $[B \\to \\gamma \\cdot]$ indicates a **Reduce** action.\nWhen both items exist in the same state, the parser cannot decide whether to shift or reduce → **Shift-Reduce (S/R) conflict**.'
         },
       ]
     }

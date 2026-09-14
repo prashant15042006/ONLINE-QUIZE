@@ -3,11 +3,24 @@
 import React, { useState, useEffect } from "react";
 import { getBookmarks, toggleBookmark, UserBookmark } from "../lib/userStore";
 import { Question } from "../data/quizData";
+import MathRenderer from "./MathRenderer";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onStartBookmarkQuiz: (questions: Question[]) => void;
+}
+
+function renderTextWithMath(text: string): React.ReactNode {
+  if (!text) return null;
+  const parts = text.split(/(\$\$[^$]+\$\$|\$[^$]+\$)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("$$") && part.endsWith("$$"))
+      return <MathRenderer key={i} math={part.slice(2, -2)} block={true} />;
+    if (part.startsWith("$") && part.endsWith("$") && part.length > 2)
+      return <MathRenderer key={i} math={part.slice(1, -1)} block={false} />;
+    return <span key={i}>{part}</span>;
+  });
 }
 
 export default function BookmarksModal({ isOpen, onClose, onStartBookmarkQuiz }: Props) {
@@ -108,19 +121,40 @@ export default function BookmarksModal({ isOpen, onClose, onStartBookmarkQuiz }:
                 </div>
 
                 <div className="font-bold text-white text-sm leading-snug">
-                  {b.question.text}
+                  {renderTextWithMath(b.question.text)}
                 </div>
+
+                {b.question.imageUrl && (
+                  <div className="my-2 flex justify-center">
+                    <div className="bg-white rounded-xl p-2 border border-amber-400/40 max-w-full overflow-x-auto">
+                      {b.question.imageUrl.trim().startsWith('<svg') ? (
+                        <div
+                          dangerouslySetInnerHTML={{ __html: b.question.imageUrl }}
+                          aria-label={b.question.imageAlt ?? 'Question diagram'}
+                        />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={b.question.imageUrl}
+                          alt={b.question.imageAlt ?? 'Question diagram'}
+                          className="max-w-full max-h-48 object-contain mx-auto"
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="p-3 bg-slate-900 rounded-xl text-slate-300 border border-slate-800">
                   <div className="font-bold text-emerald-400 mb-1">
-                    Correct Answer: {b.question.options[b.question.correctAnswerIndex]}
+                    Correct Answer: {renderTextWithMath(b.question.options[b.question.correctAnswerIndex])}
                   </div>
-                  <div className="text-slate-400 text-[11px]">{b.question.explanation}</div>
+                  <div className="text-slate-400 text-[11px] leading-relaxed">{renderTextWithMath(b.question.explanation)}</div>
                 </div>
               </div>
             ))}
           </div>
         )}
+
 
         {/* Footer */}
         <div className="mt-6 pt-4 border-t border-slate-800 flex justify-end">

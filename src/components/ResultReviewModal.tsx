@@ -141,6 +141,28 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
                 {isExpanded && (
                   <div className="px-4 pb-4 border-t border-white/5">
                     <div className="mt-3 space-y-2">
+
+                      {/* Figure / Diagram Image */}
+                      {q.imageUrl && (
+                        <div className="flex justify-center mb-2">
+                          <div className="bg-white rounded-xl p-2 border border-indigo-400/40 max-w-full overflow-x-auto">
+                            {q.imageUrl.trim().startsWith('<svg') ? (
+                              <div
+                                dangerouslySetInnerHTML={{ __html: q.imageUrl }}
+                                aria-label={q.imageAlt ?? 'Question diagram'}
+                              />
+                            ) : (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={q.imageUrl}
+                                alt={q.imageAlt ?? 'Question diagram'}
+                                className="max-w-full max-h-56 object-contain mx-auto"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                       {/* All options */}
                       <div className="space-y-1.5">
                         {q.options.map((opt, oi) => {

@@ -3,11 +3,24 @@
 import React, { useState, useEffect } from "react";
 import { getMistakes, removeMistake, UserMistake } from "../lib/userStore";
 import { Question } from "../data/quizData";
+import MathRenderer from "./MathRenderer";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   onStartMistakesQuiz: (questions: Question[]) => void;
+}
+
+function renderTextWithMath(text: string): React.ReactNode {
+  if (!text) return null;
+  const parts = text.split(/(\$\$[^$]+\$\$|\$[^$]+\$)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("$$") && part.endsWith("$$"))
+      return <MathRenderer key={i} math={part.slice(2, -2)} block={true} />;
+    if (part.startsWith("$") && part.endsWith("$") && part.length > 2)
+      return <MathRenderer key={i} math={part.slice(1, -1)} block={false} />;
+    return <span key={i}>{part}</span>;
+  });
 }
 
 export default function MistakesNotebookModal({ isOpen, onClose, onStartMistakesQuiz }: Props) {
@@ -123,19 +136,40 @@ export default function MistakesNotebookModal({ isOpen, onClose, onStartMistakes
                 </div>
 
                 <div className="font-bold text-white text-sm leading-snug">
-                  {m.question.text}
+                  {renderTextWithMath(m.question.text)}
                 </div>
+
+                {m.question.imageUrl && (
+                  <div className="my-2 flex justify-center">
+                    <div className="bg-white rounded-xl p-2 border border-rose-400/40 max-w-full overflow-x-auto">
+                      {m.question.imageUrl.trim().startsWith('<svg') ? (
+                        <div
+                          dangerouslySetInnerHTML={{ __html: m.question.imageUrl }}
+                          aria-label={m.question.imageAlt ?? 'Question diagram'}
+                        />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={m.question.imageUrl}
+                          alt={m.question.imageAlt ?? 'Question diagram'}
+                          className="max-w-full max-h-48 object-contain mx-auto"
+                        />
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 <div className="p-3 bg-slate-900 rounded-xl text-slate-300 border border-slate-800">
                   <div className="font-bold text-emerald-400 mb-1">
-                    Correct Answer: {m.question.options[m.question.correctAnswerIndex]}
+                    Correct Answer: {renderTextWithMath(m.question.options[m.question.correctAnswerIndex])}
                   </div>
-                  <div className="text-slate-400 text-[11px]">{m.question.explanation}</div>
+                  <div className="text-slate-400 text-[11px] leading-relaxed">{renderTextWithMath(m.question.explanation)}</div>
                 </div>
               </div>
             ))}
           </div>
         )}
+
 
         {/* Footer */}
         <div className="mt-6 pt-4 border-t border-slate-800 flex justify-end">

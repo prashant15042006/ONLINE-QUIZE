@@ -175,6 +175,26 @@ export default function QuestionSearchModal({ isOpen, onClose, onSelectQuestion 
                 {renderTextWithMath(item.question.text)}
               </div>
 
+              {item.question.imageUrl && (
+                <div className="my-2 flex justify-center">
+                  <div className="bg-white rounded-xl p-2 border border-blue-400/40 max-w-full overflow-x-auto">
+                    {item.question.imageUrl.trim().startsWith('<svg') ? (
+                      <div
+                        dangerouslySetInnerHTML={{ __html: item.question.imageUrl }}
+                        aria-label={item.question.imageAlt ?? 'Question diagram'}
+                      />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={item.question.imageUrl}
+                        alt={item.question.imageAlt ?? 'Question diagram'}
+                        className="max-w-full max-h-48 object-contain mx-auto"
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="flex justify-between items-center pt-2">
                 <span className="text-[11px] text-slate-500">
                   Concept: {item.question.concept || "General"}

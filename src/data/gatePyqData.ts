@@ -104,14 +104,16 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       {
         "id": "24s1-q6",
         "text": "A figure shows a square of side 4 cm with a circle inscribed. Area NOT covered by circle (use π=3.14)?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 170" width="160" height="170"><rect x="20" y="10" width="120" height="120" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/><circle cx="80" cy="70" r="60" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/><text x="80" y="152" text-anchor="middle" font-family="Arial" font-size="11" fill="#334155" font-weight="bold">Side = 4cm, Radius = 2cm</text></svg>`,
+        "imageAlt": "Square of side 4cm with an inscribed circle of radius 2cm",
         "options": [
           "3.44 cm²",
           "6.88 cm²",
           "16 cm²",
           "12.56 cm²"
         ],
-        "correctAnswerIndex": 1,
-        "explanation": "Square=16, Circle=π×2²=12.56. Uncovered=16-12.56=**3.44**. Four corners=4×3.44... Actually area=3.44. Wait corners = 16-12.56=3.44",
+        "correctAnswerIndex": 0,
+        "explanation": "Area of Square = 4² = 16 cm². Area of Inscribed Circle = π × r² = 3.14 × 2² = 12.56 cm². Area NOT covered by circle = 16 − 12.56 = **3.44 cm²**.",
         "difficulty": "easy",
         "concept": "GA – Geometry",
         "year": "GATE 2024 Set 1"
@@ -628,7 +630,35 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "24s1-q41",
-        "text": "Minimum DFA states for L = {w ∈ {0,1}* | w ends with '01'}?",
+        "text": "What is the minimum number of states in a DFA accepting the language L = {w ∈ {0,1}* | w ends with '01'} as shown in the transition diagram?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" width="380" height="145" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="g_arr41" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <line x1="10" y1="70" x2="38" y2="70" stroke="#1e293b" stroke-width="2" marker-end="url(#g_arr41)"/>
+  <circle cx="70" cy="70" r="26" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="70" y="74" text-anchor="middle" font-weight="bold" fill="#1e40af">q0</text>
+  <path d="M 58 46 Q 70 18 82 46" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#g_arr41)"/>
+  <text x="70" y="16" text-anchor="middle" fill="#334155" font-weight="bold">1</text>
+  <path d="M 96 70 L 158 70" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#g_arr41)"/>
+  <text x="127" y="62" text-anchor="middle" fill="#2563eb" font-weight="bold">0</text>
+  <circle cx="190" cy="70" r="26" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="190" y="74" text-anchor="middle" font-weight="bold" fill="#854d0e">q1</text>
+  <path d="M 178 46 Q 190 18 202 46" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#g_arr41)"/>
+  <text x="190" y="16" text-anchor="middle" fill="#334155" font-weight="bold">0</text>
+  <path d="M 216 70 L 278 70" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr41)"/>
+  <text x="247" y="62" text-anchor="middle" fill="#16a34a" font-weight="bold">1</text>
+  <circle cx="310" cy="70" r="26" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <circle cx="310" cy="70" r="21" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="310" y="74" text-anchor="middle" font-weight="bold" fill="#15803d">q2</text>
+  <path d="M 292 88 Q 250 125 208 88" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#g_arr41)"/>
+  <text x="250" y="120" text-anchor="middle" fill="#2563eb" font-weight="bold">0</text>
+  <path d="M 300 94 Q 190 145 80 94" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr41)"/>
+  <text x="190" y="138" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+</svg>`,
+        "imageAlt": "DFA state transition diagram accepting strings ending in 01",
         "options": [
           "2",
           "3",
@@ -636,7 +666,7 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
           "5"
         ],
         "correctAnswerIndex": 1,
-        "explanation": "Track last 2 characters: states for ε/other, '0', '01'. **3 states** minimum.",
+        "explanation": "Track last 2 characters: state q0 (start) for other/ε, q1 for ending in '0', q2 (accepting) for ending in '01'. Exactly **3 states** minimum.",
         "difficulty": "medium",
         "concept": "TOC – DFA",
         "year": "GATE 2024 Set 1"
@@ -1449,15 +1479,41 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "24s2-q30",
-        "text": "DFA minimization: which states are merged?",
+        "text": "In the DFA shown below, which states are merged together during the DFA minimization process?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 140" width="360" height="140" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="g_arr30" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <line x1="10" y1="70" x2="38" y2="70" stroke="#1e293b" stroke-width="2" marker-end="url(#g_arr30)"/>
+  <circle cx="70" cy="70" r="24" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="70" y="74" text-anchor="middle" font-weight="bold" fill="#1e40af">q0</text>
+  <circle cx="180" cy="35" r="24" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="180" y="39" text-anchor="middle" font-weight="bold" fill="#854d0e">p</text>
+  <circle cx="180" cy="105" r="24" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="180" y="109" text-anchor="middle" font-weight="bold" fill="#854d0e">q</text>
+  <circle cx="290" cy="70" r="24" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <circle cx="290" cy="70" r="19" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="290" y="74" text-anchor="middle" font-weight="bold" fill="#15803d">f</text>
+  <path d="M 90 55 L 158 40" fill="none" stroke="#3b82f6" stroke-width="1.8" marker-end="url(#g_arr30)"/>
+  <text x="120" y="42" fill="#2563eb" font-weight="bold">0</text>
+  <path d="M 90 85 L 158 100" fill="none" stroke="#3b82f6" stroke-width="1.8" marker-end="url(#g_arr30)"/>
+  <text x="120" y="102" fill="#2563eb" font-weight="bold">1</text>
+  <path d="M 204 38 L 268 62" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr30)"/>
+  <text x="240" y="45" fill="#16a34a" font-weight="bold">0,1</text>
+  <path d="M 204 102 L 268 78" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr30)"/>
+  <text x="240" y="100" fill="#16a34a" font-weight="bold">0,1</text>
+</svg>`,
+        "imageAlt": "DFA state diagram showing states p and q with identical transitions to final state f",
         "options": [
           "Start states",
           "Distinguishable states",
-          "Indistinguishable states",
+          "Indistinguishable (equivalent) states",
           "Dead states"
         ],
         "correctAnswerIndex": 2,
-        "explanation": "**Indistinguishable states** (equivalent states) are merged in minimization.",
+        "explanation": "**Indistinguishable (equivalent) states** are merged in DFA minimization. States p and q have identical behavior on all inputs (both go to f on 0 and 1), so p ≡ q and they merge into a single state.",
         "difficulty": "easy",
         "concept": "TOC – DFA Minimization",
         "year": "GATE 2024 Set 2"
@@ -4512,7 +4568,33 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "21s1-q37",
-        "text": "Minimum number of states in NFA for (a+b)*abb?",
+        "text": "What is the minimum number of states in an NFA that accepts the language L = (a+b)*abb?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 130" width="420" height="130" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="g_arr37" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <line x1="10" y1="65" x2="38" y2="65" stroke="#1e293b" stroke-width="2" marker-end="url(#g_arr37)"/>
+  <circle cx="65" cy="65" r="24" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="65" y="69" text-anchor="middle" font-weight="bold" fill="#1e40af">q0</text>
+  <path d="M 53 43 Q 65 15 77 43" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#g_arr37)"/>
+  <text x="65" y="14" text-anchor="middle" fill="#334155" font-weight="bold">a, b</text>
+  <path d="M 89 65 L 149 65" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#g_arr37)"/>
+  <text x="119" y="56" text-anchor="middle" fill="#2563eb" font-weight="bold">a</text>
+  <circle cx="175" cy="65" r="24" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="175" y="69" text-anchor="middle" font-weight="bold" fill="#854d0e">q1</text>
+  <path d="M 199 65 L 259 65" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#g_arr37)"/>
+  <text x="229" y="56" text-anchor="middle" fill="#2563eb" font-weight="bold">b</text>
+  <circle cx="285" cy="65" r="24" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="285" y="69" text-anchor="middle" font-weight="bold" fill="#854d0e">q2</text>
+  <path d="M 309 65 L 369 65" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr37)"/>
+  <text x="339" y="56" text-anchor="middle" fill="#16a34a" font-weight="bold">b</text>
+  <circle cx="395" cy="65" r="24" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <circle cx="395" cy="65" r="19" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="395" y="69" text-anchor="middle" font-weight="bold" fill="#15803d">q3</text>
+</svg>`,
+        "imageAlt": "NFA state diagram for (a+b)*abb showing 4 states q0, q1, q2, q3",
         "options": [
           "2",
           "3",
@@ -4520,7 +4602,7 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
           "5"
         ],
         "correctAnswerIndex": 2,
-        "explanation": "NFA for (a+b)*abb: standard construction gives **4 states**.",
+        "explanation": "Standard NFA construction for (a+b)*abb requires **4 states** (q0 start with self-loop on a,b; q0-(a)→q1-(b)→q2-(b)→q3 final). For equivalent DFA, 2³ = 8 max possible, but minimal DFA needs 4 states.",
         "difficulty": "medium",
         "concept": "TOC – NFA",
         "year": "GATE 2021 Set 1"
@@ -5989,7 +6071,35 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
       },
       {
         "id": "20-q4",
-        "text": "DFA for L={w|w ends with '00'}: minimum states?",
+        "text": "What is the minimum number of states in a DFA accepting all binary strings over {0,1} that end with '00' as shown in the state diagram?",
+        "imageUrl": `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 145" width="380" height="145" font-family="Arial" font-size="12">
+  <defs>
+    <marker id="g_arr20" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L6,3 z" fill="#1e293b"/>
+    </marker>
+  </defs>
+  <line x1="10" y1="70" x2="38" y2="70" stroke="#1e293b" stroke-width="2" marker-end="url(#g_arr20)"/>
+  <circle cx="70" cy="70" r="26" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+  <text x="70" y="74" text-anchor="middle" font-weight="bold" fill="#1e40af">q0</text>
+  <path d="M 58 46 Q 70 18 82 46" fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#g_arr20)"/>
+  <text x="70" y="16" text-anchor="middle" fill="#334155" font-weight="bold">1</text>
+  <path d="M 96 70 L 158 70" fill="none" stroke="#2563eb" stroke-width="1.8" marker-end="url(#g_arr20)"/>
+  <text x="127" y="62" text-anchor="middle" fill="#2563eb" font-weight="bold">0</text>
+  <circle cx="190" cy="70" r="26" fill="#fefce8" stroke="#eab308" stroke-width="2"/>
+  <text x="190" y="74" text-anchor="middle" font-weight="bold" fill="#854d0e">q1</text>
+  <path d="M 172 88 Q 130 120 88 88" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr20)"/>
+  <text x="130" y="120" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+  <path d="M 216 70 L 278 70" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr20)"/>
+  <text x="247" y="62" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <circle cx="310" cy="70" r="26" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <circle cx="310" cy="70" r="21" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="310" y="74" text-anchor="middle" font-weight="bold" fill="#15803d">q2</text>
+  <path d="M 298 46 Q 310 18 322 46" fill="none" stroke="#16a34a" stroke-width="1.8" marker-end="url(#g_arr20)"/>
+  <text x="310" y="16" text-anchor="middle" fill="#16a34a" font-weight="bold">0</text>
+  <path d="M 300 94 Q 190 145 80 94" fill="none" stroke="#dc2626" stroke-width="1.8" marker-end="url(#g_arr20)"/>
+  <text x="190" y="138" text-anchor="middle" fill="#dc2626" font-weight="bold">1</text>
+</svg>`,
+        "imageAlt": "DFA state transition diagram accepting strings ending in 00",
         "options": [
           "2",
           "3",
@@ -5997,7 +6107,7 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
           "5"
         ],
         "correctAnswerIndex": 1,
-        "explanation": "Track last 2 chars: states for other, '0', '00'. **3 states**.",
+        "explanation": "Track the last 2 digits: state q0 (no 0s recently), q1 (last digit is 0), q2 (last two digits are 00, accepting). Exactly **3 states** minimum.",
         "difficulty": "medium",
         "concept": "TOC – DFA",
         "year": "GATE 2020"
