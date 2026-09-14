@@ -1,3 +1,6 @@
+import { PYQ_BY_CHAPTER } from "./pyqMapper";
+import { CURATED_QUESTIONS } from "./curatedQuestions";
+
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
 export interface Question {
@@ -1897,9 +1900,52 @@ export const EXAMS_DATA: Exam[] = [
   }
 ];
 
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTOMATIC QUESTION BANK ENRICHMENT
+// Enriches all chapters with authentic GATE PYQs and curated questions
+// ─────────────────────────────────────────────────────────────────────────────
+function enrichAllChapters() {
+  const allSubjects: Subject[] = [
+    gateCS_EM, gateCS_DL, gateCS_COA, gateCS_DS, gateCS_Algo, gateCS_TOC,
+    gateCS_CD, gateCS_OS, gateCS_DBMS, gateCS_CN, gateCS_SE, gateCS_GA,
+    jeePhysics, jeeChemistry, jeeMath,
+    neetBotany, neetZoology,
+    sscQuant
+  ];
+
+  for (const sub of allSubjects) {
+    for (const chap of sub.chapters) {
+      const existingIds = new Set(chap.questions.map(q => q.id));
+      const curated = CURATED_QUESTIONS[chap.id] || [];
+      for (const q of curated) {
+        if (!existingIds.has(q.id)) {
+          chap.questions.push(q);
+          existingIds.add(q.id);
+        }
+      }
+      const pyqs = PYQ_BY_CHAPTER[chap.id] || [];
+      for (const q of pyqs) {
+        if (!existingIds.has(q.id)) {
+          chap.questions.push(q);
+          existingIds.add(q.id);
+        }
+      }
+    }
+  }
+}
+
+enrichAllChapters();
+
 export function getChapterQuestions(chapter: Chapter, difficulty: Difficulty, count: number): Question[] {
-  let pool = chapter.questions.filter(q => q.difficulty === difficulty);
-  if (pool.length < count) pool = [...chapter.questions];
+  const matchDifficulty = chapter.questions.filter(q => q.difficulty === difficulty);
+  let pool: Question[] = [];
+  if (matchDifficulty.length >= count) {
+    pool = [...matchDifficulty];
+  } else {
+    // Include all matching difficulty questions first, then backfill with other difficulties
+    const otherQuestions = chapter.questions.filter(q => q.difficulty !== difficulty);
+    pool = [...matchDifficulty, ...otherQuestions];
+  }
   const shuffled = [...pool];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -1907,3 +1953,4 @@ export function getChapterQuestions(chapter: Chapter, difficulty: Difficulty, co
   }
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
+

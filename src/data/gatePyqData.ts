@@ -1,4 +1,4 @@
-import { Question } from "./quizData";
+import { Question } from "./questionTypes";
 
 export interface GatePaper {
   id: string;
