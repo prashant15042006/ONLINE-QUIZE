@@ -22,6 +22,51 @@ import ResultReviewModal from "../components/ResultReviewModal";
 import GateRankEstimatorModal from "../components/GateRankEstimatorModal";
 import QuestionSearchModal from "../components/QuestionSearchModal";
 import GatePyqMockModal from "../components/GatePyqMockModal";
+import ScientificCalculatorModal from "../components/ScientificCalculatorModal";
+import ScratchpadModal from "../components/ScratchpadModal";
+
+function playAudioFeedback(type: "click" | "correct" | "wrong" | "next") {
+  if (typeof window === "undefined") return;
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    if (type === "click") {
+      osc.frequency.setValueAtTime(480, ctx.currentTime);
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.07);
+    } else if (type === "correct") {
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.22);
+    } else if (type === "wrong") {
+      osc.frequency.setValueAtTime(320, ctx.currentTime);
+      osc.frequency.setValueAtTime(220, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.07, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.2);
+    } else if (type === "next") {
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.06);
+    }
+  } catch {
+    // Audio context not allowed or failed silently
+  }
+}
 
 type Screen = "dashboard" | "branches" | "subjects" | "chapters" | "settings" | "quiz" | "result";
 type QuizMode = "practice" | "test" | "exam";
@@ -179,6 +224,16 @@ export default function Home() {
   const [mistakesCount, setMistakesCount] = useState(0);
   const [bookmarksCount, setBookmarksCount] = useState(0);
 
+  // Advanced CBT Exam Tools States
+  const [isAutoNext, setIsAutoNext] = useState<boolean>(false);
+  const [isScientificCalcOpen, setIsScientificCalcOpen] = useState<boolean>(false);
+  const [isScratchpadOpen, setIsScratchpadOpen] = useState<boolean>(false);
+  const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
+  const [questionFontSize, setQuestionFontSize] = useState<"normal" | "large" | "xlarge">("normal");
+  const [currentQSeconds, setCurrentQSeconds] = useState<number>(0);
+  const [showShortcutsModal, setShowShortcutsModal] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+
   const totalQs = useMemo(() => getTotalQuestionCount(), []);
   const totalChapters = useMemo(() => getTotalChapterCount(), []);
 
@@ -240,6 +295,30 @@ export default function Home() {
       setIsCurrentQBookmarked(isBookmarked(activeQuestions[currentQuestionIndex].id));
     }
   }, [currentQuestionIndex, activeQuestions]);
+
+  // Per-Question Timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (currentScreen === "quiz") {
+      interval = setInterval(() => {
+        setCurrentQSeconds(prev => prev + 1);
+      }, 1000);
+    }
+    return () => { if (interval) clearInterval(interval); };
+  }, [currentScreen, currentQuestionIndex]);
+
+  useEffect(() => {
+    setCurrentQSeconds(0);
+  }, [currentQuestionIndex]);
+
+  const toggleFullscreen = () => {
+    if (typeof document === "undefined") return;
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  };
 
   const selectExam = (exam: Exam) => {
     setSelectedExam(exam);
@@ -323,6 +402,35 @@ export default function Home() {
     const activeQ = activeQuestions[currentQuestionIndex];
     if (!activeQ) return;
     setUserAnswers(prev => ({ ...prev, [activeQ.id]: { ...prev[activeQ.id], selectedOptionIndex: optionIndex } }));
+
+    if (isSoundEnabled) {
+      if (quizMode === "practice") {
+        if (optionIndex === activeQ.correctAnswerIndex) playAudioFeedback("correct");
+        else playAudioFeedback("wrong");
+      } else {
+        playAudioFeedback("click");
+      }
+    }
+
+    if (isAutoNext) {
+      if (quizMode === "practice") {
+        setIsAnswerChecked(true);
+        setTimeout(() => {
+          if (currentQuestionIndex < activeQuestions.length - 1) {
+            setCurrentQuestionIndex(prev => prev + 1);
+            setIsAnswerChecked(false);
+            if (isSoundEnabled) playAudioFeedback("next");
+          }
+        }, 900);
+      } else {
+        setTimeout(() => {
+          if (currentQuestionIndex < activeQuestions.length - 1) {
+            setCurrentQuestionIndex(prev => prev + 1);
+            if (isSoundEnabled) playAudioFeedback("next");
+          }
+        }, 350);
+      }
+    }
   };
 
   const handleToggleBookmarkCurrent = () => {
@@ -348,15 +456,53 @@ export default function Home() {
   const handleCheckOrNext = () => {
     if (quizMode === "practice" && !isAnswerChecked) {
       setIsAnswerChecked(true);
+      if (isSoundEnabled) {
+        const activeQ = activeQuestions[currentQuestionIndex];
+        const currentAns = userAnswers[activeQ.id];
+        if (currentAns?.selectedOptionIndex === activeQ.correctAnswerIndex) playAudioFeedback("correct");
+        else playAudioFeedback("wrong");
+      }
     } else {
       if (currentQuestionIndex < activeQuestions.length - 1) {
         setCurrentQuestionIndex(prev => prev + 1);
         setIsAnswerChecked(false);
+        if (isSoundEnabled) playAudioFeedback("next");
       } else {
         handleQuizSubmit(false);
       }
     }
   };
+
+  // Keyboard Shortcuts Listener for Fast Professional Navigation
+  useEffect(() => {
+    if (currentScreen !== "quiz") return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const activeQ = activeQuestions[currentQuestionIndex];
+      if (!activeQ) return;
+
+      if (e.key === "1" || e.key.toLowerCase() === "a") {
+        if (activeQ.options.length > 0) handleSelectOption(0);
+      } else if (e.key === "2" || e.key.toLowerCase() === "b") {
+        if (activeQ.options.length > 1) handleSelectOption(1);
+      } else if (e.key === "3" || (e.key.toLowerCase() === "c" && !e.ctrlKey && !e.metaKey)) {
+        if (activeQ.options.length > 2) handleSelectOption(2);
+      } else if (e.key === "4" || e.key.toLowerCase() === "d") {
+        if (activeQ.options.length > 3) handleSelectOption(3);
+      } else if (e.key === "Enter" || e.key === "ArrowRight") {
+        handleCheckOrNext();
+      } else if (e.key === "ArrowLeft") {
+        if (currentQuestionIndex > 0) {
+          setCurrentQuestionIndex(prev => prev - 1);
+          setIsAnswerChecked(false);
+        }
+      } else if (e.key.toLowerCase() === "m") {
+        toggleMarkForReview();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentScreen, currentQuestionIndex, activeQuestions, isAnswerChecked, quizMode, isAutoNext, isSoundEnabled]);
 
   const handleQuizSubmit = async (isTimeout = false) => {
     if (timerRef.current) clearInterval(timerRef.current);
@@ -895,14 +1041,136 @@ export default function Home() {
             </div>
           </div>
 
+          {/* CBT Advanced Controls Bar */}
+          <div className="flex items-center justify-between gap-2 p-2 px-3 mb-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs overflow-x-auto scrollbar-none shadow-xl">
+            {/* Left Tools: Calculator, Rough Sheet, Mode Toggle */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsScientificCalcOpen(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold flex items-center gap-1 transition cursor-pointer border border-cyan-500/20"
+                title="Open GATE Virtual Scientific Calculator"
+              >
+                <span>🧮</span>
+                <span className="hidden sm:inline">Calculator</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsScratchpadOpen(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold flex items-center gap-1 transition cursor-pointer border border-amber-500/20"
+                title="Open Rough Sheet / Notes"
+              >
+                <span>📝</span>
+                <span className="hidden sm:inline">Rough Sheet</span>
+              </button>
+
+              {/* Mode Switcher */}
+              <button
+                type="button"
+                onClick={() => setQuizMode(prev => prev === "practice" ? "exam" : "practice")}
+                className={`px-2.5 py-1.5 rounded-xl font-bold flex items-center gap-1 transition cursor-pointer border ${
+                  quizMode === "practice"
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                    : "bg-blue-500/10 border-blue-500/30 text-blue-300"
+                }`}
+                title="Switch between Instant Practice Mode and Official Exam Mode"
+              >
+                <span>{quizMode === "practice" ? "💡 Practice Mode" : "🎯 Official Exam Mode"}</span>
+              </button>
+            </div>
+
+            {/* Middle: Per-Question Timer & Auto-Next Toggle */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Auto-Next Switch */}
+              <button
+                type="button"
+                onClick={() => setIsAutoNext(prev => !prev)}
+                className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition cursor-pointer border ${
+                  isAutoNext
+                    ? "bg-amber-500 text-slate-950 border-amber-400 font-black shadow-md shadow-amber-500/20"
+                    : "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"
+                }`}
+                title="Automatically advance to next question when option is chosen"
+              >
+                <span>⚡ Auto-Next:</span>
+                <span className={isAutoNext ? "font-black" : ""}>{isAutoNext ? "ON" : "OFF"}</span>
+              </button>
+
+              {/* Per-Question Live Stopwatch */}
+              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[11px] text-cyan-400 font-bold">
+                <span className="text-slate-500">⏳ This Q:</span>
+                <span>{Math.floor(currentQSeconds / 60).toString().padStart(2, "0")}:{(currentQSeconds % 60).toString().padStart(2, "0")}</span>
+              </div>
+            </div>
+
+            {/* Right Tools: Font Size, Sound, Shortcuts, Fullscreen */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Font Size Adjuster */}
+              <div className="flex items-center bg-slate-950 rounded-xl border border-slate-800 p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setQuestionFontSize(prev => prev === "xlarge" ? "large" : "normal")}
+                  className={`px-2 py-0.5 rounded-lg text-xs font-bold cursor-pointer ${questionFontSize === "normal" ? "text-cyan-400 font-black" : "text-slate-400 hover:text-white"}`}
+                  title="Standard text size"
+                >
+                  A
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQuestionFontSize(prev => prev === "normal" ? "large" : "xlarge")}
+                  className={`px-2 py-0.5 rounded-lg text-xs font-bold cursor-pointer ${questionFontSize !== "normal" ? "text-cyan-400 font-black" : "text-slate-400 hover:text-white"}`}
+                  title="Enlarge text size"
+                >
+                  A+
+                </button>
+              </div>
+
+              {/* Sound Toggle */}
+              <button
+                type="button"
+                onClick={() => setIsSoundEnabled(!isSoundEnabled)}
+                className={`p-1.5 rounded-xl border transition cursor-pointer text-xs ${
+                  isSoundEnabled ? "bg-slate-800 border-slate-700 text-emerald-400" : "bg-slate-950 border-slate-800 text-slate-500"
+                }`}
+                title={isSoundEnabled ? "Audio Chimes ON" : "Audio Chimes Muted"}
+              >
+                {isSoundEnabled ? "🔊" : "🔇"}
+              </button>
+
+              {/* Keyboard Shortcuts Dialog */}
+              <button
+                type="button"
+                onClick={() => setShowShortcutsModal(true)}
+                className="p-1.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-bold cursor-pointer transition hidden md:flex items-center gap-1"
+                title="Keyboard Shortcuts Guide"
+              >
+                <span>⌨️</span>
+              </button>
+
+              {/* Fullscreen */}
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className="p-1.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-bold cursor-pointer transition"
+                title="Toggle CBT Fullscreen Mode"
+              >
+                {isFullscreen ? "🗗" : "⛶"}
+              </button>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Question Column */}
             <div className="lg:col-span-8 flex flex-col">
               <div className="glass-card p-5 sm:p-7 flex flex-col gap-5">
                 {/* Q meta */}
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-black text-white bg-white/[0.08] px-3 py-1 rounded-full">Q {currentQuestionIndex + 1}</span>
+                    <span className="text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-full font-bold">
+                      {currentQuestionIndex < 10 ? (currentQuestionIndex < 5 ? "+1 Mark • -0.33" : "+2 Marks • -0.66") : (currentQuestionIndex < 35 ? "+1 Mark • -0.33" : "+2 Marks • -0.66")}
+                    </span>
                     {currentQ.concept && (
                       <span className="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-0.5 rounded-full font-bold">{currentQ.concept}</span>
                     )}
@@ -915,8 +1183,10 @@ export default function Home() {
                   </span>
                 </div>
 
-                {/* Question text — large, readable */}
-                <div className="text-[16px] sm:text-[18px] font-semibold text-white leading-[1.75] tracking-[0.01em] whitespace-pre-line break-words">
+                {/* Question text — large, readable with dynamic zoom */}
+                <div className={`font-semibold text-white leading-[1.8] tracking-[0.01em] whitespace-pre-line break-words ${
+                  questionFontSize === "xlarge" ? "text-[20px] sm:text-[22px]" : questionFontSize === "large" ? "text-[18px] sm:text-[20px]" : "text-[16px] sm:text-[18px]"
+                }`}>
                   {renderTextWithMath(cleanQuestionText(currentQ.text))}
                 </div>
 
@@ -956,11 +1226,12 @@ export default function Home() {
                     }
 
                     return (
-                      <button key={idx} onClick={() => handleSelectOption(idx)} disabled={isRevealed} className={`w-full p-4 sm:p-5 rounded-2xl text-left flex items-start gap-4 cursor-pointer disabled:cursor-default ${optClass}`}>
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black border shrink-0 ${badgeBg}`}>
+                      <button key={idx} onClick={() => handleSelectOption(idx)} disabled={isRevealed} className={`w-full p-4 sm:p-5 rounded-2xl text-left flex items-start gap-4 cursor-pointer disabled:cursor-default group ${optClass}`}>
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black border shrink-0 transition ${badgeBg}`}>
                           {badgeContent}
                         </div>
                         <span className="flex-1 text-sm sm:text-base leading-relaxed font-medium break-words">{renderTextWithMath(opt)}</span>
+                        <span className="hidden group-hover:inline text-[10px] text-slate-500 font-mono mt-1 font-bold">[{idx + 1}]</span>
                       </button>
                     );
                   })}
@@ -1143,6 +1414,44 @@ export default function Home() {
       <GateRankEstimatorModal isOpen={isRankEstimatorOpen} onClose={() => setIsRankEstimatorOpen(false)} />
       <QuestionSearchModal isOpen={isQuestionSearchOpen} onClose={() => setIsQuestionSearchOpen(false)} onSelectQuestion={(q, subjectName) => launchCustomQuestionPool([q], `Practice: ${subjectName}`)} />
       <GatePyqMockModal isOpen={isGatePyqModalOpen} onClose={() => setIsGatePyqModalOpen(false)} onStartPaper={(questions, paperTitle, durationMinutes, initialIndex) => launchCustomQuestionPool(questions, paperTitle, durationMinutes, initialIndex)} />
+      <ScientificCalculatorModal isOpen={isScientificCalcOpen} onClose={() => setIsScientificCalcOpen(false)} />
+      <ScratchpadModal isOpen={isScratchpadOpen} onClose={() => setIsScratchpadOpen(false)} />
+
+      {/* Keyboard Shortcuts Guide Modal */}
+      {showShortcutsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-[#0f172a] border border-slate-700 rounded-3xl max-w-sm w-full p-5 text-slate-100 shadow-2xl relative">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⌨️</span>
+                <h3 className="font-extrabold text-white text-sm">CBT Keyboard Shortcuts</h3>
+              </div>
+              <button onClick={() => setShowShortcutsModal(false)} className="w-7 h-7 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer text-xs">✕</button>
+            </div>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-300">Select Options A, B, C, D</span>
+                <span className="font-mono bg-slate-800 px-2 py-0.5 rounded text-cyan-300 font-bold">1, 2, 3, 4</span>
+              </div>
+              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-300">Check / Next Question</span>
+                <span className="font-mono bg-slate-800 px-2 py-0.5 rounded text-cyan-300 font-bold">Enter / →</span>
+              </div>
+              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-300">Previous Question</span>
+                <span className="font-mono bg-slate-800 px-2 py-0.5 rounded text-cyan-300 font-bold">←</span>
+              </div>
+              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-300">Mark for Review</span>
+                <span className="font-mono bg-slate-800 px-2 py-0.5 rounded text-cyan-300 font-bold">M</span>
+              </div>
+            </div>
+            <div className="mt-4 pt-3 border-t border-slate-800 text-center">
+              <button onClick={() => setShowShortcutsModal(false)} className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl cursor-pointer">Got It 👍</button>
+            </div>
+          </div>
+        </div>
+      )}
       {isResultReviewModalOpen && (
         <ResultReviewModal questions={activeQuestions} userAnswers={userAnswers} onClose={() => setIsResultReviewModalOpen(false)} />
       )}
