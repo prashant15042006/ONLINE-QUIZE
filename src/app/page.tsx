@@ -1283,6 +1283,24 @@ export default function Home() {
       {/* ═══════════════ RESULT SCREEN ═══════════════ */}
       {currentScreen === "result" && (
         <div className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+          {/* Quick Return to Dashboard Top Bar */}
+          <div className="flex items-center justify-between mb-4 bg-slate-900/90 border border-slate-800 rounded-2xl px-5 py-3.5 backdrop-blur-md shadow-xl sticky top-3 z-30">
+            <div className="flex items-center gap-2.5">
+              <span className="text-xl">🏆</span>
+              <div>
+                <h3 className="text-xs font-black text-white uppercase tracking-wider">Exam Results Overview</h3>
+                <p className="text-[10px] text-slate-400">{activeQuestions.length} Questions Attempted · Score: {score} pts</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setCurrentScreen("dashboard")}
+              className="px-5 py-2.5 btn-3d-green text-xs font-black rounded-xl cursor-pointer flex items-center gap-2 shadow-lg hover:scale-105 transition"
+            >
+              <span>🏠</span>
+              <span>Back to Dashboard</span>
+            </button>
+          </div>
+
           <div className="glass-card p-6 sm:p-10 space-y-8 text-center">
             {/* Score Circle */}
             <div className="flex flex-col items-center gap-3">
@@ -1339,6 +1357,9 @@ export default function Home() {
 
             {/* Action buttons */}
             <div className="flex flex-wrap gap-3 justify-center">
+              <button onClick={() => setCurrentScreen("dashboard")} className="px-6 py-3 btn-3d-green font-black text-xs rounded-xl cursor-pointer flex items-center gap-2 shadow-md">
+                🏠 Back to Dashboard
+              </button>
               <button onClick={() => setIsResultReviewModalOpen(true)} className="px-6 py-3 btn-3d-blue font-bold text-xs rounded-xl cursor-pointer flex items-center gap-2">📋 Full Question Review</button>
               {incorrectCount > 0 && (
                 <button onClick={retryIncorrectQuestions} className="px-6 py-3 btn-3d-purple font-bold text-xs rounded-xl cursor-pointer">🔁 Retry {incorrectCount} Incorrect</button>
