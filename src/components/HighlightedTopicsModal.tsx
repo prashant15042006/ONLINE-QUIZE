@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { HIGHLIGHTED_TOPICS } from "../data/highlightedTopics";
+import { HIGHLIGHTED_TOPICS, HighlightedTopic } from "../data/highlightedTopics";
 import { Question } from "../data/questionTypes";
 
 interface Props {
@@ -38,9 +38,22 @@ export default function HighlightedTopicsModal({ isOpen, onClose, onStartTopic }
 
   const totalQs = HIGHLIGHTED_TOPICS.reduce((a, t) => a + t.questions.length, 0);
 
+  const handleSelectTopic = (topic: HighlightedTopic) => {
+    // 1. Immediately dismiss modal so questions are directly shown without any overlay
+    onClose();
+    // 2. Launch the selected topic questions
+    onStartTopic(topic.questions, `🔥 ${topic.name}`);
+  };
+
+  const handleAttemptAll = () => {
+    const allQ = HIGHLIGHTED_TOPICS.flatMap(t => t.questions);
+    onClose();
+    onStartTopic(allQ, "🔥 All Recommended Topics");
+  };
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto animate-fade-in"
       onClick={onClose}
     >
       <div
@@ -55,7 +68,7 @@ export default function HighlightedTopicsModal({ isOpen, onClose, onStartTopic }
                 <span className="text-2xl">🔥</span>
                 <h2 className="text-xl font-black text-white">Highly Recommended Topics</h2>
               </div>
-              <p className="text-xs text-slate-400">27 Must-Know GATE CSE Topics — Don&apos;t Skip These!</p>
+              <p className="text-xs text-slate-400">27 Must-Know GATE CSE Topics — Click any topic to start instantly!</p>
             </div>
             <button
               onClick={onClose}
@@ -96,16 +109,24 @@ export default function HighlightedTopicsModal({ isOpen, onClose, onStartTopic }
 
         {/* Topics Grid */}
         <div className="p-5">
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {filtered.map(topic => {
               const subjColor = subjectColors[topic.subject] || "bg-slate-500/20 text-slate-300 border-slate-500/30";
               return (
                 <div
                   key={topic.id}
-                  className={`bg-slate-900/80 border ${topic.color} rounded-2xl p-4 flex flex-col gap-3 hover:scale-[1.02] transition group`}
+                  onClick={() => handleSelectTopic(topic)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      handleSelectTopic(topic);
+                    }
+                  }}
+                  className={`bg-slate-900/80 border ${topic.color} hover:border-cyan-400/80 rounded-2xl p-4 flex flex-col gap-3 hover:scale-[1.02] hover:bg-slate-800/80 transition-all cursor-pointer group shadow-lg`}
                 >
                   <div className="flex items-start justify-between">
-                    <span className="text-2xl">{topic.icon}</span>
+                    <span className="text-2xl group-hover:scale-110 transition">{topic.icon}</span>
                     <span className={`text-[9px] font-black px-2 py-0.5 rounded-full border ${subjColor} text-center leading-tight`}>
                       {topic.subject}
                     </span>
@@ -117,13 +138,14 @@ export default function HighlightedTopicsModal({ isOpen, onClose, onStartTopic }
                     <p className="text-[10px] text-slate-500 mt-1">{topic.questions.length} practice questions</p>
                   </div>
                   <button
-                    onClick={() => {
-                      onClose();
-                      onStartTopic(topic.questions, `🔥 ${topic.name}`);
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectTopic(topic);
                     }}
-                    className="w-full py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-[11px] font-black rounded-xl transition cursor-pointer"
+                    className="w-full py-2 bg-gradient-to-r from-cyan-600 to-blue-600 group-hover:from-cyan-500 group-hover:to-blue-500 text-white text-[11px] font-black rounded-xl transition cursor-pointer shadow-md"
                   >
-                    Practice Now →
+                    Start Questions →
                   </button>
                 </div>
               );
@@ -135,18 +157,14 @@ export default function HighlightedTopicsModal({ isOpen, onClose, onStartTopic }
           )}
 
           {/* Footer: all-topics button */}
-          <div className="mt-5 pt-4 border-t border-slate-800 flex flex-wrap items-center gap-3">
+          <div className="mt-5 pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
             <div className="text-[11px] text-slate-400">
               <span className="font-black text-cyan-400">{totalQs}</span> total questions across{" "}
               <span className="font-black text-white">27</span> topics
             </div>
             <button
-              onClick={() => {
-                const allQ = HIGHLIGHTED_TOPICS.flatMap(t => t.questions);
-                onClose();
-                onStartTopic(allQ, "🔥 All Recommended Topics");
-              }}
-              className="px-4 py-2 bg-gradient-to-r from-orange-600 to-rose-600 hover:from-orange-500 hover:to-rose-500 text-white text-[11px] font-black rounded-xl transition cursor-pointer"
+              onClick={handleAttemptAll}
+              className="px-5 py-2.5 bg-gradient-to-r from-orange-600 to-rose-600 hover:from-orange-500 hover:to-rose-500 text-white text-xs font-black rounded-xl transition cursor-pointer shadow-xl hover:scale-105"
             >
               🚀 Attempt All {totalQs} Questions
             </button>
