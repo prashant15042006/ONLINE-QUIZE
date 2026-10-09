@@ -1442,7 +1442,7 @@ export default function Home() {
       <GatePyqMockModal isOpen={isGatePyqModalOpen} onClose={() => setIsGatePyqModalOpen(false)} onStartPaper={(questions, paperTitle, durationMinutes, initialIndex) => launchCustomQuestionPool(questions, paperTitle, durationMinutes, initialIndex)} />
       <ScientificCalculatorModal isOpen={isScientificCalcOpen} onClose={() => setIsScientificCalcOpen(false)} />
       <ScratchpadModal isOpen={isScratchpadOpen} onClose={() => setIsScratchpadOpen(false)} />
-      <HighlightedTopicsModal isOpen={isHighlightedTopicsOpen} onClose={() => setIsHighlightedTopicsOpen(false)} onStartTopic={(questions, title) => launchCustomQuestionPool(questions, title)} />
+      <HighlightedTopicsModal isOpen={isHighlightedTopicsOpen} onClose={() => setIsHighlightedTopicsOpen(false)} onStartTopic={(questions, title) => { setIsHighlightedTopicsOpen(false); launchCustomQuestionPool(questions, title); }} />
 
       {/* Keyboard Shortcuts Guide Modal */}
       {showShortcutsModal && (

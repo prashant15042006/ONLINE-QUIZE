@@ -117,7 +117,10 @@ export default function HighlightedTopicsModal({ isOpen, onClose, onStartTopic }
                     <p className="text-[10px] text-slate-500 mt-1">{topic.questions.length} practice questions</p>
                   </div>
                   <button
-                    onClick={() => onStartTopic(topic.questions, `🔥 ${topic.name}`)}
+                    onClick={() => {
+                      onClose();
+                      onStartTopic(topic.questions, `🔥 ${topic.name}`);
+                    }}
                     className="w-full py-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-[11px] font-black rounded-xl transition cursor-pointer"
                   >
                     Practice Now →
@@ -140,6 +143,7 @@ export default function HighlightedTopicsModal({ isOpen, onClose, onStartTopic }
             <button
               onClick={() => {
                 const allQ = HIGHLIGHTED_TOPICS.flatMap(t => t.questions);
+                onClose();
                 onStartTopic(allQ, "🔥 All Recommended Topics");
               }}
               className="px-4 py-2 bg-gradient-to-r from-orange-600 to-rose-600 hover:from-orange-500 hover:to-rose-500 text-white text-[11px] font-black rounded-xl transition cursor-pointer"
