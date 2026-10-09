@@ -24,6 +24,7 @@ import QuestionSearchModal from "../components/QuestionSearchModal";
 import GatePyqMockModal from "../components/GatePyqMockModal";
 import ScientificCalculatorModal from "../components/ScientificCalculatorModal";
 import ScratchpadModal from "../components/ScratchpadModal";
+import HighlightedTopicsModal from "../components/HighlightedTopicsModal";
 
 function playAudioFeedback(type: "click" | "correct" | "wrong" | "next") {
   if (typeof window === "undefined") return;
@@ -218,6 +219,7 @@ export default function Home() {
   const [isQuestionSearchOpen, setIsQuestionSearchOpen] = useState(false);
   const [isResultReviewModalOpen, setIsResultReviewModalOpen] = useState(false);
   const [isGatePyqModalOpen, setIsGatePyqModalOpen] = useState(false);
+  const [isHighlightedTopicsOpen, setIsHighlightedTopicsOpen] = useState(false);
   const [showAnalyticsView, setShowAnalyticsView] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isCurrentQBookmarked, setIsCurrentQBookmarked] = useState(false);
@@ -745,6 +747,9 @@ export default function Home() {
             <button onClick={() => setIsRankEstimatorOpen(true)} className="px-4 py-2 btn-3d-slate rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5">
               📊 Rank Estimator
             </button>
+            <button onClick={() => setIsHighlightedTopicsOpen(true)} className="px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-lg" style={{background:"linear-gradient(135deg,#7c3aed,#db2777)",border:"1px solid rgba(219,39,119,0.4)"}}>
+              🔥 Must-Do Topics
+            </button>
           </div>
 
           {showAnalyticsView ? (
@@ -1268,7 +1273,7 @@ export default function Home() {
 
             {/* Navigation Sidebar */}
             <div className="lg:col-span-4 space-y-3">
-              <QuestionNavigationGrid questions={activeQuestions} userAnswers={userAnswers} correctAnswers={correctAnswersMap} currentIndex={currentQuestionIndex} isSubmitted={false} onJumpTo={idx => { setCurrentQuestionIndex(idx); setIsAnswerChecked(false); }} />
+              <QuestionNavigationGrid questions={activeQuestions} userAnswers={userAnswers} correctAnswers={correctAnswersMap} currentIndex={currentQuestionIndex} isSubmitted={false} quizMode={quizMode} onJumpTo={idx => { setCurrentQuestionIndex(idx); setIsAnswerChecked(false); }} />
               <button onClick={() => handleQuizSubmit(false)} className="w-full py-3 btn-3d-green font-black text-xs rounded-xl cursor-pointer">Submit Quiz ✓</button>
             </div>
           </div>
@@ -1416,6 +1421,7 @@ export default function Home() {
       <GatePyqMockModal isOpen={isGatePyqModalOpen} onClose={() => setIsGatePyqModalOpen(false)} onStartPaper={(questions, paperTitle, durationMinutes, initialIndex) => launchCustomQuestionPool(questions, paperTitle, durationMinutes, initialIndex)} />
       <ScientificCalculatorModal isOpen={isScientificCalcOpen} onClose={() => setIsScientificCalcOpen(false)} />
       <ScratchpadModal isOpen={isScratchpadOpen} onClose={() => setIsScratchpadOpen(false)} />
+      <HighlightedTopicsModal isOpen={isHighlightedTopicsOpen} onClose={() => setIsHighlightedTopicsOpen(false)} onStartTopic={(questions, title) => launchCustomQuestionPool(questions, title)} />
 
       {/* Keyboard Shortcuts Guide Modal */}
       {showShortcutsModal && (

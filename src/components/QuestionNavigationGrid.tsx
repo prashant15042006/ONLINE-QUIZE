@@ -5,10 +5,11 @@ import React from "react";
 interface Props {
   questions: { id: string }[];
   userAnswers: Record<string, { selectedOptionIndex: number | null; isMarkedForReview?: boolean }>;
-  correctAnswers: Record<string, number>; // questionId -> correctAnswerIndex
+  correctAnswers: Record<string, number>;
   currentIndex: number;
   isSubmitted: boolean;
   onJumpTo: (index: number) => void;
+  quizMode?: string;
 }
 
 export default function QuestionNavigationGrid({
@@ -18,6 +19,7 @@ export default function QuestionNavigationGrid({
   currentIndex,
   isSubmitted,
   onJumpTo,
+  quizMode,
 }: Props) {
   const [filter, setFilter] = React.useState<"all" | "attempted" | "unattempted" | "review">("all");
 
@@ -30,6 +32,10 @@ export default function QuestionNavigationGrid({
     if (isSubmitted) {
       return ans.selectedOptionIndex === correctAnswers[q.id] ? "correct" : "wrong";
     }
+    // Live correct/wrong colors in practice mode
+    if (quizMode === "practice") {
+      return ans.selectedOptionIndex === correctAnswers[q.id] ? "correct" : "wrong";
+    }
     return "attempted";
   };
 
@@ -37,17 +43,19 @@ export default function QuestionNavigationGrid({
     current:     "bg-blue-500 border-blue-300 text-white scale-110 shadow-md shadow-blue-500/40 font-black",
     unattempted: "bg-slate-800/90 border-slate-700 text-slate-400 hover:border-slate-500 hover:text-white",
     attempted:   "bg-emerald-600 border-emerald-400 text-white shadow-sm",
-    correct:     "bg-emerald-700 border-emerald-500 text-white",
-    wrong:       "bg-rose-700 border-rose-500 text-white",
+    correct:     "bg-emerald-600 border-emerald-400 text-white shadow-sm shadow-emerald-500/30",
+    wrong:       "bg-rose-600 border-rose-400 text-white shadow-sm shadow-rose-500/30",
     review:      "bg-amber-600 border-amber-400 text-white shadow-sm",
   };
 
-  // Summary counts
   const counts = { unattempted: 0, attempted: 0, correct: 0, wrong: 0, review: 0 };
   questions.forEach((q, i) => {
     const s = getStatus(i) as keyof typeof counts;
     if (s in counts) counts[s]++;
   });
+
+  const showResults = isSubmitted || quizMode === "practice";
+  const answeredCount = counts.attempted + counts.correct + counts.wrong;
 
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3 shadow-xl">
@@ -77,7 +85,7 @@ export default function QuestionNavigationGrid({
             filter === "attempted" ? "bg-emerald-600 border-emerald-400 text-white font-black" : "bg-slate-800/80 border-slate-700 text-emerald-400"
           }`}
         >
-          Ans ({counts.attempted})
+          Ans ({answeredCount})
         </button>
         <button
           onClick={() => setFilter("review")}
@@ -111,6 +119,7 @@ export default function QuestionNavigationGrid({
             <button
               key={idx}
               onClick={() => onJumpTo(idx)}
+              title={status === "correct" ? "✓ Correct" : status === "wrong" ? "✗ Wrong" : status}
               className={`w-full aspect-square rounded-lg border text-[11px] font-black transition cursor-pointer flex items-center justify-center ${
                 statusStyles[status]
               } ${!isMatch ? "opacity-25 scale-90" : ""}`}
@@ -125,13 +134,15 @@ export default function QuestionNavigationGrid({
       <div className="grid grid-cols-2 gap-1 pt-2 border-t border-slate-800">
         {[
           { label: "Unattempted", color: "bg-slate-700", count: counts.unattempted },
-          { label: "Attempted", color: "bg-blue-800", count: counts.attempted },
-          ...(isSubmitted
+          ...(showResults
             ? [
-                { label: "Correct", color: "bg-emerald-700", count: counts.correct },
-                { label: "Wrong", color: "bg-rose-700", count: counts.wrong },
+                { label: "Correct ✓", color: "bg-emerald-600", count: counts.correct },
+                { label: "Wrong ✗", color: "bg-rose-600", count: counts.wrong },
               ]
-            : [{ label: "For Review", color: "bg-amber-700", count: counts.review }]),
+            : [
+                { label: "Answered", color: "bg-emerald-600", count: counts.attempted },
+                { label: "For Review", color: "bg-amber-700", count: counts.review },
+              ]),
         ].map((item) => (
           <div key={item.label} className="flex items-center gap-1.5">
             <div className={`w-3 h-3 rounded ${item.color} shrink-0`} />

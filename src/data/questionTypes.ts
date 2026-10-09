@@ -11,6 +11,7 @@ export interface Question {
   year?: string;
   imageUrl?: string;   // SVG string or image URL for diagram-based questions
   imageAlt?: string;   // Accessible alt description
+  marks?: number;
 }
 
 export interface Chapter {
