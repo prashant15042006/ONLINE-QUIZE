@@ -33,7 +33,8 @@ interface UserAnswer {
 }
 
 function cleanQuestionText(text: string): string {
-  return text.replace(/^\[.*?\]\s*/g, "").replace(/\s*\(Q\d+\)$/g, "").trim();
+  if (!text) return "";
+  return text.replace(/^\[(GATE|PYQ|\d{4}|CSE|IT|CS|Q\d+)[^\]]*\]\s*/gi, "").replace(/\s*\(Q\d+\)$/g, "").trim();
 }
 
 function renderTextWithMath(text: string): React.ReactNode {
@@ -153,6 +154,7 @@ export default function Home() {
   const [timeTakenSeconds, setTimeTakenSeconds] = useState<number>(0);
   const [isPreparingQuiz, setIsPreparingQuiz] = useState<boolean>(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [activeQuizTitle, setActiveQuizTitle] = useState<string>("");
 
   const [score, setScore] = useState<number>(0);
   const [correctCount, setCorrectCount] = useState<number>(0);
@@ -253,19 +255,44 @@ export default function Home() {
     setCurrentScreen("settings");
   };
 
-  const launchCustomQuestionPool = (questions: Question[], title: string) => {
+  const launchCustomQuestionPool = (
+    questions: Question[],
+    title: string,
+    customDurationMinutes?: number,
+    initialIndex: number = 0
+  ) => {
     if (questions.length === 0) return;
     const cleaned = questions.map(q => ({ ...q, text: cleanQuestionText(q.text) }));
     setActiveQuestions(cleaned);
-    setCurrentQuestionIndex(0);
+    setCurrentQuestionIndex(initialIndex >= 0 && initialIndex < cleaned.length ? initialIndex : 0);
     setIsAnswerChecked(false);
     const initialAnswers: Record<string, UserAnswer> = {};
     cleaned.forEach(q => { initialAnswers[q.id] = { questionId: q.id, selectedOptionIndex: null, isMarkedForReview: false }; });
     setUserAnswers(initialAnswers);
-    const seconds = durationMinutes * 60;
+
+    // Dynamic duration calculation:
+    // If explicitly provided, respect it (e.g. 180m or 130m).
+    // For full 65-question GATE paper, default to official 180 minutes!
+    // For smaller pools, scale appropriately.
+    let finalDuration = customDurationMinutes;
+    if (!finalDuration) {
+      if (cleaned.length >= 60) {
+        finalDuration = 180; // Full 3-Hour GATE Official Mock
+      } else if (cleaned.length >= 30) {
+        finalDuration = Math.round(cleaned.length * 2);
+      } else if (cleaned.length === 1) {
+        finalDuration = 3;
+      } else {
+        finalDuration = durationMinutes || 10;
+      }
+    }
+
+    setDurationMinutes(finalDuration);
+    const seconds = finalDuration * 60;
     setTimeLeft(seconds);
     setTotalQuizTime(seconds);
     setQuizStartTime(Date.now());
+    setActiveQuizTitle(title);
     setCurrentScreen("quiz");
   };
 
@@ -287,6 +314,7 @@ export default function Home() {
     setTimeLeft(seconds);
     setTotalQuizTime(seconds);
     setQuizStartTime(Date.now());
+    setActiveQuizTitle(`${selectedSubject?.name || "Subject"} — ${selectedChapter?.name || "Chapter"}`);
     setCurrentScreen("quiz");
   };
 
@@ -401,8 +429,12 @@ export default function Home() {
   };
 
   const formatTime = (secs: number) => {
-    const mins = Math.floor(secs / 60);
+    const hrs = Math.floor(secs / 3600);
+    const mins = Math.floor((secs % 3600) / 60);
     const s = secs % 60;
+    if (hrs > 0) {
+      return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    }
     return `${mins.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
@@ -799,10 +831,13 @@ export default function Home() {
             <div>
               <label className="block text-xs font-black text-slate-300 mb-2 uppercase tracking-wider">Timer Duration</label>
               <select value={durationMinutes} onChange={e => setDurationMinutes(Number(e.target.value))} className="w-full bg-white/[0.04] border border-white/[0.09] rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-500/50">
-                <option value={5}>5 Minutes (Quick)</option>
+                <option value={5}>5 Minutes (Quick Sprint)</option>
                 <option value={10}>10 Minutes (Standard)</option>
                 <option value={15}>15 Minutes (Comprehensive)</option>
                 <option value={30}>30 Minutes (Exam Mode)</option>
+                <option value={60}>60 Minutes (Full Chapter Test)</option>
+                <option value={130}>130 Minutes (Fast Track Practice)</option>
+                <option value={180}>180 Minutes (GATE Official 3-Hour Exam)</option>
               </select>
             </div>
 
@@ -829,6 +864,14 @@ export default function Home() {
           {/* Quiz Top Bar */}
           <div className="flex items-center justify-between gap-3 mb-5">
             <button onClick={() => { if (confirm("Quit session? Progress will be lost.")) setCurrentScreen("dashboard"); }} className="text-slate-500 hover:text-white font-bold text-xl cursor-pointer transition">✕</button>
+
+            {/* Paper / Exam Title Badge */}
+            {activeQuizTitle && (
+              <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/25 rounded-xl text-xs font-black text-amber-300 shrink-0 shadow-sm">
+                <span>📜</span>
+                <span className="truncate max-w-[220px]">{activeQuizTitle}</span>
+              </div>
+            )}
 
             {/* Progress Bar */}
             <div className="flex-1 flex flex-col gap-1">
@@ -873,7 +916,7 @@ export default function Home() {
                 </div>
 
                 {/* Question text — large, readable */}
-                <div className="text-[16px] sm:text-[18px] font-semibold text-white leading-[1.75] tracking-[0.01em]">
+                <div className="text-[16px] sm:text-[18px] font-semibold text-white leading-[1.75] tracking-[0.01em] whitespace-pre-line break-words">
                   {renderTextWithMath(cleanQuestionText(currentQ.text))}
                 </div>
 
@@ -917,7 +960,7 @@ export default function Home() {
                         <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black border shrink-0 ${badgeBg}`}>
                           {badgeContent}
                         </div>
-                        <span className="flex-1 text-sm sm:text-base leading-relaxed font-medium">{renderTextWithMath(opt)}</span>
+                        <span className="flex-1 text-sm sm:text-base leading-relaxed font-medium break-words">{renderTextWithMath(opt)}</span>
                       </button>
                     );
                   })}
@@ -1099,7 +1142,7 @@ export default function Home() {
       <AIQuizGeneratorModal isOpen={isAIQuizGenModalOpen} onClose={() => setIsAIQuizGenModalOpen(false)} onStartGeneratedQuiz={(questions, title) => launchCustomQuestionPool(questions, title)} />
       <GateRankEstimatorModal isOpen={isRankEstimatorOpen} onClose={() => setIsRankEstimatorOpen(false)} />
       <QuestionSearchModal isOpen={isQuestionSearchOpen} onClose={() => setIsQuestionSearchOpen(false)} onSelectQuestion={(q, subjectName) => launchCustomQuestionPool([q], `Practice: ${subjectName}`)} />
-      <GatePyqMockModal isOpen={isGatePyqModalOpen} onClose={() => setIsGatePyqModalOpen(false)} onStartPaper={(questions, paperTitle) => launchCustomQuestionPool(questions, paperTitle)} />
+      <GatePyqMockModal isOpen={isGatePyqModalOpen} onClose={() => setIsGatePyqModalOpen(false)} onStartPaper={(questions, paperTitle, durationMinutes, initialIndex) => launchCustomQuestionPool(questions, paperTitle, durationMinutes, initialIndex)} />
       {isResultReviewModalOpen && (
         <ResultReviewModal questions={activeQuestions} userAnswers={userAnswers} onClose={() => setIsResultReviewModalOpen(false)} />
       )}

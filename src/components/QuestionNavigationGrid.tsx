@@ -51,19 +51,24 @@ export default function QuestionNavigationGrid({
   return (
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-black text-slate-300 uppercase tracking-wider">Question Palette</h4>
-        <span className="text-[10px] text-slate-500">{questions.length} Qs</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-cyan-400 text-xs">⊞</span>
+          <h4 className="text-xs font-black text-slate-300 uppercase tracking-wider">Question Links</h4>
+        </div>
+        <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full font-bold border border-blue-500/30">
+          {questions.length} Qs
+        </span>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-5 gap-1.5">
+      <div className={`grid ${questions.length > 25 ? "grid-cols-8" : "grid-cols-5"} gap-1.5 max-h-[360px] overflow-y-auto pr-1`}>
         {questions.map((_, idx) => {
           const status = getStatus(idx);
           return (
             <button
               key={idx}
               onClick={() => onJumpTo(idx)}
-              className={`w-full aspect-square rounded-lg border text-[11px] font-black transition cursor-pointer ${statusStyles[status]}`}
+              className={`w-full aspect-square rounded-lg border text-[11px] font-black transition cursor-pointer flex items-center justify-center ${statusStyles[status]}`}
             >
               {idx + 1}
             </button>
