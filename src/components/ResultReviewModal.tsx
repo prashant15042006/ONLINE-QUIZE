@@ -7,6 +7,7 @@ import MathRenderer from "./MathRenderer";
 interface UserAnswer {
   selectedOptionIndex: number | null;
   selectedOptionIndices?: number[];
+  natValue?: string;
   isMarkedForReview?: boolean;
 }
 
@@ -27,6 +28,24 @@ function getUserSelected(ans: UserAnswer | undefined): number[] {
 
 function checkIsCorrect(q: Question, ans: UserAnswer | undefined): boolean {
   if (!ans) return false;
+
+  if (q.questionType === "NAT") {
+    if (!ans.natValue || ans.natValue.trim() === "") return false;
+    const userNum = parseFloat(ans.natValue.trim());
+    if (isNaN(userNum)) return false;
+    let targetNum: number | null = null;
+    if (q.natAnswer !== undefined && q.natAnswer !== null) {
+      targetNum = typeof q.natAnswer === "number" ? q.natAnswer : parseFloat(String(q.natAnswer).trim());
+    } else if (q.options && q.options.length > q.correctAnswerIndex) {
+      targetNum = parseFloat(q.options[q.correctAnswerIndex].trim());
+    }
+    if (targetNum !== null && !isNaN(targetNum)) {
+      const tol = q.natTolerance ?? 0.05;
+      return Math.abs(userNum - targetNum) <= tol;
+    }
+    return false;
+  }
+
   const sel = getUserSelected(ans);
   if (sel.length === 0) return false;
   const correct = (q.correctAnswerIndices && q.correctAnswerIndices.length > 0)
@@ -34,6 +53,14 @@ function checkIsCorrect(q: Question, ans: UserAnswer | undefined): boolean {
     : [q.correctAnswerIndex];
   if (sel.length !== correct.length) return false;
   return sel.every(val => correct.includes(val));
+}
+
+function isQAnswerSkipped(q: Question, ans: UserAnswer | undefined): boolean {
+  if (!ans) return true;
+  if (q.questionType === "NAT") {
+    return !ans.natValue || ans.natValue.trim() === "";
+  }
+  return getUserSelected(ans).length === 0 && (!ans.natValue || ans.natValue.trim() === "");
 }
 
 function renderTextWithMath(text: string): React.ReactNode {
@@ -55,7 +82,7 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
   const filtered = questions.filter((q) => {
     const ans = userAnswers[q.id];
     const isCorr = checkIsCorrect(q, ans);
-    const isSkip = getUserSelected(ans).length === 0;
+    const isSkip = isQAnswerSkipped(q, ans);
     if (filter === "correct") return isCorr;
     if (filter === "wrong") return !isSkip && !isCorr;
     if (filter === "skipped") return isSkip;
@@ -66,9 +93,9 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
     correct: questions.filter(q => checkIsCorrect(q, userAnswers[q.id])).length,
     wrong: questions.filter(q => {
       const a = userAnswers[q.id];
-      return getUserSelected(a).length > 0 && !checkIsCorrect(q, a);
+      return !isQAnswerSkipped(q, a) && !checkIsCorrect(q, a);
     }).length,
-    skipped: questions.filter(q => getUserSelected(userAnswers[q.id]).length === 0).length,
+    skipped: questions.filter(q => isQAnswerSkipped(q, userAnswers[q.id])).length,
   };
 
   return (
@@ -110,15 +137,19 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
             const ans = userAnswers[q.id];
             const isCorrect = checkIsCorrect(q, ans);
             const userSel = getUserSelected(ans);
-            const isSkipped = userSel.length === 0;
+            const isSkipped = isQAnswerSkipped(q, ans);
             const isExpanded = expandedIdx === globalIdx;
 
             const correctList = (q.correctAnswerIndices && q.correctAnswerIndices.length > 0)
               ? q.correctAnswerIndices
               : [q.correctAnswerIndex];
 
-            const userText = userSel.map(i => `${String.fromCharCode(65 + i)}`).join(", ");
-            const correctText = correctList.map(i => `${String.fromCharCode(65 + i)}`).join(", ");
+            const userText = q.questionType === "NAT"
+              ? (ans?.natValue ? ans.natValue : "Not Answered")
+              : userSel.map(i => `${String.fromCharCode(65 + i)}`).join(", ");
+            const correctText = q.questionType === "NAT"
+              ? (q.natAnswer !== undefined ? String(q.natAnswer) : (q.options && q.options[q.correctAnswerIndex] ? q.options[q.correctAnswerIndex] : "Refer solution"))
+              : correctList.map(i => `${String.fromCharCode(65 + i)}`).join(", ");
 
             const rowColor = isSkipped
               ? "border-amber-500/30 bg-amber-500/5"

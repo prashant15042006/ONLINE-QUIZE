@@ -77,6 +77,7 @@ interface UserAnswer {
   questionId: string;
   selectedOptionIndex: number | null;
   selectedOptionIndices?: number[];
+  natValue?: string;
   isMarkedForReview: boolean;
 }
 
@@ -99,6 +100,29 @@ function isMSQQuestion(q: Question | undefined): boolean {
 
 function isQuestionAnswerCorrect(q: Question, ans: UserAnswer | null | undefined): boolean {
   if (!ans) return false;
+
+  // NAT (Numerical Answer Type) check
+  if (q.questionType === "NAT") {
+    if (!ans.natValue || ans.natValue.trim() === "") return false;
+    const userNum = parseFloat(ans.natValue.trim());
+    if (isNaN(userNum)) return false;
+
+    // Check against q.natAnswer or q.options[q.correctAnswerIndex]
+    let targetNum: number | null = null;
+    if (q.natAnswer !== undefined && q.natAnswer !== null) {
+      targetNum = typeof q.natAnswer === "number" ? q.natAnswer : parseFloat(String(q.natAnswer).trim());
+    } else if (q.options && q.options.length > q.correctAnswerIndex) {
+      targetNum = parseFloat(q.options[q.correctAnswerIndex].trim());
+    }
+
+    if (targetNum !== null && !isNaN(targetNum)) {
+      const tol = q.natTolerance ?? 0.05;
+      return Math.abs(userNum - targetNum) <= tol;
+    }
+    return false;
+  }
+
+  // SCQ / MSQ check
   const sel = getSelectedIndices(ans);
   if (sel.length === 0) return false;
 
@@ -112,8 +136,12 @@ function isQuestionAnswerCorrect(q: Question, ans: UserAnswer | null | undefined
   return sortedSel.every((val, i) => val === sortedCor[i]);
 }
 
-function isQuestionSkipped(ans: UserAnswer | null | undefined): boolean {
-  return getSelectedIndices(ans).length === 0;
+function isQuestionSkipped(ans: UserAnswer | null | undefined, q?: Question): boolean {
+  if (!ans) return true;
+  if (q && q.questionType === "NAT") {
+    return !ans.natValue || ans.natValue.trim() === "";
+  }
+  return getSelectedIndices(ans).length === 0 && (!ans.natValue || ans.natValue.trim() === "");
 }
 
 function cleanQuestionText(text: string): string {
@@ -528,10 +556,31 @@ export default function Home() {
     setUserAnswers(prev => ({ ...prev, [q.id]: { ...prev[q.id], isMarkedForReview: !prev[q.id].isMarkedForReview } }));
   };
 
+  const handleNatChange = (value: string) => {
+    if (quizMode === "practice" && isAnswerChecked) return;
+    const activeQ = activeQuestions[currentQuestionIndex];
+    if (!activeQ) return;
+    setUserAnswers(prev => ({
+      ...prev,
+      [activeQ.id]: {
+        ...prev[activeQ.id],
+        natValue: value,
+      }
+    }));
+  };
+
   const clearResponse = () => {
     const q = activeQuestions[currentQuestionIndex];
     if (!q) return;
-    setUserAnswers(prev => ({ ...prev, [q.id]: { ...prev[q.id], selectedOptionIndex: null, selectedOptionIndices: [] } }));
+    setUserAnswers(prev => ({
+      ...prev,
+      [q.id]: {
+        ...prev[q.id],
+        selectedOptionIndex: null,
+        selectedOptionIndices: [],
+        natValue: "",
+      }
+    }));
   };
 
   const handleCheckOrNext = () => {
@@ -1449,71 +1498,147 @@ export default function Home() {
                   )}
                 </div>
 
-                {/* Options */}
-                <div className="space-y-3">
-                  {currentQ.options.map((opt, idx) => {
-                    const userSelectedList = getSelectedIndices(currentAns);
-                    const isSelected = userSelectedList.includes(idx);
-                    const isRevealed = quizMode === "practice" && isAnswerChecked;
-                    const correctList = (currentQ.correctAnswerIndices && currentQ.correctAnswerIndices.length > 0)
-                      ? currentQ.correctAnswerIndices
-                      : [currentQ.correctAnswerIndex];
-                    const isOptCorrect = correctList.includes(idx);
-                    const isOptWrong = isSelected && !isOptCorrect && isRevealed;
-                    const isOptMissed = !isSelected && isOptCorrect && isRevealed;
+                {/* Options OR NAT Input */}
+                {currentQ.questionType === "NAT" || currentQ.options.length === 0 ? (
+                  <div className="space-y-4">
+                    <div className="p-5 rounded-2xl bg-[#0e1628] border border-cyan-500/30 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black uppercase tracking-wider text-cyan-300 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                          Numerical Answer Type (NAT) — Enter your answer below:
+                        </span>
+                        <span className="text-[11px] text-slate-400">
+                          {currentQ.marks ? `+${currentQ.marks} Marks` : "Marks: +2"} • 0 Negative
+                        </span>
+                      </div>
 
-                    const isMSQ = isMSQQuestion(currentQ);
-
-                    let optClass = "option-default";
-                    let badgeBg = isMSQ ? "rounded-lg" : "rounded-xl";
-                    let badgeContent: React.ReactNode = String.fromCharCode(65 + idx);
-
-                    if (isRevealed) {
-                      if (isOptCorrect && isSelected) {
-                        optClass = "option-correct";
-                        badgeBg += " bg-emerald-500 text-white border-emerald-400 font-bold";
-                        badgeContent = "✓";
-                      } else if (isOptWrong) {
-                        optClass = "option-wrong";
-                        badgeBg += " bg-rose-500 text-white border-rose-400 font-bold";
-                        badgeContent = "✗";
-                      } else if (isOptMissed) {
-                        optClass = "border-2 border-emerald-500/60 bg-emerald-950/40 text-emerald-300";
-                        badgeBg += " bg-emerald-700/60 text-white border-emerald-500 font-bold";
-                        badgeContent = "✓";
-                      } else {
-                        optClass = "option-default opacity-40";
-                        badgeBg += " bg-white/[0.05] text-slate-400 border-white/[0.08]";
-                      }
-                    } else if (isSelected) {
-                      optClass = "option-selected";
-                      badgeBg += " bg-white text-blue-700 border-white font-bold";
-                      badgeContent = isMSQ ? "✓" : String.fromCharCode(65 + idx);
-                    } else {
-                      badgeBg += " bg-white/[0.07] text-slate-300 border-white/[0.1]";
-                      badgeContent = String.fromCharCode(65 + idx);
-                    }
-
-                    return (
-                      <button
-                        key={idx}
-                        onClick={() => handleSelectOption(idx)}
-                        disabled={isRevealed}
-                        className={`w-full p-4 sm:p-5 rounded-2xl text-left flex items-start gap-4 cursor-pointer disabled:cursor-default group ${optClass}`}
-                      >
-                        <div className={`w-9 h-9 flex items-center justify-center text-xs font-black border shrink-0 transition ${badgeBg}`}>
-                          {badgeContent}
+                      {/* Display / Input Field */}
+                      <div className="flex items-center gap-3">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={currentAns?.natValue ?? ""}
+                            onChange={(e) => handleNatChange(e.target.value)}
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            placeholder="e.g. 10.75, 7, 34"
+                            className="w-full bg-[#070b14] border-2 border-cyan-500/50 focus:border-cyan-400 rounded-xl px-4 py-3 text-lg font-mono font-bold text-white placeholder-slate-600 outline-none transition shadow-inner"
+                          />
                         </div>
-                        <span className="flex-1 text-sm sm:text-base leading-relaxed font-medium break-words">
-                          {renderTextWithMath(opt)}
-                        </span>
-                        <span className="hidden group-hover:inline text-[10px] text-slate-500 font-mono mt-1 font-bold">
-                          [{idx + 1}]
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
+                        <button
+                          type="button"
+                          onClick={() => handleNatChange("")}
+                          disabled={quizMode === "practice" && isAnswerChecked}
+                          className="px-4 py-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white border border-white/10 text-xs font-bold transition cursor-pointer"
+                        >
+                          Backspace
+                        </button>
+                      </div>
+
+                      {/* GATE CBT On-screen Virtual Keypad */}
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
+                          Virtual Keypad (CBT Calculator Style):
+                        </div>
+                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-w-md">
+                          {["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "-"].map((keyChar) => (
+                            <button
+                              key={keyChar}
+                              type="button"
+                              disabled={quizMode === "practice" && isAnswerChecked}
+                              onClick={() => {
+                                const prev = currentAns?.natValue ?? "";
+                                if (keyChar === "." && prev.includes(".")) return;
+                                if (keyChar === "-" && prev.length > 0) return;
+                                handleNatChange(prev + keyChar);
+                              }}
+                              className="py-2.5 rounded-xl bg-slate-800/80 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            >
+                              {keyChar}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Revealed answer in practice mode */}
+                      {quizMode === "practice" && isAnswerChecked && (
+                        <div className="pt-3 border-t border-white/10 text-xs flex items-center justify-between">
+                          <span className="text-slate-400">
+                            Your Answer: <strong className={isCorrect ? "text-emerald-400" : "text-rose-400"}>{currentAns?.natValue || "None"}</strong>
+                          </span>
+                          <span className="text-emerald-300 font-bold">
+                            Correct Answer: {currentQ.natAnswer !== undefined ? String(currentQ.natAnswer) : (currentQ.options && currentQ.options[currentQ.correctAnswerIndex] ? currentQ.options[currentQ.correctAnswerIndex] : "Refer Explanation")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {currentQ.options.map((opt, idx) => {
+                      const userSelectedList = getSelectedIndices(currentAns);
+                      const isSelected = userSelectedList.includes(idx);
+                      const isRevealed = quizMode === "practice" && isAnswerChecked;
+                      const correctList = (currentQ.correctAnswerIndices && currentQ.correctAnswerIndices.length > 0)
+                        ? currentQ.correctAnswerIndices
+                        : [currentQ.correctAnswerIndex];
+                      const isOptCorrect = correctList.includes(idx);
+                      const isOptWrong = isSelected && !isOptCorrect && isRevealed;
+                      const isOptMissed = !isSelected && isOptCorrect && isRevealed;
+
+                      const isMSQ = isMSQQuestion(currentQ);
+
+                      let optClass = "option-default";
+                      let badgeBg = isMSQ ? "rounded-lg" : "rounded-xl";
+                      let badgeContent: React.ReactNode = String.fromCharCode(65 + idx);
+
+                      if (isRevealed) {
+                        if (isOptCorrect && isSelected) {
+                          optClass = "option-correct";
+                          badgeBg += " bg-emerald-500 text-white border-emerald-400 font-bold";
+                          badgeContent = "✓";
+                        } else if (isOptWrong) {
+                          optClass = "option-wrong";
+                          badgeBg += " bg-rose-500 text-white border-rose-400 font-bold";
+                          badgeContent = "✗";
+                        } else if (isOptMissed) {
+                          optClass = "border-2 border-emerald-500/60 bg-emerald-950/40 text-emerald-300";
+                          badgeBg += " bg-emerald-700/60 text-white border-emerald-500 font-bold";
+                          badgeContent = "✓";
+                        } else {
+                          optClass = "option-default opacity-40";
+                          badgeBg += " bg-white/[0.05] text-slate-400 border-white/[0.08]";
+                        }
+                      } else if (isSelected) {
+                        optClass = "option-selected";
+                        badgeBg += " bg-white text-blue-700 border-white font-bold";
+                        badgeContent = isMSQ ? "✓" : String.fromCharCode(65 + idx);
+                      } else {
+                        badgeBg += " bg-white/[0.07] text-slate-300 border-white/[0.1]";
+                        badgeContent = String.fromCharCode(65 + idx);
+                      }
+
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleSelectOption(idx)}
+                          disabled={isRevealed}
+                          className={`w-full p-4 sm:p-5 rounded-2xl text-left flex items-start gap-4 cursor-pointer disabled:cursor-default group ${optClass}`}
+                        >
+                          <div className={`w-9 h-9 flex items-center justify-center text-xs font-black border shrink-0 transition ${badgeBg}`}>
+                            {badgeContent}
+                          </div>
+                          <span className="flex-1 text-sm sm:text-base leading-relaxed font-medium break-words">
+                            {renderTextWithMath(opt)}
+                          </span>
+                          <span className="hidden group-hover:inline text-[10px] text-slate-500 font-mono mt-1 font-bold">
+                            [{idx + 1}]
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
 
                 {/* Explanation panel (practice mode) */}
                 {quizMode === "practice" && isAnswerChecked && (
@@ -1536,7 +1661,11 @@ export default function Home() {
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => { if (currentQuestionIndex > 0) { setCurrentQuestionIndex(prev => prev - 1); setIsAnswerChecked(false); } }} disabled={currentQuestionIndex === 0} className="px-4 py-2.5 btn-3d-slate text-xs font-bold rounded-xl disabled:opacity-30 cursor-pointer">← Prev</button>
-                    <button onClick={handleCheckOrNext} disabled={getSelectedIndices(currentAns).length === 0} className={`px-6 py-2.5 text-xs font-black rounded-xl cursor-pointer disabled:opacity-40 ${quizMode === "practice" && !isAnswerChecked ? "btn-3d-green" : "btn-3d-blue"}`}>
+                    <button
+                      onClick={handleCheckOrNext}
+                      disabled={isQuestionSkipped(currentAns, currentQ)}
+                      className={`px-6 py-2.5 text-xs font-black rounded-xl cursor-pointer disabled:opacity-40 ${quizMode === "practice" && !isAnswerChecked ? "btn-3d-green" : "btn-3d-blue"}`}
+                    >
                       {quizMode === "practice" && !isAnswerChecked ? "CHECK ✓" : currentQuestionIndex < activeQuestions.length - 1 ? "NEXT →" : "FINISH 🎉"}
                     </button>
                   </div>
@@ -1669,14 +1798,18 @@ export default function Home() {
               {activeQuestions.map((q, idx) => {
                 const ans = userAnswers[q.id];
                 const isQCorrect = isQuestionAnswerCorrect(q, ans);
-                const isSkipped = isQuestionSkipped(ans);
+                const isSkipped = isQuestionSkipped(ans, q);
                 const userSelected = getSelectedIndices(ans);
                 const correctList = (q.correctAnswerIndices && q.correctAnswerIndices.length > 0)
                   ? q.correctAnswerIndices
                   : [q.correctAnswerIndex];
 
-                const userText = userSelected.map(i => `${String.fromCharCode(65 + i)}: ${q.options[i]}`).join(" | ");
-                const correctText = correctList.map(i => `${String.fromCharCode(65 + i)}: ${q.options[i]}`).join(" | ");
+                const userText = q.questionType === "NAT"
+                  ? (ans?.natValue ? ans.natValue : "Not Answered")
+                  : userSelected.map(i => `${String.fromCharCode(65 + i)}: ${q.options[i]}`).join(" | ");
+                const correctText = q.questionType === "NAT"
+                  ? (q.natAnswer !== undefined ? String(q.natAnswer) : (q.options && q.options[q.correctAnswerIndex] ? q.options[q.correctAnswerIndex] : "Refer solution"))
+                  : correctList.map(i => `${String.fromCharCode(65 + i)}: ${q.options[i]}`).join(" | ");
 
                 return (
                   <div key={q.id} className={`p-5 rounded-2xl border text-xs ${isSkipped ? "bg-white/[0.02] border-white/[0.07]" : isQCorrect ? "bg-emerald-950/20 border-emerald-500/20" : "bg-rose-950/20 border-rose-500/20"}`}>

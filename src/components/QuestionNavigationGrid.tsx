@@ -3,8 +3,8 @@
 import React from "react";
 
 interface Props {
-  questions: { id: string }[];
-  userAnswers: Record<string, { selectedOptionIndex: number | null; selectedOptionIndices?: number[]; isMarkedForReview?: boolean }>;
+  questions: { id: string; questionType?: string; natAnswer?: number | string; natTolerance?: number; options?: string[]; correctAnswerIndex?: number }[];
+  userAnswers: Record<string, { selectedOptionIndex: number | null; selectedOptionIndices?: number[]; natValue?: string; isMarkedForReview?: boolean }>;
   correctAnswers: Record<string, number | number[]>;
   currentIndex: number;
   isSubmitted: boolean;
@@ -28,6 +28,28 @@ export default function QuestionNavigationGrid({
     const ans = userAnswers[q.id];
     if (idx === currentIndex) return "current";
     if (ans?.isMarkedForReview) return "review";
+
+    // NAT check
+    if (q?.questionType === "NAT") {
+      const val = ans?.natValue?.trim();
+      if (!val) return "unattempted";
+      if (isSubmitted || quizMode === "practice") {
+        const userNum = parseFloat(val);
+        let targetNum: number | null = null;
+        if (q.natAnswer !== undefined && q.natAnswer !== null) {
+          targetNum = typeof q.natAnswer === "number" ? q.natAnswer : parseFloat(String(q.natAnswer).trim());
+        } else if (q.options && q.correctAnswerIndex !== undefined && q.options.length > q.correctAnswerIndex) {
+          targetNum = parseFloat(q.options[q.correctAnswerIndex].trim());
+        }
+        if (targetNum !== null && !isNaN(targetNum) && !isNaN(userNum)) {
+          const tol = q.natTolerance ?? 0.05;
+          return Math.abs(userNum - targetNum) <= tol ? "correct" : "wrong";
+        }
+        return "wrong";
+      }
+      return "attempted";
+    }
+
     const userSelected = (ans?.selectedOptionIndices && ans.selectedOptionIndices.length > 0)
       ? ans.selectedOptionIndices
       : (ans?.selectedOptionIndex !== null && ans?.selectedOptionIndex !== undefined ? [ans.selectedOptionIndex] : []);

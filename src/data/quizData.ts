@@ -20,6 +20,8 @@ export interface Question {
   imageAlt?: string;   // Alt text for the image
   marks?: number;
   negativeMarks?: number;
+  natAnswer?: number | string;
+  natTolerance?: number;
 }
 
 export interface Chapter {

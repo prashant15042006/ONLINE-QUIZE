@@ -143,6 +143,7 @@ export const MADE_EASY_DEMO_TEST_QUESTIONS: Question[] = [
   {
     id: 'me-demo-q14', difficulty: 'hard', concept: 'CPU Scheduling – SJF vs RR',
     year: 'Made Easy CS Demo Test', marks: 2, negativeMarks: 0, questionType: 'NAT',
+    natAnswer: 10.75, natTolerance: 0.1,
     text: 'Consider processes A(15), B(12), C(5), D(7) all arriving at time 0.\nFor RR: processes scheduled in order A, B, C, D with time quantum = 5 ms.\n\nWhat is the difference between the average turnaround time (in ms) of RR and SJF (upto 2 decimal places)?',
     options: [],
     correctAnswerIndex: 0,
@@ -161,6 +162,7 @@ export const MADE_EASY_DEMO_TEST_QUESTIONS: Question[] = [
   {
     id: 'me-demo-q16', difficulty: 'hard', concept: 'Computer Networks – Go-Back-N',
     year: 'Made Easy CS Demo Test', marks: 2, negativeMarks: 0, questionType: 'NAT',
+    natAnswer: 7, natTolerance: 0.05,
     text: 'Consider a link of length 1000 km with 10⁹ bps rate. Packet length = 2500 bytes. Propagation = 2 μsec/km. Find the minimum number of bits required for the sequence number field to achieve 60% utilization using Go-Back-N protocol.',
     options: [],
     correctAnswerIndex: 0,
@@ -197,6 +199,7 @@ export const MADE_EASY_DEMO_TEST_QUESTIONS: Question[] = [
   {
     id: 'me-demo-q20', difficulty: 'medium', concept: 'Computer Networks – Application Layer',
     year: 'Made Easy CS Demo Test', marks: 1, negativeMarks: 0, questionType: 'NAT',
+    natAnswer: 2, natTolerance: 0.05,
     text: 'Consider the following statements:\nI. SMTP is used to move email from clients to different servers across the network.\nII. SMTP alone can transfer text, graphics and file attachments to the server.\nIII. FTP uses PORT 20 and PORT 21 for control signal and data transfer respectively.\nIV. MIME protocol is used to transfer digital content such as picture, audio, video and various types of documents.\n\nThe number of correct statements are _________.',
     options: [],
     correctAnswerIndex: 0,
@@ -242,6 +245,7 @@ export const MADE_EASY_DEMO_TEST_QUESTIONS: Question[] = [
   {
     id: 'me-demo-q25', difficulty: 'hard', concept: 'OS – Multi-level Paging',
     year: 'Made Easy CS Demo Test', marks: 2, negativeMarks: 0, questionType: 'NAT',
+    natAnswer: 3, natTolerance: 0.05,
     text: 'Consider a page size of 1 KB and each page table entry takes 4 bytes. If every page table fits into a single page, what is the number of levels required to map a 30-bit virtual address?',
     options: [],
     correctAnswerIndex: 0,
@@ -337,6 +341,7 @@ export const MADE_EASY_DEMO_TEST_QUESTIONS: Question[] = [
   {
     id: 'me-demo-q35', difficulty: 'hard', concept: 'Data Structures – BST Reconstruction',
     year: 'Made Easy CS Demo Test', marks: 2, negativeMarks: 0, questionType: 'NAT',
+    natAnswer: 6, natTolerance: 0.05,
     text: 'Given preorder and postorder traversal of a BST:\nPreorder: 50, 27, 16, 4, 12, 34, 29, 44, 88, 65, 52, 77, 93, 92\nPostorder: 12, 4, 16, 29, 44, 34, 27, 52, 77, 65, 92, 93, 88, 50\n\nThe number of nodes present at level 3 are ________. (Root is at level 0)',
     options: [],
     correctAnswerIndex: 0,
@@ -346,6 +351,7 @@ export const MADE_EASY_DEMO_TEST_QUESTIONS: Question[] = [
   {
     id: 'me-demo-q36', difficulty: 'hard', concept: 'Computer Networks – Subnetting',
     year: 'Made Easy CS Demo Test', marks: 2, negativeMarks: 0, questionType: 'NAT',
+    natAnswer: 190, natTolerance: 0.05,
     text: 'For a class C network, IP address = 200.99.39.112, subnet mask = 255.255.255.224.\n\nThe decimal value of the last octet of the LAST HOST of the SIXTH subnet is __________.',
     options: [],
     correctAnswerIndex: 0,
@@ -482,6 +488,7 @@ export const MADE_EASY_DEMO_TEST_QUESTIONS: Question[] = [
   {
     id: 'me-demo-q50', difficulty: 'hard', concept: 'Algorithms – Longest Common Subsequence',
     year: 'Made Easy CS Demo Test', marks: 2, negativeMarks: 0, questionType: 'NAT',
+    natAnswer: 34, natTolerance: 0.05,
     text: 'Consider two strings P = "ABCDA" and R = "CDABAC". Let y be the length of the LCS between P and R, and x be the number of such LCS.\n\nThen 2x + 10y = ________?',
     options: [],
     correctAnswerIndex: 0,
