@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Question, Subject, Chapter } from "../data/quizData";
+import { MADE_EASY_DEMO_TEST_QUESTIONS } from "../data/madeEasyDemoTest";
 
 interface Props {
   isOpen: boolean;
@@ -37,7 +38,7 @@ export default function MadeEasyTestSeriesModal({
   gateSubjects,
   onStartTest,
 }: Props) {
-  const [selectedSubjectKey, setSelectedSubjectKey] = useState<string>("coa");
+  const [selectedSubjectKey, setSelectedSubjectKey] = useState<string>("demo");
   const [examModeChoice, setExamModeChoice] = useState<"exam" | "practice">("exam");
 
   if (!isOpen) return null;
@@ -51,6 +52,44 @@ export default function MadeEasyTestSeriesModal({
   );
 
   const subjectsConfig = [
+    // ── CS Demo Test (Full Mock) ──
+    {
+      key: "demo",
+      name: "CS Demo Test (Full Mock — 65 Qs)",
+      shortName: "🔥 DEMO",
+      icon: "🧪",
+      accent: "from-emerald-600 to-teal-600",
+      tests: [
+        {
+          id: "me-cs-demo-full",
+          name: "CS DEMO TEST — GATE CS Full Pattern",
+          testNumber: 1,
+          type: "Full Syllabus Test" as const,
+          totalQuestions: 65,
+          totalMarks: 100,
+          durationMinutes: 180,
+          status: "available" as const,
+          scqCount: 43,
+          msqCount: 11,
+          natCount: 11,
+          topics: [
+            "General Aptitude (GA) — Verbal & Quant",
+            "Engineering Mathematics (Calculus, LA, Probability)",
+            "Computer Organization & Architecture (COA)",
+            "Operating Systems (OS)",
+            "DBMS & Transactions",
+            "Computer Networks (CN)",
+            "Theory of Computation (TOC)",
+            "Compiler Design (CD)",
+            "Data Structures & Algorithms (DS & Algo)",
+            "Digital Logic (DL)",
+            "Discrete Mathematics (DM)",
+          ],
+          // Special flag for demo test
+          chapterId: "me-cs-demo-test",
+        },
+      ] as MadeEasyTestMeta[],
+    },
     {
       key: "coa",
       name: "Computer Organization & Architecture (COA)",
@@ -576,6 +615,13 @@ export default function MadeEasyTestSeriesModal({
     subjectsConfig.find((s) => s.key === selectedSubjectKey) || subjectsConfig[0];
 
   const handleLaunchTest = (test: MadeEasyTestMeta) => {
+    // Demo Test — serve the 65 imported questions
+    if (test.chapterId === "me-cs-demo-test") {
+      onStartTest(MADE_EASY_DEMO_TEST_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // COA TWT-5 — serve from quizData chapter
     if (test.chapterId && twt5Chapter && twt5Chapter.questions.length > 0) {
       onStartTest(twt5Chapter.questions, test.name, examModeChoice, test.durationMinutes);
       onClose();
