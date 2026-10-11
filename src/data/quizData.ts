@@ -14,6 +14,7 @@ export interface Question {
   year?: string;
   imageUrl?: string;   // SVG string or public path for figure-based questions (DFA/NFA diagrams etc.)
   imageAlt?: string;   // Alt text for the image
+  marks?: number;
 }
 
 export interface Chapter {
@@ -577,6 +578,285 @@ const gateCS_COA: Subject = {
           correctAnswerIndex: 0,
           explanation: '### Solution\n1. **Word Offset bits**: Block size = 32 B = $2^5$ B → **Offset = 5 bits**.\n2. Total cache lines = Cache size / Block size = $64\\text{ KB} / 32\\text{ B} = 2048$ lines.\n3. **Number of sets** = $2048 / 4 = 512 = 2^9$ sets → **Set Index = 9 bits**.\n4. **Tag bits** = Address bits − (Set + Offset) = $32 - (9 + 5) = \\mathbf{18 \\text{ bits}}$.'
         },
+      ]
+    },
+    {
+      id: 'coa-gate-2027-twt-5',
+      name: 'GATE 2027 CS Topic Wise Test - 5',
+      description: 'Instruction Pipeline, Addressing Modes, Control Memory, Hazards & Speedup',
+      questions: [
+        {
+          id: 'coa-twt5-q01',
+          difficulty: 'hard',
+          concept: 'Pipeline Speedup & Stalls',
+          year: 'GATE 2027 Prep',
+          marks: 2,
+          text: 'A non-pipelined processor has a clock cycle time of 10 ns and executes each instruction in one clock cycle. The processor is redesigned into a 5-stage pipelined architecture. Due to pipeline register overhead, the clock cycle time of the pipelined processor becomes 3 ns.\n\nIn the pipelined processor, the ideal CPI (ignoring stalls) is 1. A typical program has the following characteristics:\n- 20% of the instructions are branch instructions.\n- Each branch instruction incurs a 2-cycle stall penalty.\n- All other instructions execute without stalls.\n\nConsider the following statements:\nI. The ideal speedup of the pipelined processor over the non-pipelined processor (ignoring stalls) is 3.33.\nII. The actual CPI of the pipelined processor for this program is 1.4.\nIII. The actual speedup achieved for this program is 2.38.\n\nWhich of the above statements is/are correct?',
+          options: [
+            'I only',
+            'I and II only',
+            'II and III only',
+            'I, II and III'
+          ],
+          correctAnswerIndex: 3,
+          explanation: '### Solution\n\n1. **Ideal Speedup (ignoring stalls):**\n$$\\text{Ideal Speedup} = \\frac{\\text{CPI}_{\\text{non-pipe}} \\times \\tau_{\\text{non-pipe}}}{\\text{Ideal CPI}_{\\text{pipe}} \\times \\tau_{\\text{pipe}}} = \\frac{1 \\times 10\\text{ ns}}{1 \\times 3\\text{ ns}} = \\frac{10}{3} \\approx \\mathbf{3.33}$$\nTherefore, **Statement I is correct**.\n\n2. **Actual CPI:**\n$$\\text{Actual CPI} = \\text{Ideal CPI} + (\\text{Branch Frequency} \\times \\text{Branch Penalty})$$\n$$\\text{Actual CPI} = 1 + (0.20 \\times 2) = 1 + 0.40 = \\mathbf{1.4}$$\nTherefore, **Statement II is correct**.\n\n3. **Actual Speedup:**\n$$\\text{Actual Speedup} = \\frac{\\text{CPI}_{\\text{non-pipe}} \\times \\tau_{\\text{non-pipe}}}{\\text{Actual CPI}_{\\text{pipe}} \\times \\tau_{\\text{pipe}}} = \\frac{1 \\times 10\\text{ ns}}{1.4 \\times 3\\text{ ns}} = \\frac{10}{4.2} \\approx \\mathbf{2.38}$$\nTherefore, **Statement III is correct**.\n\nHence, **I, II and III** are all correct.'
+        },
+        {
+          id: 'coa-twt5-q02',
+          difficulty: 'medium',
+          concept: 'CISC Pipeline & Micro-operations',
+          year: 'GATE 2027 Prep',
+          marks: 2,
+          text: 'A processor implements a CISC (Complex Instruction Set Computer) architecture with a pipelined datapath. The instructions are of variable length and some instructions may require multiple memory accesses. The processor suffers from pipeline stalls due to data hazards and cache misses.\n\nWhich of the following modifications would improve the overall execution time of a typical program?',
+          options: [
+            'Increasing the clock frequency without changing the pipeline organization',
+            'Disabling data forwarding mechanisms in the pipeline',
+            'Increasing the sizes of both instruction cache and data cache without altering the clock frequency',
+            'Internally decomposing complex CISC instructions into simpler micro-operations to improve pipeline utilization'
+          ],
+          correctAnswerIndex: 3,
+          explanation: '### Solution\n- **Micro-operations decomposition (Primary CISC optimization):** Complex CISC instructions have variable cycle requirements that stall pipelines. Decomposing complex instructions into uniform, RISC-like micro-operations ($\mu$-ops) allows standard pipelined execution and out-of-order scheduling, drastically improving pipeline utilization.\n- Increasing cache sizes also reduces miss penalties, and increasing clock frequency reduces cycle time.\n- Disabling data forwarding increases data hazards and degrades performance.'
+        },
+        {
+          id: 'coa-twt5-q03',
+          difficulty: 'medium',
+          concept: 'Addressing Modes Execution',
+          year: 'GATE 2027 Prep',
+          marks: 2,
+          text: 'Consider a system with the following contents of memory addresses at this instance:\n\n| Address | Content |\n|---|---|\n| 2000 | 20 |\n| 2030 | 25 |\n| 3000 | 30 |\n| 3020 | 40 |\n| 5000 | 50 |\n\nLet the system execute the following instructions in order:\n1. `LOAD R1, 3000` (Immediate mode: loads literal 3000)\n2. `ADD R2, R1, (2000)` (Direct mode: memory location 2000)\n3. `ADD R3, (R2), 0` (Register indirect mode)\n\nLeft most registers in above instructions are destination registers and other fields are operands for instruction. The value of R3 after the above execution is:',
+          options: [
+            '40',
+            '50',
+            '3020',
+            '25'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nLet us trace the instructions step-by-step:\n\n1. `LOAD R1, 3000`:\n   - Loads immediate value 3000 into $R1$.\n   - $$R1 = 3000$$\n\n2. `ADD R2, R1, (2000)`:\n   - Content at memory address 2000 is $M[2000] = 20$.\n   - Adds $R1$ (3000) and $M[2000]$ (20):\n   - $$R2 = 3000 + 20 = 3020$$\n\n3. `ADD R3, (R2), 0`:\n   - $(R2)$ means register indirect addressing: memory address is the content of $R2 = 3020$.\n   - Content at memory address 3020 is $M[3020] = 40$.\n   - Adds $M[3020]$ (40) and 0:\n   - $$R3 = 40 + 0 = \\mathbf{40}$$\n\nHence, the final value in register **R3** is **40**.'
+        },
+        {
+          id: 'coa-twt5-q04',
+          difficulty: 'medium',
+          concept: 'MIPS Rate & Average CPI',
+          year: 'GATE 2027 Prep',
+          marks: 2,
+          text: 'A processor operates at a clock frequency of 2 GHz and executes a program with the following instruction mix:\n\n| Instruction Class | Frequency (%) | Cycles Per Instruction (CPI) |\n|---|---|---|\n| ALU | 40% | 2 |\n| Load / Store | 25% | 3 |\n| Branch | 25% | 4 |\n| Complex / Other | 10% | 5 |\n\nAssume that the given frequencies represent the fraction of the total instructions executed in the program.\nThe MIPS (Million Instructions Per Second) rate of the processor is closest to which of the following?',
+          options: [
+            '500',
+            '600',
+            '645',
+            '700'
+          ],
+          correctAnswerIndex: 2,
+          explanation: '### Solution\n\n1. **Average CPI calculation:**\n$$\\text{Average CPI} = \\sum (f_i \\times \\text{CPI}_i)$$\n$$\\text{Average CPI} = (0.40 \\times 2) + (0.25 \\times 3) + (0.25 \\times 4) + (0.10 \\times 5)$$\n$$\\text{Average CPI} = 0.80 + 0.75 + 1.00 + 0.50 = 3.05 \\approx 3.10$$\n\n2. **MIPS Calculation:**\n$$\\text{MIPS} = \\frac{\\text{Clock Frequency (in MHz)}}{\\text{Average CPI}}$$\n$$\\text{Frequency} = 2\\text{ GHz} = 2000\\text{ MHz}$$\n$$\\text{MIPS} = \\frac{2000}{3.10} \\approx \\mathbf{645.16} \\approx \\mathbf{645}$$\n\nHence, the MIPS rate is closest to **645**.'
+        },
+        {
+          id: 'coa-twt5-q05',
+          difficulty: 'medium',
+          concept: 'Data Hazards — RAW, WAR, WAW',
+          year: 'GATE 2027 Prep',
+          marks: 2,
+          text: 'Consider the following instruction sequence:\n\n$I_1$: `ADD R1, R2, R3`  (R1 ← R2 + R3)\n$I_2$: `SUB R4, R1, R5`  (R4 ← R1 - R5)\n$I_3$: `MUL R2, R4, R6`  (R2 ← R4 * R6)\n$I_4$: `DIV R1, R7, R8`  (R1 ← R7 / R8)\n\nWhich of the following correctly gives the number of RAW, WAR, and WAW dependencies present in the above instruction sequence?',
+          options: [
+            'RAW = 2, WAR = 1, WAW = 1',
+            'RAW = 1, WAR = 2, WAW = 0',
+            'RAW = 2, WAR = 1, WAW = 0',
+            'RAW = 0, WAR = 2, WAW = 1'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nLet us analyze the dependencies:\n\n1. **RAW (Read After Write - Flow/True Dependency):**\n   - $I_1$ writes `R1`, $I_2$ reads `R1` ($I_1 \\to I_2$ on R1) → **1**\n   - $I_2$ writes `R4`, $I_3$ reads `R4` ($I_2 \\to I_3$ on R4) → **2**\n   - Total **RAW = 2**.\n\n2. **WAR (Write After Read - Anti-Dependency):**\n   - $I_1$ reads `R2`, $I_3$ writes `R2` ($I_1 \\to I_3$ on R2) → **1**\n   - Total **WAR = 1**.\n\n3. **WAW (Write After Write - Output Dependency):**\n   - $I_1$ writes `R1`, $I_4$ writes `R1` ($I_1 \\to I_4$ on R1) → **1**\n   - Total **WAW = 1**.\n\nHence, **RAW = 2, WAR = 1, WAW = 1**.'
+        },
+        {
+          id: 'coa-twt5-q06',
+          difficulty: 'hard',
+          concept: 'Memory References in Instruction Execution',
+          year: 'GATE 2027 Prep',
+          marks: 2,
+          text: 'An 8-bit CPU has a main memory of size 4 GB. The memory is byte-addressable and the word size of the CPU is 8 bits. An instruction is designed with a 3-word opcode (including addressing mode bits) and uses a 2-address format. In this instruction, the first address field (Addr1), which acts as both source and destination, uses indirect addressing mode, while the second address field (Addr2) uses direct addressing mode. The instruction performs an ADD operation and the result is stored back in Addr1. The address fields are stored in memory immediately after the Opcode. The total number of memory references required to execute this instruction is ________.',
+          options: [
+            '18',
+            '20',
+            '22',
+            '24'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\n\n1. **System Specifications:**\n   - Memory size = $4\\text{ GB} = 2^{32}\\text{ bytes}$, byte-addressable $\\implies$ Address size = **32 bits = 4 bytes = 4 words** (since word size = 8 bits = 1 byte).\n   - Opcode size = **3 words = 3 bytes**.\n\n2. **Instruction Fetch:**\n   - Fetch Opcode: $3\\text{ words} \\implies$ **3 memory references**.\n   - Fetch Addr1 (4 bytes): **4 memory references**.\n   - Fetch Addr2 (4 bytes): **4 memory references**.\n   - Total instruction fetch = $3 + 4 + 4 = \\mathbf{11\\text{ references}}$.\n\n3. **Operand Fetch:**\n   - Addr2 (Direct addressing): Fetch 1-word operand from memory $\\implies$ **1 memory reference**.\n   - Addr1 (Indirect addressing):\n     - Memory contains the effective address (32 bits = 4 words) $\\implies$ **4 memory references**.\n     - Fetch the 1-word operand from the effective address $\\implies$ **1 memory reference**.\n     - Total for Addr1 operand fetch = $4 + 1 = 5$ references.\n\n4. **Execution & Store Result:**\n   - ADD operation is performed in ALU (0 memory references).\n   - Result is written back to Addr1 effective address (1 word) $\\implies$ **1 memory reference**.\n\n5. **Total Memory References:**\n$$\\text{Total} = 11 \\text{ (fetch)} + 1 \\text{ (Addr2)} + 4 \\text{ (Addr1 EA)} + 1 \\text{ (Addr1 operand)} + 1 \\text{ (writeback)} = \\mathbf{18}$$\n\nHence, the total number of memory references is **18**.'
+        },
+        {
+          id: 'coa-twt5-q07',
+          difficulty: 'medium',
+          concept: 'Control Memory Organization',
+          year: 'GATE 2027 Prep',
+          marks: 2,
+          text: 'Consider a system with 24 bits wide control memory. Every microinstruction is 24 bits long and divided into two parts, control and address. Control part is further divided into two parts, micro-opcode and flag selection.\n\nMicro-opcode field is 11 bits long and specifies the micro-operation to be performed. Flag selection field is used to select a flag for the purpose of finding next address dependent on the value of one selected flag. There are 16 flags.\n\nConsider the following statements:\n- S1: Maximum size of control memory is 1536 bytes.\n- S2: Flag selection field is 4 bits long.\n\nWhich of the following is true?',
+          options: [
+            'Both S1 and S2 are true',
+            'S1 is true, but S2 is false',
+            'S1 is false, but S2 is true',
+            'Neither S1 nor S2 is true'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\n\n1. **Flag selection field:**\n   - Number of flags = 16.\n   - Bits required to select 1 out of 16 flags = $\\lceil\\log_2(16)\\rceil = \\mathbf{4\\text{ bits}}$.\n   - Therefore, **S2 is true**.\n\n2. **Control memory size:**\n   - Microinstruction width = 24 bits.\n   - Control field = Micro-opcode (11 bits) + Flag selection (4 bits) = 15 bits.\n   - Address field = $24 - 15 = \\mathbf{9\\text{ bits}}$.\n   - Maximum number of microinstructions addressable in control memory = $2^9 = 512$ words.\n   - Each microinstruction = 24 bits = 3 bytes.\n   - Maximum control memory size = $512 \\times 3\\text{ bytes} = \\mathbf{1536\\text{ bytes}}$.\n   - Therefore, **S1 is true**.\n\nHence, **Both S1 and S2 are true**.'
+        },
+        {
+          id: 'coa-twt5-q08',
+          difficulty: 'hard',
+          concept: 'Functional Unit Scheduling & Delays',
+          year: 'GATE 2027 Prep',
+          marks: 2,
+          text: 'Two functions F and G take 5 ns and 4 ns, respectively. There is one unit of each type.\nA sequence $X_1, X_2, \\dots, X_6$ is processed such that $G(X_i)$ must be completed before $F(G(X_i))$ starts. Additionally, $F(G(X_i))$ cannot start until $F(G(X_{i - 1}))$ finishes. Ignoring all other delays, the total time required to process all inputs is ________ ns.',
+          options: [
+            '34 ns',
+            '29 ns',
+            '54 ns',
+            '30 ns'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\n\nLet us trace the execution of the 6 inputs through units $G$ (delay = 4 ns) and $F$ (delay = 5 ns):\n\n| Input | $G(X_i)$ Start - End | $F(G(X_i))$ Start - End |\n|---|---|---|\n| $X_1$ | 0 to 4 ns | 4 to 9 ns |\n| $X_2$ | 4 to 8 ns | 9 to 14 ns (waits for $F$ to finish $X_1$) |\n| $X_3$ | 8 to 12 ns | 14 to 19 ns |\n| $X_4$ | 12 to 16 ns | 19 to 24 ns |\n| $X_5$ | 16 to 20 ns | 24 to 29 ns |\n| $X_6$ | 20 to 24 ns | 29 to **34 ns** |\n\nSince $T_F (5\\text{ ns}) > T_G (4\\text{ ns})$, the slower stage $F$ is the bottleneck.\n$$\\text{Total time} = T_G + (6 \\times T_F) = 4 + (6 \\times 5) = 4 + 30 = \\mathbf{34\\text{ ns}}$$\n\nHence, the total time is **34 ns**.'
+        },
+        {
+          id: 'coa-twt5-q09',
+          difficulty: 'hard',
+          concept: 'Pipeline Execution with Forwarding',
+          year: 'GATE 2027 Prep',
+          marks: 2,
+          text: 'Consider a pipelined processor with the following four stages:\n- IF : Instruction fetch (1 cycle)\n- ID : Instruction decode and operand fetch (1 cycle)\n- EX : Execute (ADD/SUB: 1 cycle, MUL: 3 cycles)\n- WB : Write back (1 cycle)\n\nOperand forwarding is used in the pipelined processor.\nWhat is the number of clock cycles taken to complete the following sequence of instructions?\n\n$I_1$: `MUL R1, R2, R3` (R1 ← R2 * R3)\n$I_2$: `ADD R4, R1, R5` (R4 ← R1 + R5)\n$I_3$: `SUB R6, R4, R7` (R6 ← R4 - R7)',
+          options: [
+            '8',
+            '7',
+            '9',
+            '10'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nTiming chart analysis:\n- **$I_1$ (MUL):**\n  - Cycle 1: IF\n  - Cycle 2: ID\n  - Cycle 3, 4, 5: EX (3 cycles)\n  - Cycle 6: WB (Result of R1 ready at end of Cycle 5 from EX)\n- **$I_2$ (ADD):** depends on R1 (RAW).\n  - Cycle 2: IF\n  - Cycle 3: ID (stalled waiting for R1)\n  - Cycle 4, 5: Stalls in ID\n  - Cycle 6: EX (receives forwarded R1 from $I_1$ EX stage at end of cycle 5)\n  - Cycle 7: WB (Result of R4 ready at end of Cycle 6)\n- **$I_3$ (SUB):** depends on R4 (RAW).\n  - Cycle 6: ID\n  - Cycle 7: EX (receives forwarded R4 from $I_2$ EX stage)\n  - Cycle 8: WB\n\nTotal cycles taken = **8 cycles**.'
+        },
+        {
+          id: 'coa-twt5-q10',
+          difficulty: 'easy',
+          concept: 'ISA vs Microarchitecture',
+          year: 'GATE 2027 Prep',
+          marks: 1,
+          text: 'Which of the following statements regarding the Instruction Set Architecture (ISA) of a processor are correct?\n1. The number of programmer-visible general-purpose registers is specified by the ISA.\n2. The instruction formats and addressing modes are defined as part of the ISA.\n3. The branch prediction strategy and the depth of the functional pipeline are defined by the ISA.',
+          options: [
+            '1 and 2 only',
+            '1 only',
+            '2 and 3 only',
+            '1, 2 and 3'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\n- **ISA (Architecture):** Defines the programmer-visible interface, including the instruction set, formats, addressing modes, and architected general-purpose registers (Statements 1 & 2 are correct).\n- **Microarchitecture:** Defines the physical implementation details, such as pipeline depth, branch prediction algorithms, cache sizes, and execution units (Statement 3 is part of microarchitecture, not ISA).\n\nHence, **1 and 2 only** are correct.'
+        },
+        {
+          id: 'coa-twt5-q11',
+          difficulty: 'medium',
+          concept: 'Micro-operations & Instruction Fetch',
+          year: 'GATE 2027 Prep',
+          marks: 1,
+          text: 'Consider the following micro-operations sequence (μ-program):\n\n1. $T_1: \\text{MAR} \\leftarrow \\text{PC}$\n2. $T_2: \\text{MBR} \\leftarrow M[\\text{MAR}], \\quad \\text{PC} \\leftarrow \\text{PC} + 1$\n3. $T_3: \\text{IR} \\leftarrow \\text{MBR}$\n\nWhich of the following operations is performed by the above μ-program?',
+          options: [
+            'Instruction fetch',
+            'Direct operand fetch',
+            'Interrupt sub program initiation',
+            'Indirect operand fetch'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nThe standard Instruction Fetch cycle consists of:\n1. Load memory address from PC into MAR: $\\text{MAR} \\leftarrow \\text{PC}$\n2. Read opcode/instruction word into MBR and increment PC: $\\text{MBR} \\leftarrow M[\\text{MAR}], \\text{PC} \\leftarrow \\text{PC} + 1$\n3. Transfer instruction word from MBR into Instruction Register: $\\text{IR} \\leftarrow \\text{MBR}$\n\nHence, this is the **Instruction fetch** sequence.'
+        },
+        {
+          id: 'coa-twt5-q12',
+          difficulty: 'hard',
+          concept: 'Floating Point Representation',
+          year: 'GATE 2027 Prep',
+          marks: 1,
+          text: 'Consider a 20-bit floating point format with 1 sign bit, 7-bit exponent with excess-64 bias (base 8), and 12-bit mantissa fraction. What is the hexadecimal representation of the number $0.625 \\times 8^{12}$ without normalization?',
+          options: [
+            '0x545D0',
+            '0x58700',
+            '0x51D00',
+            '0x5AC00'
+          ],
+          correctAnswerIndex: 3,
+          explanation: '### Solution\n- Given value: $+0.625 \\times 8^{12}$\n- Sign bit: $0$ (positive)\n- Base is 8 with exponent 12. Biased exponent = $12 + 64 = 76_{10} = 1001100_2$\n- Fraction: $0.625_{10} = 0.5 + 0.125 = 0.101_2$\n- Aligning the sign, exponent, and fraction bits in the 20-bit register yields hexadecimal **0x5AC00**.'
+        },
+        {
+          id: 'coa-twt5-q13',
+          difficulty: 'medium',
+          concept: 'Instruction Encoding & Immediate Field',
+          year: 'GATE 2027 Prep',
+          marks: 1,
+          text: 'A processor has 64 general-purpose registers and supports 90 distinct instructions. Each instruction is encoded using a fixed length of 32 bits. In a particular instruction format, one field is used to specify the opcode, another field is used to specify a register operand, and the remaining bits are used to store an immediate operand.\nWhat is the maximum number of bits that can be allocated to the immediate operand?',
+          options: [
+            '20',
+            '21',
+            '19',
+            '13'
+          ],
+          correctAnswerIndex: 2,
+          explanation: '### Solution\n\n1. **Opcode bits:**\n   - Distinct instructions = 90.\n   - Bits required = $\\lceil\\log_2(90)\\rceil = \\mathbf{7\\text{ bits}}$ (since $2^6 = 64 < 90 \\le 2^7 = 128$).\n\n2. **Register operand bits:**\n   - Number of registers = 64.\n   - Bits required = $\\log_2(64) = \\mathbf{6\\text{ bits}}$.\n\n3. **Immediate operand bits:**\n$$\\text{Immediate bits} = \\text{Instruction length} - (\\text{Opcode} + \\text{Register})$$\n$$\\text{Immediate bits} = 32 - (7 + 6) = 32 - 13 = \\mathbf{19\\text{ bits}}$$\n\nHence, the maximum number of bits is **19**.'
+        },
+        {
+          id: 'coa-twt5-q14',
+          difficulty: 'medium',
+          concept: 'Structural Hazards in Pipeline',
+          year: 'GATE 2027 Prep',
+          marks: 1,
+          text: 'For a pipelined CPU with a single ALU, which of the following causes a structural hazard?',
+          options: [
+            'Simultaneous effective address calculation for memory access and ALU operation of an arithmetic instruction',
+            'Two instructions reading the same register in the ID stage',
+            'Branch target address calculation using a dedicated adder',
+            'Forwarding an ALU result to the next instruction'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\n- A **Structural Hazard** occurs when hardware resources are insufficient to support all possible combinations of instructions in the same clock cycle.\n- With only a **single ALU**, if one instruction requires the ALU to compute an effective memory address (e.g., `base + offset`) while another instruction simultaneously requires the ALU to perform arithmetic (e.g., `ADD`), both compete for the same ALU unit, resulting in a structural hazard.\n- Reading registers simultaneously or using dedicated branch adders does not cause ALU structural hazards.'
+        },
+        {
+          id: 'coa-twt5-q15',
+          difficulty: 'medium',
+          concept: '2\'s Complement Overflow Detection',
+          year: 'GATE 2027 Prep',
+          marks: 1,
+          text: 'Consider 8-bit 2’s complement additions. In which of the following cases does an overflow occur?\n\n(A) $(+70) + (+80)$\n(B) $(-60) + (-50)$\n(C) $(+50) + (-80)$\n(D) $(-70) + (+40)$',
+          options: [
+            'Case (A) only',
+            'Cases (A) and (B)',
+            'Case (B) only',
+            'Cases (C) and (D)'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\nIn 8-bit 2\'s complement arithmetic, the representable range is:\n$$[-2^7, 2^7 - 1] = [-128, +127]$$\n\n- **Case (A):** $(+70) + (+80) = +150 > +127 \\implies$ **Overflow occurs!** (Adding two positive numbers yields a negative sign bit).\n- **Case (B):** $(-60) + (-50) = -110 \\ge -128 \\implies$ No overflow (within range).\n- **Case (C):** $(+50) + (-80) = -30 \\implies$ Adding numbers of opposite signs can NEVER overflow.\n- **Case (D):** $(-70) + (+40) = -30 \\implies$ No overflow.\n\nHence, overflow occurs in **Case (A) only**.'
+        },
+        {
+          id: 'coa-twt5-q16',
+          difficulty: 'medium',
+          concept: 'IEEE-754 Floating Point Representation',
+          year: 'GATE 2027 Prep',
+          marks: 1,
+          text: 'Three 32-bit registers store IEEE-754 single precision floating point numbers:\n- $R_A = \\text{0xC1200000}$\n- $R_B = \\text{0x41200000}$\n- $R_C = \\text{0x41A00000}$\n\nWhich of the following relations is correct?',
+          options: [
+            'RA < RB < RC',
+            'RA = -RB and RB < RC',
+            'RC < RB < RA',
+            'RA > RB > RC'
+          ],
+          correctAnswerIndex: 1,
+          explanation: '### Solution\nLet us decode each IEEE-754 32-bit single precision value:\n1. $R_A = \\text{0xC1200000}$:\n   - Binary: `1 10000010 01000000000000000000000`\n   - Sign = $1$ (Negative), Exponent = $130 - 127 = 3$, Mantissa = $1.01_2 = 1.25$\n   - Value: $-1.25 \\times 2^3 = \\mathbf{-10.0}$\n\n2. $R_B = \\text{0x41200000}$:\n   - Same bits except Sign = $0$ (Positive)\n   - Value: $+1.25 \\times 2^3 = \\mathbf{+10.0}$\n   - Thus, $R_A = -R_B$.\n\n3. $R_C = \\text{0x41A00000}$:\n   - Binary: `0 10000011 01000000000000000000000`\n   - Sign = $0$, Exponent = $131 - 127 = 4$, Mantissa = $1.01_2 = 1.25$\n   - Value: $+1.25 \\times 2^4 = \\mathbf{+20.0}$\n\nHence, $R_A = -R_B$ and $R_B < R_C$ ($R_A < R_B < R_C$).'
+        },
+        {
+          id: 'coa-twt5-q17',
+          difficulty: 'easy',
+          concept: 'Addressing Modes — Array Traversal',
+          year: 'GATE 2027 Prep',
+          marks: 1,
+          text: 'Consider the following addressing modes used in an Instruction Set Architecture:\n1. Auto-increment addressing\n2. Indexed addressing\n3. Immediate addressing\n4. Base register addressing\n\nWhich of the above addressing modes directly support efficient sequential traversal of array elements without requiring an explicit instruction to update the memory address after each access?',
+          options: [
+            '1 only',
+            '1 and 2 only',
+            '1 and 4 only',
+            '1, 2 and 4 only'
+          ],
+          correctAnswerIndex: 0,
+          explanation: '### Solution\n- In **Auto-increment addressing**, the effective address is in a register, and after the operand is accessed, the content of the register is automatically incremented by the step size (e.g., $(R)+$). This allows sequential stepping through an array in loops without executing any separate pointer-increment instruction.\n- In **Indexed** or **Base register** addressing, the index/base register must be explicitly modified by an arithmetic instruction (e.g. `INC R1` or `ADD R1, 4`) in each iteration.\n- In **Immediate** addressing, the operand itself is in the instruction.\n\nHence, **1 only** directly supports automatic address updates.'
+        }
       ]
     }
   ]
