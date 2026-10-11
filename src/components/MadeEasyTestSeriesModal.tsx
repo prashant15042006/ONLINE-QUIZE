@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Question, Subject, Chapter } from "../data/quizData";
 import { MADE_EASY_DEMO_TEST_QUESTIONS } from "../data/madeEasyDemoTest";
+import { MADE_EASY_TOC_TWT1_QUESTIONS } from "../data/madeEasyTOCTest1";
 
 interface Props {
   isOpen: boolean;
@@ -151,7 +152,31 @@ export default function MadeEasyTestSeriesModal({
       shortName: "TOC",
       icon: "🔤",
       accent: "from-purple-600 to-violet-600",
-      tests: [] as MadeEasyTestMeta[],
+      tests: [
+        {
+          id: "toc-twt-1",
+          name: "GATE 2027 CS TOPIC WISE TEST - 1 (Theory of Computation - 1)",
+          testNumber: 1,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_TOC_TWT1_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 9,
+          msqCount: 5,
+          natCount: 3,
+          topics: [
+            "Divisibility & Regular Expressions",
+            "CFL & DCFL Recognition",
+            "Context-Free Grammars & Productions",
+            "DFA Counting & Combinatorics",
+            "Minimal Automata Construction",
+            "Language Subsets & Closure Properties",
+            "Reversal of DFA State Complexity",
+          ],
+          chapterId: "me-toc-gate-2027-twt-1",
+        },
+      ] as MadeEasyTestMeta[],
     },
     {
       key: "cd",
@@ -205,10 +230,17 @@ export default function MadeEasyTestSeriesModal({
       onClose();
       return;
     }
+    // TOC TWT-1 — serve the 17 imported TOC questions
+    if (test.chapterId === "me-toc-gate-2027-twt-1") {
+      onStartTest(MADE_EASY_TOC_TWT1_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
     // COA TWT-5 — serve from quizData chapter
     if (test.chapterId && twt5Chapter && twt5Chapter.questions.length > 0) {
       onStartTest(twt5Chapter.questions, test.name, examModeChoice, test.durationMinutes);
       onClose();
+      return;
     } else {
       alert(
         `📹 "${test.name}" ke questions add karne ke liye video link, question text ya screenshot chat me bhejein!\n\nAI turant is test ko activate kar dega.`
