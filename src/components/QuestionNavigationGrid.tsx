@@ -4,8 +4,8 @@ import React from "react";
 
 interface Props {
   questions: { id: string }[];
-  userAnswers: Record<string, { selectedOptionIndex: number | null; isMarkedForReview?: boolean }>;
-  correctAnswers: Record<string, number>;
+  userAnswers: Record<string, { selectedOptionIndex: number | null; selectedOptionIndices?: number[]; isMarkedForReview?: boolean }>;
+  correctAnswers: Record<string, number | number[]>;
   currentIndex: number;
   isSubmitted: boolean;
   onJumpTo: (index: number) => void;
@@ -28,13 +28,18 @@ export default function QuestionNavigationGrid({
     const ans = userAnswers[q.id];
     if (idx === currentIndex) return "current";
     if (ans?.isMarkedForReview) return "review";
-    if (ans?.selectedOptionIndex === null || ans?.selectedOptionIndex === undefined) return "unattempted";
-    if (isSubmitted) {
-      return ans.selectedOptionIndex === correctAnswers[q.id] ? "correct" : "wrong";
-    }
-    // Live correct/wrong colors in practice mode
-    if (quizMode === "practice") {
-      return ans.selectedOptionIndex === correctAnswers[q.id] ? "correct" : "wrong";
+    const userSelected = (ans?.selectedOptionIndices && ans.selectedOptionIndices.length > 0)
+      ? ans.selectedOptionIndices
+      : (ans?.selectedOptionIndex !== null && ans?.selectedOptionIndex !== undefined ? [ans.selectedOptionIndex] : []);
+
+    if (userSelected.length === 0) return "unattempted";
+
+    const target = correctAnswers[q.id];
+    const targetArray = Array.isArray(target) ? target : (target !== undefined ? [target] : []);
+    const isCorrect = userSelected.length === targetArray.length && userSelected.every(v => targetArray.includes(v));
+
+    if (isSubmitted || quizMode === "practice") {
+      return isCorrect ? "correct" : "wrong";
     }
     return "attempted";
   };

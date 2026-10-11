@@ -6,6 +6,7 @@ import MathRenderer from "./MathRenderer";
 
 interface UserAnswer {
   selectedOptionIndex: number | null;
+  selectedOptionIndices?: number[];
   isMarkedForReview?: boolean;
 }
 
@@ -13,6 +14,26 @@ interface Props {
   questions: Question[];
   userAnswers: Record<string, UserAnswer>;
   onClose: () => void;
+}
+
+function getUserSelected(ans: UserAnswer | undefined): number[] {
+  if (!ans) return [];
+  if (Array.isArray(ans.selectedOptionIndices) && ans.selectedOptionIndices.length > 0)
+    return ans.selectedOptionIndices;
+  if (ans.selectedOptionIndex !== null && ans.selectedOptionIndex !== undefined)
+    return [ans.selectedOptionIndex];
+  return [];
+}
+
+function checkIsCorrect(q: Question, ans: UserAnswer | undefined): boolean {
+  if (!ans) return false;
+  const sel = getUserSelected(ans);
+  if (sel.length === 0) return false;
+  const correct = (q.correctAnswerIndices && q.correctAnswerIndices.length > 0)
+    ? q.correctAnswerIndices
+    : [q.correctAnswerIndex];
+  if (sel.length !== correct.length) return false;
+  return sel.every(val => correct.includes(val));
 }
 
 function renderTextWithMath(text: string): React.ReactNode {
@@ -33,17 +54,21 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
 
   const filtered = questions.filter((q) => {
     const ans = userAnswers[q.id];
-    const sel = ans?.selectedOptionIndex;
-    if (filter === "correct") return sel !== null && sel !== undefined && sel === q.correctAnswerIndex;
-    if (filter === "wrong") return sel !== null && sel !== undefined && sel !== q.correctAnswerIndex;
-    if (filter === "skipped") return sel === null || sel === undefined;
+    const isCorr = checkIsCorrect(q, ans);
+    const isSkip = getUserSelected(ans).length === 0;
+    if (filter === "correct") return isCorr;
+    if (filter === "wrong") return !isSkip && !isCorr;
+    if (filter === "skipped") return isSkip;
     return true;
   });
 
   const counts = {
-    correct: questions.filter(q => userAnswers[q.id]?.selectedOptionIndex === q.correctAnswerIndex).length,
-    wrong: questions.filter(q => { const s = userAnswers[q.id]?.selectedOptionIndex; return s !== null && s !== undefined && s !== q.correctAnswerIndex; }).length,
-    skipped: questions.filter(q => { const s = userAnswers[q.id]?.selectedOptionIndex; return s === null || s === undefined; }).length,
+    correct: questions.filter(q => checkIsCorrect(q, userAnswers[q.id])).length,
+    wrong: questions.filter(q => {
+      const a = userAnswers[q.id];
+      return getUserSelected(a).length > 0 && !checkIsCorrect(q, a);
+    }).length,
+    skipped: questions.filter(q => getUserSelected(userAnswers[q.id]).length === 0).length,
   };
 
   return (
@@ -83,10 +108,17 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
           {filtered.map((q, displayIdx) => {
             const globalIdx = questions.indexOf(q);
             const ans = userAnswers[q.id];
-            const sel = ans?.selectedOptionIndex;
-            const isCorrect = sel !== null && sel !== undefined && sel === q.correctAnswerIndex;
-            const isSkipped = sel === null || sel === undefined;
+            const isCorrect = checkIsCorrect(q, ans);
+            const userSel = getUserSelected(ans);
+            const isSkipped = userSel.length === 0;
             const isExpanded = expandedIdx === globalIdx;
+
+            const correctList = (q.correctAnswerIndices && q.correctAnswerIndices.length > 0)
+              ? q.correctAnswerIndices
+              : [q.correctAnswerIndex];
+
+            const userText = userSel.map(i => `${String.fromCharCode(65 + i)}`).join(", ");
+            const correctText = correctList.map(i => `${String.fromCharCode(65 + i)}`).join(", ");
 
             const rowColor = isSkipped
               ? "border-amber-500/30 bg-amber-500/5"
@@ -110,6 +142,9 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-[10px] font-bold text-slate-500">Q{globalIdx + 1}</span>
+                      {q.questionType === "MSQ" && (
+                        <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-black border border-amber-500/30">MSQ</span>
+                      )}
                       {q.concept && <span className="text-[10px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded font-bold">{q.concept}</span>}
                       {q.year && <span className="text-[10px] text-slate-600">{q.year}</span>}
                     </div>
@@ -119,18 +154,18 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
                     {!isSkipped && (
                       <div className="flex items-center gap-3 mt-2 text-xs">
                         <span className={`font-bold ${isCorrect ? "text-emerald-400" : "text-rose-400"}`}>
-                          Your: {String.fromCharCode(65 + (sel as number))}. {q.options[sel as number]}
+                          Your: {userText}
                         </span>
                         {!isCorrect && (
                           <span className="text-emerald-400 font-bold">
-                            Correct: {String.fromCharCode(65 + q.correctAnswerIndex)}. {q.options[q.correctAnswerIndex]}
+                            Correct: {correctText}
                           </span>
                         )}
                       </div>
                     )}
                     {isSkipped && (
                       <div className="mt-1 text-xs text-amber-400 font-bold">
-                        Correct: {String.fromCharCode(65 + q.correctAnswerIndex)}. {q.options[q.correctAnswerIndex]}
+                        Correct: {correctText}
                       </div>
                     )}
                   </div>
@@ -166,8 +201,8 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
                       {/* All options */}
                       <div className="space-y-1.5">
                         {q.options.map((opt, oi) => {
-                          const isCorrectOpt = oi === q.correctAnswerIndex;
-                          const isSelectedOpt = oi === sel;
+                          const isCorrectOpt = correctList.includes(oi);
+                          const isSelectedOpt = userSel.includes(oi);
                           return (
                             <div key={oi} className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs ${
                               isCorrectOpt ? "bg-emerald-500/15 border border-emerald-500/30 text-emerald-300"

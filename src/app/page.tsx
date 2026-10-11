@@ -25,6 +25,7 @@ import GatePyqMockModal from "../components/GatePyqMockModal";
 import ScientificCalculatorModal from "../components/ScientificCalculatorModal";
 import ScratchpadModal from "../components/ScratchpadModal";
 import HighlightedTopicsModal from "../components/HighlightedTopicsModal";
+import MadeEasyTestSeriesModal from "../components/MadeEasyTestSeriesModal";
 
 function playAudioFeedback(type: "click" | "correct" | "wrong" | "next") {
   if (typeof window === "undefined") return;
@@ -75,7 +76,44 @@ type QuizMode = "practice" | "test" | "exam";
 interface UserAnswer {
   questionId: string;
   selectedOptionIndex: number | null;
+  selectedOptionIndices?: number[];
   isMarkedForReview: boolean;
+}
+
+function getSelectedIndices(ans: UserAnswer | null | undefined): number[] {
+  if (!ans) return [];
+  if (Array.isArray(ans.selectedOptionIndices) && ans.selectedOptionIndices.length > 0)
+    return ans.selectedOptionIndices;
+  if (ans.selectedOptionIndex !== null && ans.selectedOptionIndex !== undefined)
+    return [ans.selectedOptionIndex];
+  return [];
+}
+
+function isMSQQuestion(q: Question | undefined): boolean {
+  if (!q) return false;
+  return Boolean(
+    q.questionType === "MSQ" ||
+    (q.correctAnswerIndices && q.correctAnswerIndices.length > 1)
+  );
+}
+
+function isQuestionAnswerCorrect(q: Question, ans: UserAnswer | null | undefined): boolean {
+  if (!ans) return false;
+  const sel = getSelectedIndices(ans);
+  if (sel.length === 0) return false;
+
+  const correct = (q.correctAnswerIndices && q.correctAnswerIndices.length > 0)
+    ? q.correctAnswerIndices
+    : [q.correctAnswerIndex];
+
+  if (sel.length !== correct.length) return false;
+  const sortedSel = [...sel].sort((a, b) => a - b);
+  const sortedCor = [...correct].sort((a, b) => a - b);
+  return sortedSel.every((val, i) => val === sortedCor[i]);
+}
+
+function isQuestionSkipped(ans: UserAnswer | null | undefined): boolean {
+  return getSelectedIndices(ans).length === 0;
 }
 
 function cleanQuestionText(text: string): string {
@@ -220,6 +258,7 @@ export default function Home() {
   const [isResultReviewModalOpen, setIsResultReviewModalOpen] = useState(false);
   const [isGatePyqModalOpen, setIsGatePyqModalOpen] = useState(false);
   const [isHighlightedTopicsOpen, setIsHighlightedTopicsOpen] = useState(false);
+  const [isMadeEasyModalOpen, setIsMadeEasyModalOpen] = useState(false);
   const [showAnalyticsView, setShowAnalyticsView] = useState(false);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const [isCurrentQBookmarked, setIsCurrentQBookmarked] = useState(false);
@@ -264,8 +303,12 @@ export default function Home() {
   }, [selectedSubject]);
 
   const correctAnswersMap = useMemo(() => {
-    const map: Record<string, number> = {};
-    activeQuestions.forEach(q => { map[q.id] = q.correctAnswerIndex; });
+    const map: Record<string, number | number[]> = {};
+    activeQuestions.forEach(q => {
+      map[q.id] = (q.correctAnswerIndices && q.correctAnswerIndices.length > 0)
+        ? q.correctAnswerIndices
+        : q.correctAnswerIndex;
+    });
     return map;
   }, [activeQuestions]);
 
@@ -348,7 +391,7 @@ export default function Home() {
     setCurrentQuestionIndex(initialIndex >= 0 && initialIndex < cleaned.length ? initialIndex : 0);
     setIsAnswerChecked(false);
     const initialAnswers: Record<string, UserAnswer> = {};
-    cleaned.forEach(q => { initialAnswers[q.id] = { questionId: q.id, selectedOptionIndex: null, isMarkedForReview: false }; });
+    cleaned.forEach(q => { initialAnswers[q.id] = { questionId: q.id, selectedOptionIndex: null, selectedOptionIndices: [], isMarkedForReview: false }; });
     setUserAnswers(initialAnswers);
 
     // Dynamic duration calculation:
@@ -389,7 +432,7 @@ export default function Home() {
     setCurrentQuestionIndex(0);
     setIsAnswerChecked(false);
     const initialAnswers: Record<string, UserAnswer> = {};
-    cleaned.forEach(q => { initialAnswers[q.id] = { questionId: q.id, selectedOptionIndex: null, isMarkedForReview: false }; });
+    cleaned.forEach(q => { initialAnswers[q.id] = { questionId: q.id, selectedOptionIndex: null, selectedOptionIndices: [], isMarkedForReview: false }; });
     setUserAnswers(initialAnswers);
     const seconds = durationMinutes * 60;
     setTimeLeft(seconds);
@@ -403,34 +446,70 @@ export default function Home() {
     if (quizMode === "practice" && isAnswerChecked) return;
     const activeQ = activeQuestions[currentQuestionIndex];
     if (!activeQ) return;
-    setUserAnswers(prev => ({ ...prev, [activeQ.id]: { ...prev[activeQ.id], selectedOptionIndex: optionIndex } }));
 
-    if (isSoundEnabled) {
-      if (quizMode === "practice") {
-        if (optionIndex === activeQ.correctAnswerIndex) playAudioFeedback("correct");
-        else playAudioFeedback("wrong");
-      } else {
+    const isMSQ = isMSQQuestion(activeQ);
+
+    if (isMSQ) {
+      setUserAnswers(prev => {
+        const currentAns = prev[activeQ.id];
+        const currentSelected = getSelectedIndices(currentAns);
+        let nextSelected: number[];
+        if (currentSelected.includes(optionIndex)) {
+          nextSelected = currentSelected.filter(i => i !== optionIndex);
+        } else {
+          nextSelected = [...currentSelected, optionIndex].sort((a, b) => a - b);
+        }
+
+        return {
+          ...prev,
+          [activeQ.id]: {
+            ...currentAns,
+            selectedOptionIndices: nextSelected,
+            selectedOptionIndex: nextSelected.length > 0 ? nextSelected[0] : null,
+          }
+        };
+      });
+
+      if (isSoundEnabled) {
         playAudioFeedback("click");
       }
-    }
+    } else {
+      setUserAnswers(prev => ({
+        ...prev,
+        [activeQ.id]: {
+          ...prev[activeQ.id],
+          selectedOptionIndex: optionIndex,
+          selectedOptionIndices: [optionIndex],
+        }
+      }));
 
-    if (isAutoNext) {
-      if (quizMode === "practice") {
-        setIsAnswerChecked(true);
-        setTimeout(() => {
-          if (currentQuestionIndex < activeQuestions.length - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-            setIsAnswerChecked(false);
-            if (isSoundEnabled) playAudioFeedback("next");
-          }
-        }, 900);
-      } else {
-        setTimeout(() => {
-          if (currentQuestionIndex < activeQuestions.length - 1) {
-            setCurrentQuestionIndex(prev => prev + 1);
-            if (isSoundEnabled) playAudioFeedback("next");
-          }
-        }, 350);
+      if (isSoundEnabled) {
+        if (quizMode === "practice") {
+          if (optionIndex === activeQ.correctAnswerIndex) playAudioFeedback("correct");
+          else playAudioFeedback("wrong");
+        } else {
+          playAudioFeedback("click");
+        }
+      }
+
+      if (isAutoNext) {
+        if (quizMode === "practice") {
+          setIsAnswerChecked(true);
+          setTimeout(() => {
+            if (currentQuestionIndex < activeQuestions.length - 1) {
+              setCurrentQuestionIndex(prev => prev + 1);
+              setIsAnswerChecked(false);
+              if (isSoundEnabled) playAudioFeedback("next");
+            }
+          }, 900);
+        } else {
+          setTimeout(() => {
+            if (currentQuestionIndex < activeQuestions.length - 1) {
+              setCurrentQuestionIndex(prev => prev + 1);
+              if (isSoundEnabled) playAudioFeedback("next");
+            }
+          }, 350);
+        }
       }
     }
   };
@@ -452,7 +531,7 @@ export default function Home() {
   const clearResponse = () => {
     const q = activeQuestions[currentQuestionIndex];
     if (!q) return;
-    setUserAnswers(prev => ({ ...prev, [q.id]: { ...prev[q.id], selectedOptionIndex: null } }));
+    setUserAnswers(prev => ({ ...prev, [q.id]: { ...prev[q.id], selectedOptionIndex: null, selectedOptionIndices: [] } }));
   };
 
   const handleCheckOrNext = () => {
@@ -461,7 +540,7 @@ export default function Home() {
       if (isSoundEnabled) {
         const activeQ = activeQuestions[currentQuestionIndex];
         const currentAns = userAnswers[activeQ.id];
-        if (currentAns?.selectedOptionIndex === activeQ.correctAnswerIndex) playAudioFeedback("correct");
+        if (isQuestionAnswerCorrect(activeQ, currentAns)) playAudioFeedback("correct");
         else playAudioFeedback("wrong");
       }
     } else {
@@ -515,9 +594,21 @@ export default function Home() {
     let calculatedScore = 0, correct = 0, incorrect = 0, skipped = 0;
     activeQuestions.forEach(q => {
       const ans = userAnswers[q.id];
-      if (!ans || ans.selectedOptionIndex === null) { skipped++; }
-      else if (ans.selectedOptionIndex === q.correctAnswerIndex) { correct++; calculatedScore += quizMode === "exam" ? 4 : 10; }
-      else { incorrect++; if (quizMode === "exam") calculatedScore -= 1; }
+      if (isQuestionSkipped(ans)) {
+        skipped++;
+      } else if (isQuestionAnswerCorrect(q, ans)) {
+        correct++;
+        const qMarks = q.marks ?? (quizMode === "exam" ? 4 : 10);
+        calculatedScore += qMarks;
+      } else {
+        incorrect++;
+        if (quizMode === "exam") {
+          const isMSQ = isMSQQuestion(q);
+          if (!isMSQ) {
+            calculatedScore -= (q.negativeMarks ?? 1);
+          }
+        }
+      }
     });
 
     setScore(calculatedScore);
@@ -561,7 +652,7 @@ export default function Home() {
   const retryIncorrectQuestions = () => {
     const missedQuestions = activeQuestions.filter(q => {
       const ans = userAnswers[q.id];
-      return ans && ans.selectedOptionIndex !== null && ans.selectedOptionIndex !== q.correctAnswerIndex;
+      return !isQuestionSkipped(ans) && !isQuestionAnswerCorrect(q, ans);
     });
     if (missedQuestions.length === 0) return;
     const currentAcc = Math.round((correctCount / activeQuestions.length) * 100);
@@ -588,7 +679,7 @@ export default function Home() {
 
   const currentQ = activeQuestions[currentQuestionIndex];
   const currentAns = currentQ ? userAnswers[currentQ.id] : null;
-  const isCorrect = currentAns && currentQ && currentAns.selectedOptionIndex === currentQ.correctAnswerIndex;
+  const isCorrect = currentAns && currentQ && isQuestionAnswerCorrect(currentQ, currentAns);
 
   // Subject icon helper
   const subjIcon = (name: string) => {
@@ -675,6 +766,7 @@ export default function Home() {
                 {[
                   { label: "🗺️ Learning Pathway", action: () => { setCurrentScreen("dashboard"); setShowAnalyticsView(false); setIsMobileDrawerOpen(false); }, active: !showAnalyticsView },
                   { label: "📊 Performance Analytics", action: () => { setCurrentScreen("dashboard"); setShowAnalyticsView(true); setIsMobileDrawerOpen(false); }, active: showAnalyticsView },
+                  { label: "🎯 MADE EASY Test Series (GATE)", action: () => { setIsMadeEasyModalOpen(true); setIsMobileDrawerOpen(false); } },
                   { label: "📜 GATE PYQ Papers (2015-2024)", action: () => { setIsGatePyqModalOpen(true); setIsMobileDrawerOpen(false); } },
                   { label: "📊 GATE Rank Estimator", action: () => { setIsRankEstimatorOpen(true); setIsMobileDrawerOpen(false); } },
                   { label: `📕 Mistakes Notebook (${mistakesCount})`, action: () => { setIsMistakesModalOpen(true); setIsMobileDrawerOpen(false); } },
@@ -735,6 +827,19 @@ export default function Home() {
 
           {/* ── Top Action Bar ── */}
           <div className="flex flex-wrap items-center gap-2">
+            {/* 🎯 MADE EASY – Featured Hero Button */}
+            <button
+              onClick={() => setIsMadeEasyModalOpen(true)}
+              className="px-4 py-2 rounded-xl text-xs font-black cursor-pointer flex items-center gap-1.5 shadow-xl transition hover:scale-[1.03]"
+              style={{
+                background: "linear-gradient(135deg, #be123c, #9f1239, #7c3aed)",
+                border: "1px solid rgba(225,29,72,0.5)",
+                boxShadow: "0 0 20px rgba(225,29,72,0.25)",
+              }}
+            >
+              🎯 MADE EASY Test Series (GATE)
+              <span className="text-[9px] bg-white/20 px-1.5 py-0.5 rounded-full font-black">OTS</span>
+            </button>
             <button onClick={() => setIsGatePyqModalOpen(true)} className="px-4 py-2 btn-3d-amber rounded-xl text-xs font-black cursor-pointer flex items-center gap-1.5 shadow-lg">
               📜 GATE Year-Wise PYQ (2015-2024)
             </button>
@@ -750,6 +855,76 @@ export default function Home() {
             <button onClick={() => setIsHighlightedTopicsOpen(true)} className="px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-lg" style={{background:"linear-gradient(135deg,#7c3aed,#db2777)",border:"1px solid rgba(219,39,119,0.4)"}}>
               🔥 Must-Do Topics
             </button>
+          </div>
+
+          {/* ── MADE EASY Featured Banner Card ── */}
+          <div
+            className="relative overflow-hidden rounded-3xl p-5 sm:p-6 cursor-pointer group transition hover:scale-[1.01]"
+            style={{
+              background: "linear-gradient(135deg, #1a0010 0%, #2d0a2d 40%, #0a0a2a 100%)",
+              border: "1px solid rgba(225,29,72,0.3)",
+              boxShadow: "0 0 30px rgba(225,29,72,0.08)",
+            }}
+            onClick={() => setIsMadeEasyModalOpen(true)}
+          >
+            <div className="absolute -right-8 -top-8 w-40 h-40 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -right-4 bottom-0 w-32 h-32 bg-violet-600/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div
+                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 font-black"
+                  style={{
+                    background: "linear-gradient(135deg, #be123c, #7c3aed)",
+                    boxShadow: "0 4px 16px rgba(190,18,60,0.4)",
+                  }}
+                >
+                  🎯
+                </div>
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-2.5 py-0.5 rounded-full border border-rose-500/30">
+                      🏆 Official Pattern
+                    </span>
+                    <span className="text-[10px] font-black text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                      MSQ Multi-Select ✓
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
+                      COA Test 5 Live 🟢
+                    </span>
+                  </div>
+                  <h3 className="text-base sm:text-lg font-extrabold text-white">
+                    MADE EASY Online Test Series (OTS) — GATE CS & IT 2027
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
+                    Topic-wise & Subject Tests with authentic SCQ / MSQ / NAT pattern · Exact GATE marking (+1/−0.33, +2/−0.66, MSQ 0 negative) · Real CBT Timer
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <div className="flex gap-3 text-center">
+                  {[
+                    { val: "10+", lbl: "Subjects" },
+                    { val: "30+", lbl: "Tests Planned" },
+                    { val: "1", lbl: "Test Live" },
+                  ].map((s, i) => (
+                    <div key={i} className="text-center">
+                      <div className="text-lg font-black text-white">{s.val}</div>
+                      <div className="text-[10px] text-slate-500 font-medium">{s.lbl}</div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className="px-5 py-2.5 rounded-xl text-xs font-black text-white cursor-pointer group-hover:shadow-lg transition flex items-center gap-1.5"
+                  style={{
+                    background: "linear-gradient(135deg, #e11d48, #9f1239)",
+                    border: "1px solid rgba(244,63,94,0.4)",
+                  }}
+                  onClick={(e) => { e.stopPropagation(); setIsMadeEasyModalOpen(true); }}
+                >
+                  Attempt Tests Now →
+                </button>
+              </div>
+            </div>
           </div>
 
           {showAnalyticsView ? (
@@ -861,6 +1036,41 @@ export default function Home() {
 
               {/* ── Sidebar ── */}
               <div className="lg:col-span-4 space-y-4">
+
+                {/* 🎯 MADE EASY Test Series Sidebar Card */}
+                <div
+                  className="p-5 space-y-3 rounded-3xl cursor-pointer group transition hover:scale-[1.01]"
+                  style={{
+                    background: "linear-gradient(135deg, #1a0010, #2d0a2d)",
+                    border: "1px solid rgba(225,29,72,0.35)",
+                    boxShadow: "0 0 18px rgba(225,29,72,0.08)",
+                  }}
+                  onClick={() => setIsMadeEasyModalOpen(true)}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-2.5 py-1 rounded-full border border-rose-500/30">
+                      🎯 MADE EASY OTS
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
+                      1 Test Live
+                    </span>
+                  </div>
+                  <h4 className="font-extrabold text-white text-sm leading-snug">
+                    GATE 2027 CS Online Test Series
+                  </h4>
+                  <p className="text-[11px] text-rose-100/60 leading-relaxed">
+                    COA Topic Wise Test - 5 is ready! SCQ / MSQ / NAT pattern with real CBT timer & negative marking.
+                  </p>
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex gap-1.5">
+                      <span className="text-[10px] bg-blue-500/10 border border-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold">SCQ</span>
+                      <span className="text-[10px] bg-purple-500/10 border border-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-bold">MSQ</span>
+                      <span className="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-bold">NAT</span>
+                    </div>
+                    <span className="text-xs font-black text-rose-300 group-hover:translate-x-1 transition">Attempt →</span>
+                  </div>
+                </div>
 
                 {/* GATE PYQ Banner */}
                 <div className="glass-card glass-card-amber p-5 space-y-3" style={{background: "rgba(30,15,0,0.6)", borderColor: "rgba(255,171,0,0.15)"}}>
@@ -1210,33 +1420,96 @@ export default function Home() {
                   </div>
                 )}
 
+                {/* Question Type & Marks Indicator */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+                  <div className="flex items-center gap-2">
+                    {isMSQQuestion(currentQ) ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
+                        <span className="text-sm">☑</span> Multiple Select Question (MSQ) — Choose all correct options
+                      </span>
+                    ) : currentQ.questionType === "NAT" ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        NAT (Numerical Answer Type)
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/[0.06] text-slate-300 border border-white/10">
+                        <span>◉</span> Single Choice Question (SCQ)
+                      </span>
+                    )}
+                  </div>
+                  {currentQ.marks && (
+                    <span className="text-[11px] font-semibold text-slate-400">
+                      Marks: <span className="text-emerald-400 font-bold">+{currentQ.marks}</span>
+                      {currentQ.negativeMarks ? (
+                        <> | Negative: <span className="text-rose-400 font-bold">-{currentQ.negativeMarks}</span></>
+                      ) : (
+                        <> | Negative: <span className="text-slate-400 font-bold">0</span></>
+                      )}
+                    </span>
+                  )}
+                </div>
+
                 {/* Options */}
                 <div className="space-y-3">
                   {currentQ.options.map((opt, idx) => {
-                    const isSelected = currentAns?.selectedOptionIndex === idx;
+                    const userSelectedList = getSelectedIndices(currentAns);
+                    const isSelected = userSelectedList.includes(idx);
                     const isRevealed = quizMode === "practice" && isAnswerChecked;
-                    const isOptCorrect = idx === currentQ.correctAnswerIndex;
+                    const correctList = (currentQ.correctAnswerIndices && currentQ.correctAnswerIndices.length > 0)
+                      ? currentQ.correctAnswerIndices
+                      : [currentQ.correctAnswerIndex];
+                    const isOptCorrect = correctList.includes(idx);
                     const isOptWrong = isSelected && !isOptCorrect && isRevealed;
+                    const isOptMissed = !isSelected && isOptCorrect && isRevealed;
+
+                    const isMSQ = isMSQQuestion(currentQ);
 
                     let optClass = "option-default";
-                    let badgeBg = "bg-white/[0.07] text-slate-300 border-white/[0.1]";
+                    let badgeBg = isMSQ ? "rounded-lg" : "rounded-xl";
                     let badgeContent: React.ReactNode = String.fromCharCode(65 + idx);
+
                     if (isRevealed) {
-                      if (isOptCorrect) { optClass = "option-correct"; badgeBg = "bg-white/20 text-white border-white/30"; badgeContent = "✓"; }
-                      else if (isOptWrong) { optClass = "option-wrong"; badgeBg = "bg-white/20 text-white border-white/30"; badgeContent = "✗"; }
-                      else { optClass = "option-default opacity-40"; }
+                      if (isOptCorrect && isSelected) {
+                        optClass = "option-correct";
+                        badgeBg += " bg-emerald-500 text-white border-emerald-400 font-bold";
+                        badgeContent = "✓";
+                      } else if (isOptWrong) {
+                        optClass = "option-wrong";
+                        badgeBg += " bg-rose-500 text-white border-rose-400 font-bold";
+                        badgeContent = "✗";
+                      } else if (isOptMissed) {
+                        optClass = "border-2 border-emerald-500/60 bg-emerald-950/40 text-emerald-300";
+                        badgeBg += " bg-emerald-700/60 text-white border-emerald-500 font-bold";
+                        badgeContent = "✓";
+                      } else {
+                        optClass = "option-default opacity-40";
+                        badgeBg += " bg-white/[0.05] text-slate-400 border-white/[0.08]";
+                      }
                     } else if (isSelected) {
                       optClass = "option-selected";
-                      badgeBg = "bg-white text-blue-700 border-white";
+                      badgeBg += " bg-white text-blue-700 border-white font-bold";
+                      badgeContent = isMSQ ? "✓" : String.fromCharCode(65 + idx);
+                    } else {
+                      badgeBg += " bg-white/[0.07] text-slate-300 border-white/[0.1]";
+                      badgeContent = String.fromCharCode(65 + idx);
                     }
 
                     return (
-                      <button key={idx} onClick={() => handleSelectOption(idx)} disabled={isRevealed} className={`w-full p-4 sm:p-5 rounded-2xl text-left flex items-start gap-4 cursor-pointer disabled:cursor-default group ${optClass}`}>
-                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black border shrink-0 transition ${badgeBg}`}>
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectOption(idx)}
+                        disabled={isRevealed}
+                        className={`w-full p-4 sm:p-5 rounded-2xl text-left flex items-start gap-4 cursor-pointer disabled:cursor-default group ${optClass}`}
+                      >
+                        <div className={`w-9 h-9 flex items-center justify-center text-xs font-black border shrink-0 transition ${badgeBg}`}>
                           {badgeContent}
                         </div>
-                        <span className="flex-1 text-sm sm:text-base leading-relaxed font-medium break-words">{renderTextWithMath(opt)}</span>
-                        <span className="hidden group-hover:inline text-[10px] text-slate-500 font-mono mt-1 font-bold">[{idx + 1}]</span>
+                        <span className="flex-1 text-sm sm:text-base leading-relaxed font-medium break-words">
+                          {renderTextWithMath(opt)}
+                        </span>
+                        <span className="hidden group-hover:inline text-[10px] text-slate-500 font-mono mt-1 font-bold">
+                          [{idx + 1}]
+                        </span>
                       </button>
                     );
                   })}
@@ -1263,7 +1536,7 @@ export default function Home() {
                   </div>
                   <div className="flex gap-2">
                     <button onClick={() => { if (currentQuestionIndex > 0) { setCurrentQuestionIndex(prev => prev - 1); setIsAnswerChecked(false); } }} disabled={currentQuestionIndex === 0} className="px-4 py-2.5 btn-3d-slate text-xs font-bold rounded-xl disabled:opacity-30 cursor-pointer">← Prev</button>
-                    <button onClick={handleCheckOrNext} disabled={currentAns?.selectedOptionIndex === null} className={`px-6 py-2.5 text-xs font-black rounded-xl cursor-pointer disabled:opacity-40 ${quizMode === "practice" && !isAnswerChecked ? "btn-3d-green" : "btn-3d-blue"}`}>
+                    <button onClick={handleCheckOrNext} disabled={getSelectedIndices(currentAns).length === 0} className={`px-6 py-2.5 text-xs font-black rounded-xl cursor-pointer disabled:opacity-40 ${quizMode === "practice" && !isAnswerChecked ? "btn-3d-green" : "btn-3d-blue"}`}>
                       {quizMode === "practice" && !isAnswerChecked ? "CHECK ✓" : currentQuestionIndex < activeQuestions.length - 1 ? "NEXT →" : "FINISH 🎉"}
                     </button>
                   </div>
@@ -1395,23 +1668,42 @@ export default function Home() {
               </h3>
               {activeQuestions.map((q, idx) => {
                 const ans = userAnswers[q.id];
-                const selectedIdx = ans?.selectedOptionIndex;
-                const isQCorrect = selectedIdx === q.correctAnswerIndex;
-                const isSkipped = selectedIdx === null || selectedIdx === undefined;
+                const isQCorrect = isQuestionAnswerCorrect(q, ans);
+                const isSkipped = isQuestionSkipped(ans);
+                const userSelected = getSelectedIndices(ans);
+                const correctList = (q.correctAnswerIndices && q.correctAnswerIndices.length > 0)
+                  ? q.correctAnswerIndices
+                  : [q.correctAnswerIndex];
+
+                const userText = userSelected.map(i => `${String.fromCharCode(65 + i)}: ${q.options[i]}`).join(" | ");
+                const correctText = correctList.map(i => `${String.fromCharCode(65 + i)}: ${q.options[i]}`).join(" | ");
 
                 return (
                   <div key={q.id} className={`p-5 rounded-2xl border text-xs ${isSkipped ? "bg-white/[0.02] border-white/[0.07]" : isQCorrect ? "bg-emerald-950/20 border-emerald-500/20" : "bg-rose-950/20 border-rose-500/20"}`}>
                     <div className="flex justify-between items-start mb-3 gap-2">
                       <div className="flex items-start gap-2">
                         <span className={`w-6 h-6 rounded-full text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5 ${isSkipped ? "bg-white/10 text-slate-400" : isQCorrect ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400"}`}>{isSkipped ? "–" : isQCorrect ? "✓" : "✗"}</span>
-                        <div className="font-semibold text-slate-200 text-sm leading-relaxed">{cleanQuestionText(q.text)}</div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            {isMSQQuestion(q) && (
+                              <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-black border border-amber-500/30">MSQ</span>
+                            )}
+                            {q.concept && <span className="text-[10px] text-slate-400 font-medium">{q.concept}</span>}
+                          </div>
+                          <div className="font-semibold text-slate-200 text-sm leading-relaxed">{cleanQuestionText(q.text)}</div>
+                        </div>
                       </div>
                       <button onClick={() => trySimilarQuestion(q)} className="text-[11px] text-cyan-400 hover:underline font-bold whitespace-nowrap shrink-0">Try Similar →</button>
                     </div>
                     <div className="ml-8">
-                      <div className="text-[11px] text-slate-400 mb-2">
-                        {!isSkipped && selectedIdx !== q.correctAnswerIndex && <span>Your answer: <strong className="text-rose-400">{q.options[selectedIdx!]}</strong> · </span>}
-                        Correct: <strong className="text-emerald-400">{q.options[q.correctAnswerIndex]}</strong>
+                      <div className="text-[11px] text-slate-400 mb-2 flex flex-col sm:flex-row gap-2">
+                        {!isSkipped && !isQCorrect && (
+                          <span>Your answer: <strong className="text-rose-400">{userText || "None"}</strong></span>
+                        )}
+                        {!isSkipped && isQCorrect && (
+                          <span>Your answer: <strong className="text-emerald-400">{userText}</strong></span>
+                        )}
+                        <span>Correct: <strong className="text-emerald-400">{correctText}</strong></span>
                       </div>
                       <div className="p-3 bg-white/[0.03] rounded-xl border border-white/[0.06]">
                         {renderFormattedSolution(q.explanation)}
@@ -1443,6 +1735,17 @@ export default function Home() {
       <ScientificCalculatorModal isOpen={isScientificCalcOpen} onClose={() => setIsScientificCalcOpen(false)} />
       <ScratchpadModal isOpen={isScratchpadOpen} onClose={() => setIsScratchpadOpen(false)} />
       <HighlightedTopicsModal isOpen={isHighlightedTopicsOpen && currentScreen === "dashboard"} onClose={() => setIsHighlightedTopicsOpen(false)} onStartTopic={(questions, title) => { setIsHighlightedTopicsOpen(false); launchCustomQuestionPool(questions, title); }} />
+      <MadeEasyTestSeriesModal
+        isOpen={isMadeEasyModalOpen}
+        onClose={() => setIsMadeEasyModalOpen(false)}
+        gateSubjects={
+          (EXAMS_DATA.find(e => e.id === "gate")?.branches?.find(b => b.id === "cs")?.subjects) || []
+        }
+        onStartTest={(questions, title, mode, durationMinutes) => {
+          setQuizMode(mode);
+          launchCustomQuestionPool(questions, title, durationMinutes);
+        }}
+      />
 
       {/* Keyboard Shortcuts Guide Modal */}
       {showShortcutsModal && (

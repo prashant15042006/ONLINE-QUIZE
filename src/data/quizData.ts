@@ -3,11 +3,15 @@ import { CURATED_QUESTIONS } from "./curatedQuestions";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
+export type QuestionType = 'SCQ' | 'MCQ' | 'MSQ' | 'NAT';
+
 export interface Question {
   id: string;
   text: string;
   options: string[];
   correctAnswerIndex: number;
+  correctAnswerIndices?: number[];
+  questionType?: QuestionType;
   explanation: string;
   difficulty: Difficulty;
   concept?: string;
@@ -15,6 +19,7 @@ export interface Question {
   imageUrl?: string;   // SVG string or public path for figure-based questions (DFA/NFA diagrams etc.)
   imageAlt?: string;   // Alt text for the image
   marks?: number;
+  negativeMarks?: number;
 }
 
 export interface Chapter {
@@ -591,6 +596,9 @@ const gateCS_COA: Subject = {
           concept: 'Pipeline Speedup & Stalls',
           year: 'GATE 2027 Prep',
           marks: 2,
+          negativeMarks: 0.66,
+          questionType: 'SCQ',
+          correctAnswerIndices: [3],
           text: 'A non-pipelined processor has a clock cycle time of 10 ns and executes each instruction in one clock cycle. The processor is redesigned into a 5-stage pipelined architecture. Due to pipeline register overhead, the clock cycle time of the pipelined processor becomes 3 ns.\n\nIn the pipelined processor, the ideal CPI (ignoring stalls) is 1. A typical program has the following characteristics:\n- 20% of the instructions are branch instructions.\n- Each branch instruction incurs a 2-cycle stall penalty.\n- All other instructions execute without stalls.\n\nConsider the following statements:\nI. The ideal speedup of the pipelined processor over the non-pipelined processor (ignoring stalls) is 3.33.\nII. The actual CPI of the pipelined processor for this program is 1.4.\nIII. The actual speedup achieved for this program is 2.38.\n\nWhich of the above statements is/are correct?',
           options: [
             'I only',
@@ -607,6 +615,9 @@ const gateCS_COA: Subject = {
           concept: 'CISC Pipeline & Micro-operations',
           year: 'GATE 2027 Prep',
           marks: 2,
+          negativeMarks: 0,
+          questionType: 'MSQ',
+          correctAnswerIndices: [0, 2, 3],
           text: 'A processor implements a CISC (Complex Instruction Set Computer) architecture with a pipelined datapath. The instructions are of variable length and some instructions may require multiple memory accesses. The processor suffers from pipeline stalls due to data hazards and cache misses.\n\nWhich of the following modifications would improve the overall execution time of a typical program?',
           options: [
             'Increasing the clock frequency without changing the pipeline organization',
@@ -623,6 +634,9 @@ const gateCS_COA: Subject = {
           concept: 'Addressing Modes Execution',
           year: 'GATE 2027 Prep',
           marks: 2,
+          negativeMarks: 0.66,
+          questionType: 'SCQ',
+          correctAnswerIndices: [0],
           text: 'Consider a system with the following contents of memory addresses at this instance:\n\n| Address | Content |\n|---|---|\n| 2000 | 20 |\n| 2030 | 25 |\n| 3000 | 30 |\n| 3020 | 40 |\n| 5000 | 50 |\n\nLet the system execute the following instructions in order:\n1. `LOAD R1, 3000` (Immediate mode: loads literal 3000)\n2. `ADD R2, R1, (2000)` (Direct mode: memory location 2000)\n3. `ADD R3, (R2), 0` (Register indirect mode)\n\nLeft most registers in above instructions are destination registers and other fields are operands for instruction. The value of R3 after the above execution is:',
           options: [
             '40',
@@ -639,6 +653,9 @@ const gateCS_COA: Subject = {
           concept: 'MIPS Rate & Average CPI',
           year: 'GATE 2027 Prep',
           marks: 2,
+          negativeMarks: 0.66,
+          questionType: 'SCQ',
+          correctAnswerIndices: [2],
           text: 'A processor operates at a clock frequency of 2 GHz and executes a program with the following instruction mix:\n\n| Instruction Class | Frequency (%) | Cycles Per Instruction (CPI) |\n|---|---|---|\n| ALU | 40% | 2 |\n| Load / Store | 25% | 3 |\n| Branch | 25% | 4 |\n| Complex / Other | 10% | 5 |\n\nAssume that the given frequencies represent the fraction of the total instructions executed in the program.\nThe MIPS (Million Instructions Per Second) rate of the processor is closest to which of the following?',
           options: [
             '500',
@@ -655,6 +672,9 @@ const gateCS_COA: Subject = {
           concept: 'Data Hazards — RAW, WAR, WAW',
           year: 'GATE 2027 Prep',
           marks: 2,
+          negativeMarks: 0.66,
+          questionType: 'SCQ',
+          correctAnswerIndices: [0],
           text: 'Consider the following instruction sequence:\n\n$I_1$: `ADD R1, R2, R3`  (R1 ← R2 + R3)\n$I_2$: `SUB R4, R1, R5`  (R4 ← R1 - R5)\n$I_3$: `MUL R2, R4, R6`  (R2 ← R4 * R6)\n$I_4$: `DIV R1, R7, R8`  (R1 ← R7 / R8)\n\nWhich of the following correctly gives the number of RAW, WAR, and WAW dependencies present in the above instruction sequence?',
           options: [
             'RAW = 2, WAR = 1, WAW = 1',
@@ -671,6 +691,9 @@ const gateCS_COA: Subject = {
           concept: 'Memory References in Instruction Execution',
           year: 'GATE 2027 Prep',
           marks: 2,
+          negativeMarks: 0.66,
+          questionType: 'SCQ',
+          correctAnswerIndices: [0],
           text: 'An 8-bit CPU has a main memory of size 4 GB. The memory is byte-addressable and the word size of the CPU is 8 bits. An instruction is designed with a 3-word opcode (including addressing mode bits) and uses a 2-address format. In this instruction, the first address field (Addr1), which acts as both source and destination, uses indirect addressing mode, while the second address field (Addr2) uses direct addressing mode. The instruction performs an ADD operation and the result is stored back in Addr1. The address fields are stored in memory immediately after the Opcode. The total number of memory references required to execute this instruction is ________.',
           options: [
             '18',
@@ -687,6 +710,9 @@ const gateCS_COA: Subject = {
           concept: 'Control Memory Organization',
           year: 'GATE 2027 Prep',
           marks: 2,
+          negativeMarks: 0.66,
+          questionType: 'SCQ',
+          correctAnswerIndices: [0],
           text: 'Consider a system with 24 bits wide control memory. Every microinstruction is 24 bits long and divided into two parts, control and address. Control part is further divided into two parts, micro-opcode and flag selection.\n\nMicro-opcode field is 11 bits long and specifies the micro-operation to be performed. Flag selection field is used to select a flag for the purpose of finding next address dependent on the value of one selected flag. There are 16 flags.\n\nConsider the following statements:\n- S1: Maximum size of control memory is 1536 bytes.\n- S2: Flag selection field is 4 bits long.\n\nWhich of the following is true?',
           options: [
             'Both S1 and S2 are true',
@@ -703,6 +729,9 @@ const gateCS_COA: Subject = {
           concept: 'Functional Unit Scheduling & Delays',
           year: 'GATE 2027 Prep',
           marks: 2,
+          negativeMarks: 0,
+          questionType: 'NAT',
+          correctAnswerIndices: [0],
           text: 'Two functions F and G take 5 ns and 4 ns, respectively. There is one unit of each type.\nA sequence $X_1, X_2, \\dots, X_6$ is processed such that $G(X_i)$ must be completed before $F(G(X_i))$ starts. Additionally, $F(G(X_i))$ cannot start until $F(G(X_{i - 1}))$ finishes. Ignoring all other delays, the total time required to process all inputs is ________ ns.',
           options: [
             '34 ns',
@@ -719,6 +748,9 @@ const gateCS_COA: Subject = {
           concept: 'Pipeline Execution with Forwarding',
           year: 'GATE 2027 Prep',
           marks: 2,
+          negativeMarks: 0,
+          questionType: 'NAT',
+          correctAnswerIndices: [0],
           text: 'Consider a pipelined processor with the following four stages:\n- IF : Instruction fetch (1 cycle)\n- ID : Instruction decode and operand fetch (1 cycle)\n- EX : Execute (ADD/SUB: 1 cycle, MUL: 3 cycles)\n- WB : Write back (1 cycle)\n\nOperand forwarding is used in the pipelined processor.\nWhat is the number of clock cycles taken to complete the following sequence of instructions?\n\n$I_1$: `MUL R1, R2, R3` (R1 ← R2 * R3)\n$I_2$: `ADD R4, R1, R5` (R4 ← R1 + R5)\n$I_3$: `SUB R6, R4, R7` (R6 ← R4 - R7)',
           options: [
             '8',
@@ -735,12 +767,15 @@ const gateCS_COA: Subject = {
           concept: 'ISA vs Microarchitecture',
           year: 'GATE 2027 Prep',
           marks: 1,
+          negativeMarks: 0,
+          questionType: 'MSQ',
+          correctAnswerIndices: [0, 1],
           text: 'Which of the following statements regarding the Instruction Set Architecture (ISA) of a processor are correct?\n1. The number of programmer-visible general-purpose registers is specified by the ISA.\n2. The instruction formats and addressing modes are defined as part of the ISA.\n3. The branch prediction strategy and the depth of the functional pipeline are defined by the ISA.',
           options: [
-            '1 and 2 only',
-            '1 only',
-            '2 and 3 only',
-            '1, 2 and 3'
+            'The number of programmer-visible general-purpose registers is specified by the ISA',
+            'The instruction formats and addressing modes are defined as part of the ISA',
+            'The branch prediction strategy and the depth of the functional pipeline are defined by the ISA',
+            'The cache hierarchy organization and cache replacement policy are defined by the ISA'
           ],
           correctAnswerIndex: 0,
           explanation: '### Solution\n- **ISA (Architecture):** Defines the programmer-visible interface, including the instruction set, formats, addressing modes, and architected general-purpose registers (Statements 1 & 2 are correct).\n- **Microarchitecture:** Defines the physical implementation details, such as pipeline depth, branch prediction algorithms, cache sizes, and execution units (Statement 3 is part of microarchitecture, not ISA).\n\nHence, **1 and 2 only** are correct.'
@@ -751,6 +786,9 @@ const gateCS_COA: Subject = {
           concept: 'Micro-operations & Instruction Fetch',
           year: 'GATE 2027 Prep',
           marks: 1,
+          negativeMarks: 0.33,
+          questionType: 'SCQ',
+          correctAnswerIndices: [0],
           text: 'Consider the following micro-operations sequence (μ-program):\n\n1. $T_1: \\text{MAR} \\leftarrow \\text{PC}$\n2. $T_2: \\text{MBR} \\leftarrow M[\\text{MAR}], \\quad \\text{PC} \\leftarrow \\text{PC} + 1$\n3. $T_3: \\text{IR} \\leftarrow \\text{MBR}$\n\nWhich of the following operations is performed by the above μ-program?',
           options: [
             'Instruction fetch',
@@ -767,6 +805,9 @@ const gateCS_COA: Subject = {
           concept: 'Floating Point Representation',
           year: 'GATE 2027 Prep',
           marks: 1,
+          negativeMarks: 0.33,
+          questionType: 'SCQ',
+          correctAnswerIndices: [3],
           text: 'Consider a 20-bit floating point format with 1 sign bit, 7-bit exponent with excess-64 bias (base 8), and 12-bit mantissa fraction. What is the hexadecimal representation of the number $0.625 \\times 8^{12}$ without normalization?',
           options: [
             '0x545D0',
@@ -783,6 +824,9 @@ const gateCS_COA: Subject = {
           concept: 'Instruction Encoding & Immediate Field',
           year: 'GATE 2027 Prep',
           marks: 1,
+          negativeMarks: 0.33,
+          questionType: 'SCQ',
+          correctAnswerIndices: [2],
           text: 'A processor has 64 general-purpose registers and supports 90 distinct instructions. Each instruction is encoded using a fixed length of 32 bits. In a particular instruction format, one field is used to specify the opcode, another field is used to specify a register operand, and the remaining bits are used to store an immediate operand.\nWhat is the maximum number of bits that can be allocated to the immediate operand?',
           options: [
             '20',
@@ -796,15 +840,18 @@ const gateCS_COA: Subject = {
         {
           id: 'coa-twt5-q14',
           difficulty: 'medium',
-          concept: 'Structural Hazards in Pipeline',
+          concept: 'Pipeline Hazards & Hazards Causes',
           year: 'GATE 2027 Prep',
           marks: 1,
+          negativeMarks: 0,
+          questionType: 'MSQ',
+          correctAnswerIndices: [0, 1, 2],
           text: 'For a pipelined CPU with a single ALU, which of the following causes a structural hazard?',
           options: [
-            'Simultaneous effective address calculation for memory access and ALU operation of an arithmetic instruction',
-            'Two instructions reading the same register in the ID stage',
-            'Branch target address calculation using a dedicated adder',
-            'Forwarding an ALU result to the next instruction'
+            'Simultaneous effective address calculation for memory access and ALU operation of an arithmetic instruction (Structural hazard)',
+            'Instruction attempting to read a register before an immediately preceding instruction writes it back without forwarding (RAW Data hazard)',
+            'Conditional branch instruction executed before the branch outcome is determined (Control hazard)',
+            'Register write in the first half of the clock cycle and register read in the second half of the clock cycle'
           ],
           correctAnswerIndex: 0,
           explanation: '### Solution\n- A **Structural Hazard** occurs when hardware resources are insufficient to support all possible combinations of instructions in the same clock cycle.\n- With only a **single ALU**, if one instruction requires the ALU to compute an effective memory address (e.g., `base + offset`) while another instruction simultaneously requires the ALU to perform arithmetic (e.g., `ADD`), both compete for the same ALU unit, resulting in a structural hazard.\n- Reading registers simultaneously or using dedicated branch adders does not cause ALU structural hazards.'
@@ -815,6 +862,9 @@ const gateCS_COA: Subject = {
           concept: '2\'s Complement Overflow Detection',
           year: 'GATE 2027 Prep',
           marks: 1,
+          negativeMarks: 0.33,
+          questionType: 'SCQ',
+          correctAnswerIndices: [0],
           text: 'Consider 8-bit 2’s complement additions. In which of the following cases does an overflow occur?\n\n(A) $(+70) + (+80)$\n(B) $(-60) + (-50)$\n(C) $(+50) + (-80)$\n(D) $(-70) + (+40)$',
           options: [
             'Case (A) only',
@@ -831,6 +881,9 @@ const gateCS_COA: Subject = {
           concept: 'IEEE-754 Floating Point Representation',
           year: 'GATE 2027 Prep',
           marks: 1,
+          negativeMarks: 0.33,
+          questionType: 'SCQ',
+          correctAnswerIndices: [1],
           text: 'Three 32-bit registers store IEEE-754 single precision floating point numbers:\n- $R_A = \\text{0xC1200000}$\n- $R_B = \\text{0x41200000}$\n- $R_C = \\text{0x41A00000}$\n\nWhich of the following relations is correct?',
           options: [
             'RA < RB < RC',
@@ -847,6 +900,9 @@ const gateCS_COA: Subject = {
           concept: 'Addressing Modes — Array Traversal',
           year: 'GATE 2027 Prep',
           marks: 1,
+          negativeMarks: 0.33,
+          questionType: 'SCQ',
+          correctAnswerIndices: [0],
           text: 'Consider the following addressing modes used in an Instruction Set Architecture:\n1. Auto-increment addressing\n2. Indexed addressing\n3. Immediate addressing\n4. Base register addressing\n\nWhich of the above addressing modes directly support efficient sequential traversal of array elements without requiring an explicit instruction to update the memory address after each access?',
           options: [
             '1 only',

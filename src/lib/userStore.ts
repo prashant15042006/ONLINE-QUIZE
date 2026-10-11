@@ -4,6 +4,7 @@ export interface UserMistake {
   id: string; // question.id
   question: Question;
   userSelectedIndex: number;
+  userSelectedIndices?: number[];
   examName: string;
   subjectName: string;
   chapterName: string;
@@ -37,7 +38,7 @@ export interface QuizAttemptRecord {
   avgTimePerQuestionSeconds: number;
   timestamp: string;
   questions: Question[];
-  userAnswers: Record<string, { selectedOptionIndex: number | null }>;
+  userAnswers: Record<string, { selectedOptionIndex: number | null; selectedOptionIndices?: number[] }>;
   isRetryAttempt?: boolean;
   firstAttemptAccuracy?: number;
 }
