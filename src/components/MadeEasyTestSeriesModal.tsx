@@ -7,6 +7,7 @@ import { MADE_EASY_TOC_TWT1_QUESTIONS } from "../data/madeEasyTOCTest1";
 import { MADE_EASY_APTITUDE_TWT11_QUESTIONS } from "../data/madeEasyAptitudeTest11";
 import { MADE_EASY_APTITUDE_TWT12_QUESTIONS } from "../data/madeEasyAptitudeTest12";
 import { MADE_EASY_OS_TWT13_QUESTIONS } from "../data/madeEasyOSTest13";
+import { MADE_EASY_OS_TWT14_QUESTIONS } from "../data/madeEasyOSTest14";
 
 interface Props {
   isOpen: boolean;
@@ -164,6 +165,39 @@ export default function MadeEasyTestSeriesModal({
             "Single-Level Page Table Size Calculation",
           ],
           chapterId: "os-gate-2027-twt-13",
+        },
+        {
+          id: "os-twt-14",
+          name: "GATE 2027 CS TOPIC WISE TEST - 14 (Operating Systems)",
+          testNumber: 14,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_OS_TWT14_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 7,
+          msqCount: 4,
+          natCount: 6,
+          topics: [
+            "Interrupts & Process State Transitions (MSQ)",
+            "User-Level Threads vs Kernel-Level Threads (MSQ)",
+            "Semaphores & Minimum Prints until Deadlock (NAT)",
+            "LRTF CPU Scheduling with Highest PID Tie-Break (NAT)",
+            "Preemptive SRTF Metrics & Response Time (MSQ)",
+            "Round Robin Average Turnaround Time (NAT)",
+            "Preemptive Priority Scheduling Waiting Times",
+            "Critical Section Mutual Exclusion & Progress",
+            "Short, Mid & Long Term Schedulers (MSQ)",
+            "Fork System Call & Process Trees",
+            "Round Robin TAT with Simultaneous Arrival (NAT)",
+            "Starvation in Scheduling Algorithms",
+            "Counting Semaphore Arithmetic Operations (NAT)",
+            "SRTF Context Switches Counting (NAT)",
+            "Thread Memory Sharing & Direct Communication",
+            "Starvation Susceptibility (HRRN, SRTF, MLQ)",
+            "Non-preemptive Waiting Time Priority Equivalence",
+          ],
+          chapterId: "os-gate-2027-twt-14",
         },
       ] as MadeEasyTestMeta[],
     },
@@ -354,6 +388,12 @@ export default function MadeEasyTestSeriesModal({
     // OS TWT-13 — serve the 17 imported OS questions (MSQ + SCQ + NAT)
     if (test.chapterId === "os-gate-2027-twt-13") {
       onStartTest(MADE_EASY_OS_TWT13_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // OS TWT-14 — serve the 17 imported OS questions (MSQ + SCQ + NAT)
+    if (test.chapterId === "os-gate-2027-twt-14") {
+      onStartTest(MADE_EASY_OS_TWT14_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }

@@ -3,6 +3,7 @@ import { CURATED_QUESTIONS } from "./curatedQuestions";
 import { MADE_EASY_APTITUDE_TWT11_CHAPTER } from "./madeEasyAptitudeTest11";
 import { MADE_EASY_APTITUDE_TWT12_CHAPTER } from "./madeEasyAptitudeTest12";
 import { MADE_EASY_OS_TWT13_CHAPTER } from "./madeEasyOSTest13";
+import { MADE_EASY_OS_TWT14_CHAPTER } from "./madeEasyOSTest14";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -1622,7 +1623,8 @@ const gateCS_OS: Subject = {
         },
       ]
     },
-    MADE_EASY_OS_TWT13_CHAPTER
+    MADE_EASY_OS_TWT13_CHAPTER,
+    MADE_EASY_OS_TWT14_CHAPTER
   ]
 };
 
