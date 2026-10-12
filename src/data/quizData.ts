@@ -8,6 +8,7 @@ import { MADE_EASY_DS_TWT15_CHAPTER } from "./madeEasyDSTest15";
 import { MADE_EASY_DS_TWT16_CHAPTER } from "./madeEasyDSTest16";
 import { MADE_EASY_CN_TWT17_CHAPTER } from "./madeEasyCNTest17";
 import { MADE_EASY_CN_TWT18_CHAPTER } from "./madeEasyCNTest18";
+import { MADE_EASY_CD_TWT23_CHAPTER } from "./madeEasyCDTest23";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -1896,7 +1897,8 @@ const gateCS_CD: Subject = {
           explanation: '### Solution\n- Item $[A \\to \\alpha \\cdot b \\beta]$ where $b$ is a terminal indicates a **Shift** action on input $b$.\n- Item $[B \\to \\gamma \\cdot]$ indicates a **Reduce** action.\nWhen both items exist in the same state, the parser cannot decide whether to shift or reduce → **Shift-Reduce (S/R) conflict**.'
         },
       ]
-    }
+    },
+    MADE_EASY_CD_TWT23_CHAPTER
   ]
 };
 

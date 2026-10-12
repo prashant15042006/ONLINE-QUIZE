@@ -12,6 +12,7 @@ import { MADE_EASY_DS_TWT15_QUESTIONS } from "../data/madeEasyDSTest15";
 import { MADE_EASY_DS_TWT16_QUESTIONS } from "../data/madeEasyDSTest16";
 import { MADE_EASY_CN_TWT17_QUESTIONS } from "../data/madeEasyCNTest17";
 import { MADE_EASY_CN_TWT18_QUESTIONS } from "../data/madeEasyCNTest18";
+import { MADE_EASY_CD_TWT23_QUESTIONS } from "../data/madeEasyCDTest23";
 
 interface Props {
   isOpen: boolean;
@@ -321,7 +322,41 @@ export default function MadeEasyTestSeriesModal({
       shortName: "CD",
       icon: "⚡",
       accent: "from-amber-600 to-orange-600",
-      tests: [] as MadeEasyTestMeta[],
+      tests: [
+        {
+          id: "cd-twt-23",
+          name: "GATE 2027 CS TOPIC WISE TEST - 23 (Compiler Design)",
+          testNumber: 23,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_CD_TWT23_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 9,
+          msqCount: 2,
+          natCount: 6,
+          topics: [
+            "Lexical Analysis & Maximal Munch Rule",
+            "Compiler Phases & Roles (Type Checking, Symbol Table)",
+            "Semantic Analysis Error Detection",
+            "C Compilation vs Linker Behavior",
+            "Language Processing Tools (Loader, Linker, Assembler)",
+            "Symbol Table Properties & Performance",
+            "L-Attributed SDT Violations & Rules",
+            "Code Optimization (CSE, Constant Folding, Strength Reduction)",
+            "S-Attributed & L-Attributed SDT Traversal",
+            "SDTS Parse Tree Leaf Counting",
+            "Semantic Action Deduction in SDTS",
+            "Custom Operator Precedence & Associativity",
+            "Intermediate 3AC Code to High-Level Code",
+            "Grammar Translation Rules & Evaluation",
+            "Three-Address Code Temporary Variables",
+            "Lexical Errors Identification in C",
+            "Basic Block DAG Representation (Nodes + Edges)",
+          ],
+          chapterId: "cd-gate-2027-twt-23",
+        },
+      ] as MadeEasyTestMeta[],
     },
     {
       key: "ds_algo",
@@ -541,6 +576,12 @@ export default function MadeEasyTestSeriesModal({
     // CN TWT-18 — serve the 17 imported CN questions (Network & Transport Layer)
     if (test.chapterId === "cn-gate-2027-twt-18") {
       onStartTest(MADE_EASY_CN_TWT18_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // CD TWT-23 — serve the 17 imported Compiler Design questions
+    if (test.chapterId === "cd-gate-2027-twt-23") {
+      onStartTest(MADE_EASY_CD_TWT23_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
