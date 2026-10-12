@@ -9,6 +9,7 @@ import { MADE_EASY_APTITUDE_TWT12_QUESTIONS } from "../data/madeEasyAptitudeTest
 import { MADE_EASY_OS_TWT13_QUESTIONS } from "../data/madeEasyOSTest13";
 import { MADE_EASY_OS_TWT14_QUESTIONS } from "../data/madeEasyOSTest14";
 import { MADE_EASY_DS_TWT15_QUESTIONS } from "../data/madeEasyDSTest15";
+import { MADE_EASY_DS_TWT16_QUESTIONS } from "../data/madeEasyDSTest16";
 
 interface Props {
   isOpen: boolean;
@@ -293,6 +294,34 @@ export default function MadeEasyTestSeriesModal({
           ],
           chapterId: "ds-gate-2027-twt-15",
         },
+        {
+          id: "ds-twt-16",
+          name: "GATE 2027 CS TOPIC WISE TEST - 16 (Data Structures)",
+          testNumber: 16,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_DS_TWT16_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 10,
+          msqCount: 3,
+          natCount: 4,
+          topics: [
+            "BST Labeling & Properties",
+            "BST Inorder Successor & Predecessor",
+            "Linked List Reversal",
+            "Remove Last Node Bug Analysis",
+            "BST Construction & Path Analysis",
+            "Binary Tree Transformation",
+            "AVL Tree Deletion & Rotations",
+            "AVL Tree Properties (Min/Max Nodes)",
+            "AVL Tree Insertion & Level Sum",
+            "Linked List Insert at End",
+            "Full 4-ary Tree — Internal Nodes",
+            "Hash Table Chaining & Slot Probability",
+          ],
+          chapterId: "ds-gate-2027-twt-16",
+        },
       ] as MadeEasyTestMeta[],
     },
     {
@@ -430,6 +459,12 @@ export default function MadeEasyTestSeriesModal({
     // DS TWT-15 — serve the 17 imported DS & C Programming questions (SCQ + MSQ + NAT)
     if (test.chapterId === "ds-gate-2027-twt-15") {
       onStartTest(MADE_EASY_DS_TWT15_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // DS TWT-16 — serve the 17 imported DS questions (BST, AVL, LL, Hash)
+    if (test.chapterId === "ds-gate-2027-twt-16") {
+      onStartTest(MADE_EASY_DS_TWT16_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }

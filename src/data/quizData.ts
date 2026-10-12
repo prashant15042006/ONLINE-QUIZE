@@ -5,6 +5,7 @@ import { MADE_EASY_APTITUDE_TWT12_CHAPTER } from "./madeEasyAptitudeTest12";
 import { MADE_EASY_OS_TWT13_CHAPTER } from "./madeEasyOSTest13";
 import { MADE_EASY_OS_TWT14_CHAPTER } from "./madeEasyOSTest14";
 import { MADE_EASY_DS_TWT15_CHAPTER } from "./madeEasyDSTest15";
+import { MADE_EASY_DS_TWT16_CHAPTER } from "./madeEasyDSTest16";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -1031,7 +1032,8 @@ const gateCS_DS: Subject = {
         },
       ]
     },
-    MADE_EASY_DS_TWT15_CHAPTER
+    MADE_EASY_DS_TWT15_CHAPTER,
+    MADE_EASY_DS_TWT16_CHAPTER
   ]
 };
 
