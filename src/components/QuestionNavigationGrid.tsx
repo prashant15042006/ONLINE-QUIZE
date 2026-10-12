@@ -133,7 +133,7 @@ export default function QuestionNavigationGrid({
       </div>
 
       {/* Grid */}
-      <div className={`grid ${questions.length > 25 ? "grid-cols-8" : "grid-cols-5"} gap-1.5 max-h-[360px] overflow-y-auto pr-1`}>
+      <div className={`grid ${questions.length > 25 ? "grid-cols-6 sm:grid-cols-8" : "grid-cols-5 sm:grid-cols-6"} gap-1.5 max-h-[280px] sm:max-h-[340px] overflow-y-auto pr-1 scrollbar-none`}>
         {questions.map((_, idx) => {
           const status = getStatus(idx);
           const isMatch =

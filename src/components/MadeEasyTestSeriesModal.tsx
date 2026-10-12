@@ -752,8 +752,33 @@ export default function MadeEasyTestSeriesModal({
         {/* Main Content Area */}
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           
-          {/* Left: Subjects List Sidebar */}
-          <div className="md:w-72 border-r border-white/[0.08] bg-[#0c101c] overflow-y-auto p-3 space-y-1.5 shrink-0 max-h-[35vh] md:max-h-full">
+          {/* Mobile: Horizontal Subjects Tab Bar */}
+          <div className="flex md:hidden overflow-x-auto gap-2 p-2.5 bg-[#0c101c] border-b border-white/[0.08] scrollbar-none shrink-0">
+            {subjectsConfig.map((subj) => {
+              const isSelected = subj.key === selectedSubjectKey;
+              const hasActiveTest = subj.tests.some((t) => t.status === "available");
+              return (
+                <button
+                  key={subj.key}
+                  onClick={() => setSelectedSubjectKey(subj.key)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer shrink-0 ${
+                    isSelected
+                      ? "bg-gradient-to-r from-rose-600 to-indigo-600 text-white shadow-md border border-rose-400/40"
+                      : "bg-white/[0.04] text-slate-400 hover:text-white border border-white/[0.06]"
+                  }`}
+                >
+                  <span>{subj.icon}</span>
+                  <span>{subj.shortName}</span>
+                  {hasActiveTest && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Desktop Left: Subjects List Sidebar */}
+          <div className="hidden md:block md:w-72 border-r border-white/[0.08] bg-[#0c101c] overflow-y-auto p-3 space-y-1.5 shrink-0 md:max-h-full">
             <div className="text-[10px] font-black uppercase tracking-wider text-slate-500 px-3 py-1">
               GATE CS Subjects ({subjectsConfig.length})
             </div>
@@ -896,7 +921,7 @@ export default function MadeEasyTestSeriesModal({
                         <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">
                           Key Topics Covered:
                         </div>
-                        <div className="flex flex-wrap gap-1.5">
+                        <div className="flex flex-wrap gap-1.5 max-h-24 sm:max-h-36 overflow-y-auto pr-1 scrollbar-none">
                           {test.topics.map((top, idx) => (
                             <span
                               key={idx}

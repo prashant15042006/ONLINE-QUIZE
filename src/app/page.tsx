@@ -302,6 +302,9 @@ export default function Home() {
   const [currentQSeconds, setCurrentQSeconds] = useState<number>(0);
   const [showShortcutsModal, setShowShortcutsModal] = useState<boolean>(false);
   const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [zoomedImageUrl, setZoomedImageUrl] = useState<string | null>(null);
+  const [zoomedImageAlt, setZoomedImageAlt] = useState<string | null>(null);
+  const [isMobilePaletteOpen, setIsMobilePaletteOpen] = useState<boolean>(false);
 
   const totalQs = useMemo(() => getTotalQuestionCount(), []);
   const totalChapters = useMemo(() => getTotalChapterCount(), []);
@@ -938,7 +941,7 @@ export default function Home() {
                       MSQ Multi-Select ✓
                     </span>
                     <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
-                      COA Test 5 Live 🟢
+                      14+ Tests Live 🟢
                     </span>
                   </div>
                   <h3 className="text-base sm:text-lg font-extrabold text-white">
@@ -954,7 +957,7 @@ export default function Home() {
                   {[
                     { val: "10+", lbl: "Subjects" },
                     { val: "30+", lbl: "Tests Planned" },
-                    { val: "1", lbl: "Test Live" },
+                    { val: "14+", lbl: "Tests Live" },
                   ].map((s, i) => (
                     <div key={i} className="text-center">
                       <div className="text-lg font-black text-white">{s.val}</div>
@@ -1427,93 +1430,95 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Question Column */}
             <div className="lg:col-span-8 flex flex-col">
-              <div className="glass-card p-5 sm:p-7 flex flex-col gap-5">
+              <div className="glass-card p-3.5 sm:p-6 md:p-7 flex flex-col gap-3.5 sm:gap-5">
                 {/* Q meta */}
                 <div className="flex items-center justify-between gap-2 flex-wrap">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-black text-white bg-white/[0.08] px-3 py-1 rounded-full">Q {currentQuestionIndex + 1}</span>
-                    <span className="text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-full font-bold">
-                      {currentQuestionIndex < 10 ? (currentQuestionIndex < 5 ? "+1 Mark • -0.33" : "+2 Marks • -0.66") : (currentQuestionIndex < 35 ? "+1 Mark • -0.33" : "+2 Marks • -0.66")}
-                    </span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <span className="text-xs font-black text-white bg-white/[0.08] px-2.5 py-1 rounded-full">Q {currentQuestionIndex + 1}</span>
+                    {currentQ.marks && (
+                      <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold">
+                        +{currentQ.marks} Marks {currentQ.negativeMarks ? `• -${currentQ.negativeMarks}` : "• 0 Neg"}
+                      </span>
+                    )}
                     {currentQ.concept && (
-                      <span className="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-0.5 rounded-full font-bold">{currentQ.concept}</span>
+                      <span className="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-0.5 rounded-full font-bold max-w-[200px] truncate">{currentQ.concept}</span>
                     )}
                     {currentQ.year && (
-                      <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-full font-bold">GATE {currentQ.year}</span>
+                      <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-bold">GATE {currentQ.year}</span>
                     )}
                   </div>
-                  <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full border ${currentQ.difficulty === "easy" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : currentQ.difficulty === "medium" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-rose-500/10 text-rose-400 border-rose-500/20"}`}>
+                  <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full border ${currentQ.difficulty === "easy" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : currentQ.difficulty === "medium" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-rose-500/10 text-rose-400 border-rose-500/20"}`}>
                     {currentQ.difficulty}
                   </span>
                 </div>
 
                 {/* Question text — large, readable with dynamic zoom */}
                 <div className={`font-semibold text-white leading-[1.8] tracking-[0.01em] whitespace-pre-line break-words ${
-                  questionFontSize === "xlarge" ? "text-[20px] sm:text-[22px]" : questionFontSize === "large" ? "text-[18px] sm:text-[20px]" : "text-[16px] sm:text-[18px]"
+                  questionFontSize === "xlarge" ? "text-[18px] sm:text-[22px]" : questionFontSize === "large" ? "text-[17px] sm:text-[20px]" : "text-[15px] sm:text-[18px]"
                 }`}>
                   {renderTextWithMath(cleanQuestionText(currentQ.text))}
                 </div>
 
                 {/* Diagram/image */}
                 {currentQ.imageUrl && (
-                  <div className="flex justify-center">
-                    <div className="bg-white rounded-2xl p-3 border-2 border-cyan-500/30 shadow-lg shadow-cyan-950/30 max-w-full overflow-x-auto">
+                  <div className="flex flex-col items-center justify-center my-1 sm:my-2 max-w-full">
+                    <div 
+                      onClick={() => {
+                        setZoomedImageUrl(currentQ.imageUrl!);
+                        setZoomedImageAlt(currentQ.imageAlt ?? "Question diagram");
+                      }}
+                      className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 border-2 border-cyan-500/30 shadow-lg shadow-cyan-950/20 max-w-full overflow-hidden flex flex-col items-center cursor-zoom-in group hover:border-cyan-400 transition"
+                      title="Tap / Click to view full image"
+                    >
                       {currentQ.imageUrl.trim().startsWith("<svg") ? (
-                        <div className="w-full" dangerouslySetInnerHTML={{ __html: currentQ.imageUrl }} aria-label={currentQ.imageAlt ?? "Question diagram"} />
+                        <div className="w-full overflow-x-auto" dangerouslySetInnerHTML={{ __html: currentQ.imageUrl }} aria-label={currentQ.imageAlt ?? "Question diagram"} />
                       ) : (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={currentQ.imageUrl} alt={currentQ.imageAlt ?? "Question diagram"} className="max-w-full max-h-72 object-contain mx-auto" />
+                        <img src={currentQ.imageUrl} alt={currentQ.imageAlt ?? "Question diagram"} className="max-w-full max-h-48 sm:max-h-64 md:max-h-80 w-auto object-contain mx-auto rounded transition duration-200 group-hover:scale-[1.01]" />
                       )}
+                      <span className="text-[10px] text-slate-500 font-medium mt-1.5 flex items-center gap-1 group-hover:text-cyan-600 transition">
+                        <span>🔍</span> Tap to enlarge diagram
+                      </span>
                     </div>
-                    {currentQ.imageAlt && <p className="text-[10px] text-slate-500 text-center mt-1">{currentQ.imageAlt}</p>}
+                    {currentQ.imageAlt && <p className="text-[10px] text-slate-400 text-center mt-1">{currentQ.imageAlt}</p>}
                   </div>
                 )}
 
-                {/* Question Type & Marks Indicator */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-1">
+                {/* Question Type Indicator */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-1 border-b border-white/[0.04]">
                   <div className="flex items-center gap-2">
                     {isMSQQuestion(currentQ) ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 animate-pulse">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
                         <span className="text-sm">☑</span> Multiple Select Question (MSQ) — Choose all correct options
                       </span>
                     ) : currentQ.questionType === "NAT" ? (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                        NAT (Numerical Answer Type)
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        Numerical Answer Type (NAT)
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/[0.06] text-slate-300 border border-white/10">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-white/[0.06] text-slate-300 border border-white/10">
                         <span>◉</span> Single Choice Question (SCQ)
                       </span>
                     )}
                   </div>
-                  {currentQ.marks && (
-                    <span className="text-[11px] font-semibold text-slate-400">
-                      Marks: <span className="text-emerald-400 font-bold">+{currentQ.marks}</span>
-                      {currentQ.negativeMarks ? (
-                        <> | Negative: <span className="text-rose-400 font-bold">-{currentQ.negativeMarks}</span></>
-                      ) : (
-                        <> | Negative: <span className="text-slate-400 font-bold">0</span></>
-                      )}
-                    </span>
-                  )}
                 </div>
 
                 {/* Options OR NAT Input */}
                 {currentQ.questionType === "NAT" || currentQ.options.length === 0 ? (
-                  <div className="space-y-4">
-                    <div className="p-5 rounded-2xl bg-[#0e1628] border border-cyan-500/30 space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="p-4 sm:p-5 rounded-2xl bg-[#0e1628] border border-cyan-500/30 space-y-4">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-black uppercase tracking-wider text-cyan-300 flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                          Numerical Answer Type (NAT) — Enter your answer below:
+                          Enter your numerical answer:
                         </span>
-                        <span className="text-[11px] text-slate-400">
-                          {currentQ.marks ? `+${currentQ.marks} Marks` : "Marks: +2"} • 0 Negative
+                        <span className="text-[11px] text-slate-400 font-semibold">
+                          {currentQ.marks ? `+${currentQ.marks} Marks` : "+2 Marks"} • 0 Negative
                         </span>
                       </div>
 
                       {/* Display / Input Field */}
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <div className="relative flex-1">
                           <input
                             type="text"
@@ -1522,41 +1527,159 @@ export default function Home() {
                             onChange={(e) => handleNatChange(e.target.value)}
                             disabled={quizMode === "practice" && isAnswerChecked}
                             placeholder="e.g. 10.75, 7, 34"
-                            className="w-full bg-[#070b14] border-2 border-cyan-500/50 focus:border-cyan-400 rounded-xl px-4 py-3 text-lg font-mono font-bold text-white placeholder-slate-600 outline-none transition shadow-inner"
+                            className="w-full bg-[#070b14] border-2 border-cyan-500/50 focus:border-cyan-400 rounded-xl px-4 py-2.5 sm:py-3 text-base sm:text-lg font-mono font-bold text-white placeholder-slate-600 outline-none transition shadow-inner"
                           />
                         </div>
                         <button
                           type="button"
                           onClick={() => handleNatChange("")}
                           disabled={quizMode === "practice" && isAnswerChecked}
-                          className="px-4 py-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white border border-white/10 text-xs font-bold transition cursor-pointer"
+                          className="px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white border border-white/10 text-xs font-bold transition cursor-pointer"
                         >
-                          Backspace
+                          Clear
                         </button>
                       </div>
 
                       {/* GATE CBT On-screen Virtual Keypad */}
                       <div>
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
-                          Virtual Keypad (CBT Calculator Style):
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
+                          <span>Virtual Keypad (CBT Calculator Style):</span>
+                          <span className="text-[10px] text-slate-500 font-normal">GATE On-Screen Layout</span>
                         </div>
-                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-w-md">
-                          {["7", "8", "9", "4", "5", "6", "1", "2", "3", "0", ".", "-"].map((keyChar) => (
+                        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 max-w-xs sm:max-w-sm">
+                          {/* Row 1 */}
+                          {["7", "8", "9"].map((keyChar) => (
                             <button
                               key={keyChar}
                               type="button"
                               disabled={quizMode === "practice" && isAnswerChecked}
                               onClick={() => {
                                 const prev = currentAns?.natValue ?? "";
-                                if (keyChar === "." && prev.includes(".")) return;
-                                if (keyChar === "-" && prev.length > 0) return;
                                 handleNatChange(prev + keyChar);
                               }}
-                              className="py-2.5 rounded-xl bg-slate-800/80 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                              className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
                             >
                               {keyChar}
                             </button>
                           ))}
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              handleNatChange(prev.slice(0, -1));
+                            }}
+                            className="py-2.5 rounded-xl bg-rose-950/60 hover:bg-rose-600 border border-rose-800/80 hover:border-rose-400 text-rose-300 hover:text-white font-mono font-black text-xs active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            title="Backspace"
+                          >
+                            ⌫ Back
+                          </button>
+
+                          {/* Row 2 */}
+                          {["4", "5", "6"].map((keyChar) => (
+                            <button
+                              key={keyChar}
+                              type="button"
+                              disabled={quizMode === "practice" && isAnswerChecked}
+                              onClick={() => {
+                                const prev = currentAns?.natValue ?? "";
+                                handleNatChange(prev + keyChar);
+                              }}
+                              className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            >
+                              {keyChar}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => handleNatChange("")}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-amber-600 border border-slate-700/80 hover:border-amber-400 text-amber-300 hover:text-white font-mono font-black text-xs active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            title="Clear"
+                          >
+                            Clear
+                          </button>
+
+                          {/* Row 3 */}
+                          {["1", "2", "3"].map((keyChar) => (
+                            <button
+                              key={keyChar}
+                              type="button"
+                              disabled={quizMode === "practice" && isAnswerChecked}
+                              onClick={() => {
+                                const prev = currentAns?.natValue ?? "";
+                                handleNatChange(prev + keyChar);
+                              }}
+                              className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            >
+                              {keyChar}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              if (prev.startsWith("-")) {
+                                handleNatChange(prev.slice(1));
+                              } else {
+                                handleNatChange("-" + prev);
+                              }
+                            }}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            title="Toggle sign"
+                          >
+                            ±
+                          </button>
+
+                          {/* Row 4 */}
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              handleNatChange(prev + "0");
+                            }}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                          >
+                            0
+                          </button>
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              if (prev.includes(".")) return;
+                              handleNatChange(prev + ".");
+                            }}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                          >
+                            .
+                          </button>
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              if (prev === "" || prev === "-") return;
+                              handleNatChange(prev + "00");
+                            }}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                          >
+                            00
+                          </button>
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              if (prev.includes("-")) return;
+                              handleNatChange("-" + prev);
+                            }}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                          >
+                            -
+                          </button>
                         </div>
                       </div>
 
@@ -1623,9 +1746,9 @@ export default function Home() {
                           key={idx}
                           onClick={() => handleSelectOption(idx)}
                           disabled={isRevealed}
-                          className={`w-full p-4 sm:p-5 rounded-2xl text-left flex items-start gap-4 cursor-pointer disabled:cursor-default group ${optClass}`}
+                          className={`w-full p-3 sm:p-4 rounded-xl sm:rounded-2xl text-left flex items-start gap-3 sm:gap-4 cursor-pointer disabled:cursor-default group ${optClass}`}
                         >
-                          <div className={`w-9 h-9 flex items-center justify-center text-xs font-black border shrink-0 transition ${badgeBg}`}>
+                          <div className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-xs font-black border shrink-0 transition ${badgeBg}`}>
                             {badgeContent}
                           </div>
                           <span className="flex-1 text-sm sm:text-base leading-relaxed font-medium break-words">
@@ -1642,29 +1765,38 @@ export default function Home() {
 
                 {/* Explanation panel (practice mode) */}
                 {quizMode === "practice" && isAnswerChecked && (
-                  <div className={`p-5 rounded-2xl flex items-start gap-4 border animate-slide-up ${isCorrect ? "bg-emerald-950/60 border-emerald-500/30 text-emerald-200" : "bg-rose-950/60 border-rose-500/30 text-rose-200"}`}>
-                    <span className="text-2xl shrink-0">{isCorrect ? "🎉" : "💡"}</span>
+                  <div className={`p-4 sm:p-5 rounded-2xl flex items-start gap-3 sm:gap-4 border animate-slide-up ${isCorrect ? "bg-emerald-950/60 border-emerald-500/30 text-emerald-200" : "bg-rose-950/60 border-rose-500/30 text-rose-200"}`}>
+                    <span className="text-xl sm:text-2xl shrink-0">{isCorrect ? "🎉" : "💡"}</span>
                     <div className="flex-1 min-w-0">
-                      <div className="font-black text-sm mb-2">{isCorrect ? "Correct! Well done! (+10 XP)" : "Explanation:"}</div>
+                      <div className="font-black text-sm mb-1.5">{isCorrect ? "Correct! Well done! (+10 XP)" : "Explanation:"}</div>
                       <div className="text-xs leading-relaxed">{renderFormattedSolution(currentQ.explanation)}</div>
                     </div>
                   </div>
                 )}
 
                 {/* Bottom controls */}
-                <div className="pt-4 border-t border-white/[0.06] flex flex-wrap justify-between items-center gap-3">
-                  <div className="flex gap-2">
+                <div className="pt-3 sm:pt-4 border-t border-white/[0.06] flex flex-wrap justify-between items-center gap-2.5">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <button onClick={toggleMarkForReview} className={`px-3 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ${currentAns?.isMarkedForReview ? "bg-amber-600 text-white border-amber-500" : "bg-white/[0.04] text-slate-400 border-white/[0.08] hover:bg-white/[0.08]"}`}>
                       {currentAns?.isMarkedForReview ? "★ Marked" : "☆ Mark"}
                     </button>
                     <button onClick={clearResponse} className="px-3 py-2 rounded-xl text-xs font-bold bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 border border-white/[0.08] cursor-pointer">Clear</button>
+                    {/* Mobile palette quick jump button */}
+                    <button
+                      type="button"
+                      onClick={() => setIsMobilePaletteOpen(true)}
+                      className="lg:hidden px-3 py-2 rounded-xl text-xs font-bold bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 transition cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>📋</span>
+                      <span>Palette</span>
+                    </button>
                   </div>
-                  <div className="flex gap-2">
-                    <button onClick={() => { if (currentQuestionIndex > 0) { setCurrentQuestionIndex(prev => prev - 1); setIsAnswerChecked(false); } }} disabled={currentQuestionIndex === 0} className="px-4 py-2.5 btn-3d-slate text-xs font-bold rounded-xl disabled:opacity-30 cursor-pointer">← Prev</button>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => { if (currentQuestionIndex > 0) { setCurrentQuestionIndex(prev => prev - 1); setIsAnswerChecked(false); } }} disabled={currentQuestionIndex === 0} className="px-3.5 sm:px-4 py-2 sm:py-2.5 btn-3d-slate text-xs font-bold rounded-xl disabled:opacity-30 cursor-pointer">← Prev</button>
                     <button
                       onClick={handleCheckOrNext}
                       disabled={isQuestionSkipped(currentAns, currentQ)}
-                      className={`px-6 py-2.5 text-xs font-black rounded-xl cursor-pointer disabled:opacity-40 ${quizMode === "practice" && !isAnswerChecked ? "btn-3d-green" : "btn-3d-blue"}`}
+                      className={`px-5 sm:px-6 py-2 sm:py-2.5 text-xs font-black rounded-xl cursor-pointer disabled:opacity-40 ${quizMode === "practice" && !isAnswerChecked ? "btn-3d-green" : "btn-3d-blue"}`}
                     >
                       {quizMode === "practice" && !isAnswerChecked ? "CHECK ✓" : currentQuestionIndex < activeQuestions.length - 1 ? "NEXT →" : "FINISH 🎉"}
                     </button>
@@ -1679,6 +1811,47 @@ export default function Home() {
               <button onClick={() => handleQuizSubmit(false)} className="w-full py-3 btn-3d-green font-black text-xs rounded-xl cursor-pointer">Submit Quiz ✓</button>
             </div>
           </div>
+
+          {/* Mobile Question Navigation Palette Modal */}
+          {isMobilePaletteOpen && (
+            <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-3 animate-fade-in lg:hidden">
+              <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg p-4 space-y-4 shadow-2xl max-h-[85vh] flex flex-col overflow-hidden">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">📋</span>
+                    <h3 className="text-xs font-black text-white uppercase tracking-wider">Question Navigation Palette</h3>
+                  </div>
+                  <button 
+                    onClick={() => setIsMobilePaletteOpen(false)}
+                    className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  <QuestionNavigationGrid 
+                    questions={activeQuestions} 
+                    userAnswers={userAnswers} 
+                    correctAnswers={correctAnswersMap} 
+                    currentIndex={currentQuestionIndex} 
+                    isSubmitted={false} 
+                    quizMode={quizMode} 
+                    onJumpTo={idx => { 
+                      setCurrentQuestionIndex(idx); 
+                      setIsAnswerChecked(false); 
+                      setIsMobilePaletteOpen(false); 
+                    }} 
+                  />
+                </div>
+                <button 
+                  onClick={() => { setIsMobilePaletteOpen(false); handleQuizSubmit(false); }} 
+                  className="w-full py-2.5 btn-3d-green font-black text-xs rounded-xl cursor-pointer"
+                >
+                  Submit Quiz ✓
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1917,6 +2090,35 @@ export default function Home() {
       )}
       {isResultReviewModalOpen && (
         <ResultReviewModal questions={activeQuestions} userAnswers={userAnswers} onClose={() => setIsResultReviewModalOpen(false)} />
+      )}
+
+      {/* ═══════════════ IMAGE LIGHTBOX ZOOM MODAL ═══════════════ */}
+      {zoomedImageUrl && (
+        <div 
+          onClick={() => setZoomedImageUrl(null)}
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-6 animate-fade-in cursor-zoom-out"
+        >
+          <div className="max-w-4xl w-full flex flex-col items-center gap-3" onClick={e => e.stopPropagation()}>
+            <div className="w-full flex items-center justify-between text-white text-xs px-2">
+              <span className="font-bold text-slate-300 truncate">{zoomedImageAlt || "Question Diagram / Image"}</span>
+              <button
+                onClick={() => setZoomedImageUrl(null)}
+                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition flex items-center gap-1 cursor-pointer"
+              >
+                <span>✕</span> Close
+              </button>
+            </div>
+            <div className="bg-white rounded-2xl p-3 sm:p-4 border-2 border-cyan-400/60 shadow-2xl max-w-full max-h-[82vh] overflow-auto flex items-center justify-center">
+              {zoomedImageUrl.trim().startsWith("<svg") ? (
+                <div className="w-full" dangerouslySetInnerHTML={{ __html: zoomedImageUrl }} />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={zoomedImageUrl} alt={zoomedImageAlt || "Enlarged diagram"} className="max-w-full max-h-[75vh] w-auto h-auto object-contain select-none" />
+              )}
+            </div>
+            <span className="text-[11px] text-slate-400">Click anywhere outside or ✕ button to close</span>
+          </div>
+        </div>
       )}
     </main>
   );

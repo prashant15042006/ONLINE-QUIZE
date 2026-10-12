@@ -78,6 +78,7 @@ function renderTextWithMath(text: string): React.ReactNode {
 export default function ResultReviewModal({ questions, userAnswers, onClose }: Props) {
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [filter, setFilter] = useState<"all" | "correct" | "wrong" | "skipped">("all");
+  const [reviewZoomUrl, setReviewZoomUrl] = useState<string | null>(null);
 
   const filtered = questions.filter((q) => {
     const ans = userAnswers[q.id];
@@ -210,8 +211,12 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
 
                       {/* Figure / Diagram Image */}
                       {q.imageUrl && (
-                        <div className="flex justify-center mb-2">
-                          <div className="bg-white rounded-xl p-2 border border-indigo-400/40 max-w-full overflow-x-auto">
+                        <div className="flex flex-col items-center justify-center mb-2">
+                          <div 
+                            onClick={() => setReviewZoomUrl(q.imageUrl!)}
+                            className="bg-white rounded-xl p-2 border border-indigo-400/40 max-w-full overflow-hidden cursor-zoom-in group hover:border-cyan-400 transition flex flex-col items-center"
+                            title="Tap / Click to enlarge"
+                          >
                             {q.imageUrl.trim().startsWith('<svg') ? (
                               <div
                                 dangerouslySetInnerHTML={{ __html: q.imageUrl }}
@@ -222,9 +227,12 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
                               <img
                                 src={q.imageUrl}
                                 alt={q.imageAlt ?? 'Question diagram'}
-                                className="max-w-full max-h-56 object-contain mx-auto"
+                                className="max-w-full max-h-48 sm:max-h-56 object-contain mx-auto rounded transition group-hover:scale-[1.01]"
                               />
                             )}
+                            <span className="text-[10px] text-slate-500 mt-1 flex items-center gap-1 group-hover:text-cyan-600 transition">
+                              <span>🔍</span> Tap to enlarge
+                            </span>
                           </div>
                         </div>
                       )}
@@ -273,6 +281,35 @@ export default function ResultReviewModal({ questions, userAnswers, onClose }: P
           )}
         </div>
       </div>
+
+      {/* Review Lightbox Zoom Modal */}
+      {reviewZoomUrl && (
+        <div
+          onClick={() => setReviewZoomUrl(null)}
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-6 animate-fade-in cursor-zoom-out"
+        >
+          <div className="max-w-4xl w-full flex flex-col items-center gap-3" onClick={e => e.stopPropagation()}>
+            <div className="w-full flex items-center justify-between text-white text-xs px-2">
+              <span className="font-bold text-slate-300">Enlarged Question Diagram</span>
+              <button
+                onClick={() => setReviewZoomUrl(null)}
+                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition flex items-center gap-1 cursor-pointer"
+              >
+                <span>✕</span> Close
+              </button>
+            </div>
+            <div className="bg-white rounded-2xl p-3 sm:p-4 border-2 border-cyan-400/60 shadow-2xl max-w-full max-h-[82vh] overflow-auto flex items-center justify-center">
+              {reviewZoomUrl.trim().startsWith('<svg') ? (
+                <div className="w-full" dangerouslySetInnerHTML={{ __html: reviewZoomUrl }} />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={reviewZoomUrl} alt="Enlarged diagram" className="max-w-full max-h-[75vh] w-auto h-auto object-contain select-none" />
+              )}
+            </div>
+            <span className="text-[11px] text-slate-400">Click anywhere outside or ✕ button to close</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
