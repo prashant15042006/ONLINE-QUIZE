@@ -1,5 +1,7 @@
 import { PYQ_BY_CHAPTER } from "./pyqMapper";
 import { CURATED_QUESTIONS } from "./curatedQuestions";
+import { MADE_EASY_APTITUDE_TWT11_CHAPTER } from "./madeEasyAptitudeTest11";
+import { MADE_EASY_APTITUDE_TWT12_CHAPTER } from "./madeEasyAptitudeTest12";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -1949,7 +1951,9 @@ const gateCS_GA: Subject = {
           explanation: '### Solution\n$$A = P\\left(1 + \\frac{r}{100}\\right)^n = 5000 \\times (1.1)^2 = 5000 \\times 1.21 = \\mathbf{₹6050}$$'
         },
       ]
-    }
+    },
+    MADE_EASY_APTITUDE_TWT11_CHAPTER,
+    MADE_EASY_APTITUDE_TWT12_CHAPTER
   ]
 };
 

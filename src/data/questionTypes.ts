@@ -17,6 +17,8 @@ export interface Question {
   imageAlt?: string;   // Accessible alt description
   marks?: number;
   negativeMarks?: number;
+  natAnswer?: number | string;
+  natTolerance?: number;
 }
 
 export interface Chapter {

@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { Question, Subject, Chapter } from "../data/quizData";
 import { MADE_EASY_DEMO_TEST_QUESTIONS } from "../data/madeEasyDemoTest";
 import { MADE_EASY_TOC_TWT1_QUESTIONS } from "../data/madeEasyTOCTest1";
+import { MADE_EASY_APTITUDE_TWT11_QUESTIONS } from "../data/madeEasyAptitudeTest11";
+import { MADE_EASY_APTITUDE_TWT12_QUESTIONS } from "../data/madeEasyAptitudeTest12";
 
 interface Props {
   isOpen: boolean;
@@ -216,7 +218,73 @@ export default function MadeEasyTestSeriesModal({
       shortName: "EM & GA",
       icon: "📊",
       accent: "from-teal-600 to-cyan-600",
-      tests: [] as MadeEasyTestMeta[],
+      tests: [
+        {
+          id: "ga-twt-11",
+          name: "GATE 2027 CS TOPIC WISE TEST - 11 (General Aptitude)",
+          testNumber: 11,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_APTITUDE_TWT11_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 15,
+          msqCount: 0,
+          natCount: 2,
+          topics: [
+            "Clocks & Gain of Time",
+            "Set Theory & Venn Diagrams (NAT)",
+            "Directions & Spatial Reasoning",
+            "Number Matrix Puzzles",
+            "Geometry & Similar Triangles (NAT)",
+            "Infinite Series & Geometric Progressions",
+            "Combinatorics & Step Climbing Recurrence",
+            "Surds & Real Solutions of Equations",
+            "Mensuration: Cylinder & Open Box Volume",
+            "Perimeter with Circular Corner Arcs",
+            "Pipes, Cisterns & Simultaneous Flow Rates",
+            "Profit, Loss & Equivalent Margins",
+            "Defective Products Percentage",
+            "Averages & Integer Inequalities",
+            "Time, Speed & Train Stoppages",
+            "Quadratic Inequalities & Fare Calculations",
+            "Extreme Digit Permutations & Differences",
+          ],
+          chapterId: "ga-gate-2027-twt-11",
+        },
+        {
+          id: "ga-twt-12",
+          name: "GATE 2027 CS TOPIC WISE TEST - 12 (General Aptitude)",
+          testNumber: 12,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_APTITUDE_TWT12_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 17,
+          msqCount: 0,
+          natCount: 0,
+          topics: [
+            "Linear Arrangement & House Colours",
+            "Mirror Images & Water Reflections",
+            "Critical Reasoning & Salience Fallacy",
+            "Complex Blood Relations & Siblings",
+            "Reading Comprehension: Optimism in Life",
+            "Venn Diagrams: Educated & Employed",
+            "Word Coding: Reverse & Alphabet Shifts",
+            "Vocabulary: Sumptuous & Ominous",
+            "Verbal Fillers: Concessive Clauses",
+            "Paper Folding & Symmetric Punching",
+            "Logical Venn Diagrams: Subsets & Disjoints",
+            "Clock Mirror Reflections (11:60 Rule)",
+            "Geometric Square Counting in Dot Grids",
+            "Verbal Inference: Economy Shift to Services",
+            "Alphabet Positional Squares Coding",
+            "Syllogisms: 4 Categorical Deductions",
+          ],
+          chapterId: "ga-gate-2027-twt-12",
+        },
+      ] as MadeEasyTestMeta[],
     },
   ];
 
@@ -233,6 +301,18 @@ export default function MadeEasyTestSeriesModal({
     // TOC TWT-1 — serve the 17 imported TOC questions
     if (test.chapterId === "me-toc-gate-2027-twt-1") {
       onStartTest(MADE_EASY_TOC_TWT1_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // GA TWT-11 — serve the 17 imported Aptitude questions (SCQ + NAT)
+    if (test.chapterId === "ga-gate-2027-twt-11") {
+      onStartTest(MADE_EASY_APTITUDE_TWT11_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // GA TWT-12 — serve the 17 imported Aptitude questions (SCQ)
+    if (test.chapterId === "ga-gate-2027-twt-12") {
+      onStartTest(MADE_EASY_APTITUDE_TWT12_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
