@@ -11,6 +11,7 @@ import { MADE_EASY_OS_TWT14_QUESTIONS } from "../data/madeEasyOSTest14";
 import { MADE_EASY_DS_TWT15_QUESTIONS } from "../data/madeEasyDSTest15";
 import { MADE_EASY_DS_TWT16_QUESTIONS } from "../data/madeEasyDSTest16";
 import { MADE_EASY_CN_TWT17_QUESTIONS } from "../data/madeEasyCNTest17";
+import { MADE_EASY_CN_TWT18_QUESTIONS } from "../data/madeEasyCNTest18";
 
 interface Props {
   isOpen: boolean;
@@ -246,6 +247,39 @@ export default function MadeEasyTestSeriesModal({
             "Collision & Broadcast Domains",
           ],
           chapterId: "cn-gate-2027-twt-17",
+        },
+        {
+          id: "cn-twt-18",
+          name: "GATE 2027 CS TOPIC WISE TEST - 18 (Computer Networks - 2)",
+          testNumber: 18,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_CN_TWT18_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 6,
+          msqCount: 4,
+          natCount: 7,
+          topics: [
+            "Connection-Oriented vs Connectionless Protocols",
+            "IPv4 Router Forwarding & Header Checksum",
+            "Directed Broadcast Address & Network ID 1s",
+            "Class C Subnetting Host Calculation",
+            "Distance Vector vs Link State Routing",
+            "OSPF Routing Protocol Properties",
+            "TCP Cumulative Acknowledgment",
+            "TCP Sequence Number Wrap-around",
+            "TCP Full-Duplex & Elastic Applications",
+            "CIDR Address Block Allocation",
+            "Subnetting First & Last Subnet DBA",
+            "IPv4 Fragmentation Offset Calculation",
+            "End-to-End Transport Layer Encapsulation",
+            "TCP Round Trip Time (RTT) Estimation",
+            "CIDR Route Aggregation & Supernetting",
+            "TCP Three-Way Handshake Sequence Numbers",
+            "Distance Vector Count-to-Infinity Problem",
+          ],
+          chapterId: "cn-gate-2027-twt-18",
         },
       ] as MadeEasyTestMeta[],
     },
@@ -501,6 +535,12 @@ export default function MadeEasyTestSeriesModal({
     // CN TWT-17 — serve the 17 imported CN questions
     if (test.chapterId === "cn-gate-2027-twt-17") {
       onStartTest(MADE_EASY_CN_TWT17_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // CN TWT-18 — serve the 17 imported CN questions (Network & Transport Layer)
+    if (test.chapterId === "cn-gate-2027-twt-18") {
+      onStartTest(MADE_EASY_CN_TWT18_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
