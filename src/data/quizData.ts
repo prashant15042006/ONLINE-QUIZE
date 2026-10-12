@@ -2,6 +2,7 @@ import { PYQ_BY_CHAPTER } from "./pyqMapper";
 import { CURATED_QUESTIONS } from "./curatedQuestions";
 import { MADE_EASY_APTITUDE_TWT11_CHAPTER } from "./madeEasyAptitudeTest11";
 import { MADE_EASY_APTITUDE_TWT12_CHAPTER } from "./madeEasyAptitudeTest12";
+import { MADE_EASY_OS_TWT13_CHAPTER } from "./madeEasyOSTest13";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -1620,7 +1621,8 @@ const gateCS_OS: Subject = {
           explanation: '### Solution\n- On TLB hit: $T_{hit} = TLB + MM = 20 + 100 = 120$ ns.\n- On TLB miss: $T_{miss} = TLB + MM (\\text{page table}) + MM (\\text{data}) = 20 + 100 + 100 = 220$ ns.\n$$\\text{EMAT} = (0.8 \\times 120) + (0.2 \\times 220) = 96 + 44 = \\mathbf{140 \\text{ ns}}$$.'
         },
       ]
-    }
+    },
+    MADE_EASY_OS_TWT13_CHAPTER
   ]
 };
 

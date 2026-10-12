@@ -6,6 +6,7 @@ import { MADE_EASY_DEMO_TEST_QUESTIONS } from "../data/madeEasyDemoTest";
 import { MADE_EASY_TOC_TWT1_QUESTIONS } from "../data/madeEasyTOCTest1";
 import { MADE_EASY_APTITUDE_TWT11_QUESTIONS } from "../data/madeEasyAptitudeTest11";
 import { MADE_EASY_APTITUDE_TWT12_QUESTIONS } from "../data/madeEasyAptitudeTest12";
+import { MADE_EASY_OS_TWT13_QUESTIONS } from "../data/madeEasyOSTest13";
 
 interface Props {
   isOpen: boolean;
@@ -130,7 +131,41 @@ export default function MadeEasyTestSeriesModal({
       shortName: "OS",
       icon: "⚙️",
       accent: "from-cyan-600 to-blue-600",
-      tests: [] as MadeEasyTestMeta[],
+      tests: [
+        {
+          id: "os-twt-13",
+          name: "GATE 2027 CS TOPIC WISE TEST - 13 (Operating Systems)",
+          testNumber: 13,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_OS_TWT13_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 7,
+          msqCount: 7,
+          natCount: 3,
+          topics: [
+            "Resource Allocation Graphs & Safe Sequences (MSQ)",
+            "Segmentation Hardware & MMU Roles (MSQ)",
+            "Shortest Seek Time First (SSTF) Disk Scheduling",
+            "Paging & Page Size Trade-offs (MSQ)",
+            "Multi-level Paging Levels Calculation (NAT)",
+            "Inverted Page Tables & Control Bits (MSQ)",
+            "Cyclic Page References & FIFO/LRU/OPT (MSQ)",
+            "Demand Paging & Page Fault Semantics (MSQ)",
+            "File Allocation: Contiguous, Linked & Indexed",
+            "Deadlocks, Safe States & Banker's Algorithm (MSQ)",
+            "Dynamic Storage Allocation: First/Best/Worst Fit",
+            "Effective Memory Access Time with TLB (NAT)",
+            "Memory Allocation Algorithm Properties Matching",
+            "Compilers, Linkers & Loader Responsibilities",
+            "Bit Map Free Disk Space Management (NAT)",
+            "Least Recently Used (LRU) Page Replacement",
+            "Single-Level Page Table Size Calculation",
+          ],
+          chapterId: "os-gate-2027-twt-13",
+        },
+      ] as MadeEasyTestMeta[],
     },
     {
       key: "dbms",
@@ -313,6 +348,12 @@ export default function MadeEasyTestSeriesModal({
     // GA TWT-12 — serve the 17 imported Aptitude questions (SCQ)
     if (test.chapterId === "ga-gate-2027-twt-12") {
       onStartTest(MADE_EASY_APTITUDE_TWT12_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // OS TWT-13 — serve the 17 imported OS questions (MSQ + SCQ + NAT)
+    if (test.chapterId === "os-gate-2027-twt-13") {
+      onStartTest(MADE_EASY_OS_TWT13_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
