@@ -10,6 +10,7 @@ import { MADE_EASY_CN_TWT17_CHAPTER } from "./madeEasyCNTest17";
 import { MADE_EASY_CN_TWT18_CHAPTER } from "./madeEasyCNTest18";
 import { MADE_EASY_CD_TWT23_CHAPTER } from "./madeEasyCDTest23";
 import { MADE_EASY_DBMS_TWT7_CHAPTER } from "./madeEasyDBMSTest7";
+import { MADE_EASY_DM_TWT21_CHAPTER } from "./madeEasyDMTest21";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -276,7 +277,8 @@ const gateCS_EM: Subject = {
           explanation: '### Solution\nGeometric distribution: X = number of trials until first success.\n$$E[X] = \\frac{1}{p} = \\frac{1}{0.3} \\approx \\mathbf{3.33}$$\n\nIntuitively, if each trial has 30% success chance, on average we need ~3.33 trials to get first success.'
         },
       ]
-    }
+    },
+    MADE_EASY_DM_TWT21_CHAPTER
   ]
 };
 

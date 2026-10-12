@@ -14,6 +14,7 @@ import { MADE_EASY_CN_TWT17_QUESTIONS } from "../data/madeEasyCNTest17";
 import { MADE_EASY_CN_TWT18_QUESTIONS } from "../data/madeEasyCNTest18";
 import { MADE_EASY_CD_TWT23_QUESTIONS } from "../data/madeEasyCDTest23";
 import { MADE_EASY_DBMS_TWT7_QUESTIONS } from "../data/madeEasyDBMSTest7";
+import { MADE_EASY_DM_TWT21_QUESTIONS } from "../data/madeEasyDMTest21";
 
 interface Props {
   isOpen: boolean;
@@ -472,7 +473,41 @@ export default function MadeEasyTestSeriesModal({
       shortName: "DM",
       icon: "📐",
       accent: "from-fuchsia-600 to-pink-600",
-      tests: [] as MadeEasyTestMeta[],
+      tests: [
+        {
+          id: "dm-twt-21",
+          name: "GATE 2027 CS TOPIC WISE TEST - 21 (Discrete Mathematics)",
+          testNumber: 21,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_DM_TWT21_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 8,
+          msqCount: 5,
+          natCount: 4,
+          topics: [
+            "Injective & Surjective Function Cardinalities",
+            "Strings with Fixed Character Frequency (Combinatorics)",
+            "Pass/Fail Examination Outcomes (Binomial Symmetry)",
+            "Propositional Logic Tautologies & Equivalences",
+            "Function Injective/Surjective Bounds (Pigeonhole Principle)",
+            "Complement Counting on Subsets with Odd Numbers (NAT)",
+            "Universal Equivalence Relation Size (NAT)",
+            "Relatively Prime Integers via PIE (NAT)",
+            "Non-Tautology Implication Identification",
+            "Unordered Disjoint Subsets Pairs Counting",
+            "Biconditional Logic Expression Equivalences (MSQ)",
+            "Predicate Logic Universal Conditional Statements (MSQ)",
+            "Matching: Catalan Numbers, Permutations & String Palindromes",
+            "Distinct Digit 4-Digit Numbers Permutations (NAT)",
+            "Identity Relation & Equivalence Classes on Power Sets (MSQ)",
+            "Natural Language Translation to Propositional Logic (MSQ)",
+            "Even Sum Parity Equivalence Relation Properties (MSQ)",
+          ],
+          chapterId: "dm-gate-2027-twt-21",
+        },
+      ] as MadeEasyTestMeta[],
     },
     {
       key: "em_ga",
@@ -623,6 +658,12 @@ export default function MadeEasyTestSeriesModal({
     // DBMS TWT-7 — serve the 17 imported DBMS questions
     if (test.chapterId === "dbms-gate-2027-twt-7") {
       onStartTest(MADE_EASY_DBMS_TWT7_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // DM TWT-21 — serve the 17 imported Discrete Mathematics questions
+    if (test.chapterId === "dm-gate-2027-twt-21") {
+      onStartTest(MADE_EASY_DM_TWT21_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
