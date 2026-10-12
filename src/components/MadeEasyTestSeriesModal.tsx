@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { Question, Subject, Chapter } from "../data/quizData";
@@ -64,17 +64,17 @@ export default function MadeEasyTestSeriesModal({
   );
 
   const subjectsConfig = [
-    // ── CS Demo Test (Full Mock) ──
+    // â”€â”€ CS Demo Test (Full Mock) â”€â”€
     {
       key: "demo",
-      name: "CS Demo Test (Full Mock — 65 Qs)",
-      shortName: "🔥 DEMO TEST",
-      icon: "🎯",
+      name: "CS Demo Test (Full Mock â€” 65 Qs)",
+      shortName: "ðŸ”¥ DEMO TEST",
+      icon: "ðŸŽ¯",
       accent: "from-emerald-600 to-teal-600",
       tests: [
         {
           id: "me-cs-demo-full",
-          name: "CS DEMO TEST — GATE CS Full Pattern",
+          name: "CS DEMO TEST â€” GATE CS Full Pattern",
           testNumber: 1,
           type: "Full Syllabus Test" as const,
           totalQuestions: 65,
@@ -85,7 +85,7 @@ export default function MadeEasyTestSeriesModal({
           msqCount: 11,
           natCount: 11,
           topics: [
-            "General Aptitude (GA) — Verbal & Quant",
+            "General Aptitude (GA) â€” Verbal & Quant",
             "Engineering Mathematics (Calculus, Linear Algebra, Probability)",
             "Computer Organization & Architecture (COA)",
             "Operating Systems (OS)",
@@ -105,7 +105,7 @@ export default function MadeEasyTestSeriesModal({
       key: "coa",
       name: "Computer Organization & Architecture (COA)",
       shortName: "COA",
-      icon: "🖥️",
+      icon: "ðŸ–¥ï¸",
       accent: "from-blue-600 to-indigo-600",
       tests: [
         {
@@ -137,7 +137,7 @@ export default function MadeEasyTestSeriesModal({
       key: "os",
       name: "Operating Systems (OS)",
       shortName: "OS",
-      icon: "⚙️",
+      icon: "âš™ï¸",
       accent: "from-cyan-600 to-blue-600",
       tests: [
         {
@@ -212,7 +212,7 @@ export default function MadeEasyTestSeriesModal({
       key: "dbms",
       name: "Database Management Systems (DBMS)",
       shortName: "DBMS",
-      icon: "🗄️",
+      icon: "ðŸ—„ï¸",
       accent: "from-emerald-600 to-teal-600",
       tests: [
         {
@@ -254,7 +254,7 @@ export default function MadeEasyTestSeriesModal({
       key: "cn",
       name: "Computer Networks (CN)",
       shortName: "CN",
-      icon: "🌐",
+      icon: "ðŸŒ",
       accent: "from-indigo-600 to-sky-600",
       tests: [
         {
@@ -324,7 +324,7 @@ export default function MadeEasyTestSeriesModal({
       key: "toc",
       name: "Theory of Computation (TOC)",
       shortName: "TOC",
-      icon: "🔤",
+      icon: "ðŸ”¤",
       accent: "from-purple-600 to-violet-600",
       tests: [
         {
@@ -356,7 +356,7 @@ export default function MadeEasyTestSeriesModal({
       key: "cd",
       name: "Compiler Design (CD)",
       shortName: "CD",
-      icon: "⚡",
+      icon: "âš¡",
       accent: "from-amber-600 to-orange-600",
       tests: [
         {
@@ -398,7 +398,7 @@ export default function MadeEasyTestSeriesModal({
       key: "ds_algo",
       name: "Data Structures & Algorithms (DS & Algo)",
       shortName: "DS & Algo",
-      icon: "🌲",
+      icon: "ðŸŒ²",
       accent: "from-green-600 to-emerald-600",
       tests: [
         {
@@ -452,7 +452,7 @@ export default function MadeEasyTestSeriesModal({
             "AVL Tree Properties (Min/Max Nodes)",
             "AVL Tree Insertion & Level Sum",
             "Linked List Insert at End",
-            "Full 4-ary Tree — Internal Nodes",
+            "Full 4-ary Tree â€” Internal Nodes",
             "Hash Table Chaining & Slot Probability",
           ],
           chapterId: "ds-gate-2027-twt-16",
@@ -463,7 +463,7 @@ export default function MadeEasyTestSeriesModal({
       key: "dl",
       name: "Digital Logic (DL)",
       shortName: "DL",
-      icon: "💡",
+      icon: "ðŸ’¡",
       accent: "from-rose-600 to-red-600",
       tests: [] as MadeEasyTestMeta[],
     },
@@ -471,7 +471,7 @@ export default function MadeEasyTestSeriesModal({
       key: "dm",
       name: "Discrete Mathematics & Graph Theory",
       shortName: "DM",
-      icon: "📐",
+      icon: "ðŸ“",
       accent: "from-fuchsia-600 to-pink-600",
       tests: [
         {
@@ -513,7 +513,7 @@ export default function MadeEasyTestSeriesModal({
       key: "em_ga",
       name: "Engineering Mathematics & General Aptitude",
       shortName: "EM & GA",
-      icon: "📊",
+      icon: "ðŸ“Š",
       accent: "from-teal-600 to-cyan-600",
       tests: [
         {
@@ -589,393 +589,330 @@ export default function MadeEasyTestSeriesModal({
     subjectsConfig.find((s) => s.key === selectedSubjectKey) || subjectsConfig[0];
 
   const handleLaunchTest = (test: MadeEasyTestMeta) => {
-    // Demo Test — serve the 65 imported questions
+    // Demo Test â€” serve the 65 imported questions
     if (test.chapterId === "me-cs-demo-test") {
       onStartTest(MADE_EASY_DEMO_TEST_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // TOC TWT-1 — serve the 17 imported TOC questions
+    // TOC TWT-1 â€” serve the 17 imported TOC questions
     if (test.chapterId === "me-toc-gate-2027-twt-1") {
       onStartTest(MADE_EASY_TOC_TWT1_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // GA TWT-11 — serve the 17 imported Aptitude questions (SCQ + NAT)
+    // GA TWT-11 â€” serve the 17 imported Aptitude questions (SCQ + NAT)
     if (test.chapterId === "ga-gate-2027-twt-11") {
       onStartTest(MADE_EASY_APTITUDE_TWT11_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // GA TWT-12 — serve the 17 imported Aptitude questions (SCQ)
+    // GA TWT-12 â€” serve the 17 imported Aptitude questions (SCQ)
     if (test.chapterId === "ga-gate-2027-twt-12") {
       onStartTest(MADE_EASY_APTITUDE_TWT12_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // OS TWT-13 — serve the 17 imported OS questions (MSQ + SCQ + NAT)
+    // OS TWT-13 â€” serve the 17 imported OS questions (MSQ + SCQ + NAT)
     if (test.chapterId === "os-gate-2027-twt-13") {
       onStartTest(MADE_EASY_OS_TWT13_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // OS TWT-14 — serve the 17 imported OS questions (MSQ + SCQ + NAT)
+    // OS TWT-14 â€” serve the 17 imported OS questions (MSQ + SCQ + NAT)
     if (test.chapterId === "os-gate-2027-twt-14") {
       onStartTest(MADE_EASY_OS_TWT14_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // DS TWT-15 — serve the 17 imported DS & C Programming questions (SCQ + MSQ + NAT)
+    // DS TWT-15 â€” serve the 17 imported DS & C Programming questions (SCQ + MSQ + NAT)
     if (test.chapterId === "ds-gate-2027-twt-15") {
       onStartTest(MADE_EASY_DS_TWT15_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // DS TWT-16 — serve the 17 imported DS questions (BST, AVL, LL, Hash)
+    // DS TWT-16 â€” serve the 17 imported DS questions (BST, AVL, LL, Hash)
     if (test.chapterId === "ds-gate-2027-twt-16") {
       onStartTest(MADE_EASY_DS_TWT16_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // CN TWT-17 — serve the 17 imported CN questions
+    // CN TWT-17 â€” serve the 17 imported CN questions
     if (test.chapterId === "cn-gate-2027-twt-17") {
       onStartTest(MADE_EASY_CN_TWT17_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // CN TWT-18 — serve the 17 imported CN questions (Network & Transport Layer)
+    // CN TWT-18 â€” serve the 17 imported CN questions (Network & Transport Layer)
     if (test.chapterId === "cn-gate-2027-twt-18") {
       onStartTest(MADE_EASY_CN_TWT18_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // CD TWT-23 — serve the 17 imported Compiler Design questions
+    // CD TWT-23 â€” serve the 17 imported Compiler Design questions
     if (test.chapterId === "cd-gate-2027-twt-23") {
       onStartTest(MADE_EASY_CD_TWT23_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // DBMS TWT-7 — serve the 17 imported DBMS questions
+    // DBMS TWT-7 â€” serve the 17 imported DBMS questions
     if (test.chapterId === "dbms-gate-2027-twt-7") {
       onStartTest(MADE_EASY_DBMS_TWT7_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // DM TWT-21 — serve the 17 imported Discrete Mathematics questions
+    // DM TWT-21 â€” serve the 17 imported Discrete Mathematics questions
     if (test.chapterId === "dm-gate-2027-twt-21") {
       onStartTest(MADE_EASY_DM_TWT21_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
-    // COA TWT-5 — serve from quizData chapter
+    // COA TWT-5 â€” serve from quizData chapter
     if (test.chapterId && twt5Chapter && twt5Chapter.questions.length > 0) {
       onStartTest(twt5Chapter.questions, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     } else {
       alert(
-        `📹 "${test.name}" ke questions add karne ke liye video link, question text ya screenshot chat me bhejein!\n\nAI turant is test ko activate kar dega.`
+        `ðŸ“¹ "${test.name}" ke questions add karne ke liye video link, question text ya screenshot chat me bhejein!\n\nAI turant is test ko activate kar dega.`
       );
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-5 animate-fade-in">
-      <div className="bg-[#0b101b] border border-slate-700/80 rounded-3xl max-w-5xl w-full text-slate-100 shadow-2xl relative max-h-[92vh] flex flex-col overflow-hidden">
-        
-        {/* Top Header */}
-        <div className="flex justify-between items-center border-b border-white/[0.08] px-5 py-4 shrink-0 bg-[#0e1422]">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-rose-600 via-amber-500 to-yellow-400 flex items-center justify-center text-xl shadow-lg shadow-rose-500/20 font-black text-white">
-              🎯
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md p-0 sm:p-4 animate-fade-in">
+      <div className="bg-[#0b101b] border border-slate-700/60 rounded-t-3xl sm:rounded-3xl max-w-5xl w-full text-slate-100 shadow-2xl relative flex flex-col overflow-hidden"
+        style={{ maxHeight: "94svh" }}>
+
+        {/* â”€â”€ Compact Header â”€â”€ */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.07] bg-[#0e1422] shrink-0">
+          {/* Brand */}
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-600 to-amber-400 flex items-center justify-center text-lg shrink-0 shadow-md shadow-rose-500/20">
+              ðŸŽ¯
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-extrabold text-white text-base sm:text-lg tracking-wide">
-                  MADE EASY Online Test Series (OTS)
-                </h3>
-                <span className="text-[10px] font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-2.5 py-0.5 rounded-full border border-rose-500/30">
-                  GATE CS & IT
-                </span>
-                <span className="hidden sm:inline-block text-[10px] font-bold text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
-                  Authentic Pattern
-                </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-black text-white text-sm tracking-wide truncate">MADE EASY OTS 2027</span>
+                <span className="text-[9px] font-black uppercase text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/30 shrink-0">GATE CS</span>
               </div>
-              <p className="text-[11px] text-slate-400">
-                Official Topic-wise &amp; Subject Tests • SCQ / MSQ / NAT • Exact GATE Marking Scheme (+1/-0.33, +2/-0.66, MSQ 0 Negative)
-              </p>
+              <p className="text-[10px] text-slate-500 hidden sm:block">SCQ / MSQ / NAT Â· Authentic GATE Marking</p>
             </div>
           </div>
+
+          {/* Mode Switcher */}
+          <div className="flex bg-black/40 rounded-xl p-0.5 border border-white/10 shrink-0">
+            <button
+              onClick={() => setExamModeChoice("exam")}
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold cursor-pointer transition ${
+                examModeChoice === "exam"
+                  ? "bg-rose-600 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              â±ï¸ <span className="hidden sm:inline">CBT </span>Exam
+            </button>
+            <button
+              onClick={() => setExamModeChoice("practice")}
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-bold cursor-pointer transition ${
+                examModeChoice === "practice"
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              ðŸ’¡ <span className="hidden sm:inline">Practice</span>
+            </button>
+          </div>
+
+          {/* Close */}
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
-          >
-            ✕
-          </button>
+            className="w-8 h-8 rounded-xl bg-white/[0.05] hover:bg-white/[0.12] text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0 text-sm"
+          >âœ•</button>
         </div>
 
-        {/* Info & Mode Banner */}
-        <div className="px-5 py-3 bg-gradient-to-r from-slate-900/90 via-indigo-950/60 to-slate-900/90 border-b border-indigo-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2.5">
-            <span className="text-base shrink-0">📌</span>
-            <span className="text-slate-300 leading-snug">
-              <strong className="text-white">Authentic Tests:</strong> Jaise hi aap kisi bhi subject ka test question provide karenge, hum exact marks, negative marking, aur solutions ke saath live add karte jayenge!
-            </span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="text-[11px] text-slate-400 font-medium">Mode:</span>
-            <div className="flex bg-black/40 rounded-xl p-0.5 border border-white/10">
-              <button
-                onClick={() => setExamModeChoice("exam")}
-                className={`px-3 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition ${
-                  examModeChoice === "exam"
-                    ? "bg-rose-600 text-white shadow-sm"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                ⏱️ CBT Exam Mode
-              </button>
-              <button
-                onClick={() => setExamModeChoice("practice")}
-                className={`px-3 py-1 rounded-lg text-[11px] font-bold cursor-pointer transition ${
-                  examModeChoice === "practice"
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                💡 Practice Mode
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content Area */}
+        {/* â”€â”€ Main Content â”€â”€ */}
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-          
-          {/* Mobile: Horizontal Subjects Tab Bar */}
-          <div className="flex md:hidden overflow-x-auto gap-2 p-2.5 bg-[#0c101c] border-b border-white/[0.08] scrollbar-none shrink-0">
+
+          {/* Mobile: Horizontal Subject Pill Bar */}
+          <div className="flex md:hidden overflow-x-auto gap-1.5 px-3 py-2.5 bg-[#0c101c] border-b border-white/[0.06] scrollbar-none shrink-0">
             {subjectsConfig.map((subj) => {
               const isSelected = subj.key === selectedSubjectKey;
-              const hasActiveTest = subj.tests.some((t) => t.status === "available");
+              const hasTests = subj.tests.some(t => t.status === "available");
               return (
                 <button
                   key={subj.key}
                   onClick={() => setSelectedSubjectKey(subj.key)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer shrink-0 ${
+                  className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold whitespace-nowrap transition cursor-pointer shrink-0 ${
                     isSelected
-                      ? "bg-gradient-to-r from-rose-600 to-indigo-600 text-white shadow-md border border-rose-400/40"
+                      ? "bg-gradient-to-r from-rose-600 to-indigo-600 text-white shadow-md"
                       : "bg-white/[0.04] text-slate-400 hover:text-white border border-white/[0.06]"
                   }`}
                 >
                   <span>{subj.icon}</span>
                   <span>{subj.shortName}</span>
-                  {hasActiveTest && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
-                  )}
+                  {hasTests && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />}
                 </button>
               );
             })}
           </div>
 
-          {/* Desktop Left: Subjects List Sidebar */}
-          <div className="hidden md:block md:w-72 border-r border-white/[0.08] bg-[#0c101c] overflow-y-auto p-3 space-y-1.5 shrink-0 md:max-h-full">
-            <div className="text-[10px] font-black uppercase tracking-wider text-slate-500 px-3 py-1">
-              GATE CS Subjects ({subjectsConfig.length})
+          {/* Desktop Left Sidebar */}
+          <div className="hidden md:flex flex-col md:w-64 border-r border-white/[0.07] bg-[#0c101c] overflow-y-auto p-2.5 gap-0.5 shrink-0">
+            <div className="text-[9px] font-black uppercase tracking-widest text-slate-500 px-3 py-1.5">
+              GATE CS Subjects
             </div>
             {subjectsConfig.map((subj) => {
               const isSelected = subj.key === selectedSubjectKey;
-              const hasActiveTest = subj.tests.some((t) => t.status === "available");
+              const hasTests = subj.tests.some(t => t.status === "available");
               return (
                 <button
                   key={subj.key}
                   onClick={() => setSelectedSubjectKey(subj.key)}
-                  className={`w-full text-left p-3 rounded-2xl flex items-center justify-between transition cursor-pointer group ${
+                  className={`w-full text-left px-3 py-2.5 rounded-xl flex items-center justify-between transition cursor-pointer group ${
                     isSelected
                       ? "bg-gradient-to-r from-rose-600/20 to-indigo-600/20 border border-rose-500/30 text-white"
-                      : "bg-white/[0.02] border border-white/[0.04] text-slate-400 hover:bg-white/[0.05] hover:text-slate-200"
+                      : "text-slate-400 hover:bg-white/[0.04] hover:text-slate-200 border border-transparent"
                   }`}
                 >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="text-lg shrink-0">{subj.icon}</span>
-                    <div className="truncate">
-                      <div className="text-xs font-bold truncate group-hover:text-white">
-                        {subj.shortName}
-                      </div>
-                      <div className="text-[10px] text-slate-500 truncate">
-                        {hasActiveTest ? `${subj.tests.length} Active Test` : "Tests to be added"}
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-base shrink-0">{subj.icon}</span>
+                    <span className="text-xs font-bold truncate">{subj.shortName}</span>
                   </div>
-                  {hasActiveTest ? (
-                    <span className="text-[9px] font-black uppercase tracking-wide bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full shrink-0">
+                  {hasTests ? (
+                    <span className="text-[9px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded-full shrink-0">
                       LIVE
                     </span>
                   ) : (
-                    <span className="text-[9px] font-bold text-slate-500 bg-white/[0.03] px-1.5 py-0.5 rounded shrink-0">
-                      Upcoming
-                    </span>
+                    <span className="text-[9px] text-slate-600 shrink-0">Soon</span>
                   )}
                 </button>
               );
             })}
           </div>
 
-          {/* Right: Tests List for Selected Subject */}
-          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 bg-[#0b101b]">
-            
-            {/* Subject Title Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">{currentSubjectObj.icon}</span>
-                <div>
-                  <h4 className="text-base font-black text-white">
-                    {currentSubjectObj.name}
-                  </h4>
-                  <p className="text-[11px] text-slate-400">
-                    Made Easy Topic-wise Tests (45 mins, 25 marks) &amp; Subject Tests (90 mins, 50 marks)
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] bg-slate-800 text-slate-300 px-2.5 py-1 rounded-full border border-slate-700 font-bold">
-                  {currentSubjectObj.tests.length} Total Tests
-                </span>
-              </div>
-            </div>
+          {/* Right: Test Cards */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-3">
 
-            {/* Test Cards Grid OR Empty State */}
             {currentSubjectObj.tests.length === 0 ? (
-              <div className="p-8 sm:p-12 rounded-3xl bg-white/[0.02] border border-dashed border-white/10 text-center space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-center text-3xl mx-auto shadow-inner">
+              /* Empty State */
+              <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-center space-y-3 py-12">
+                <div className="w-14 h-14 rounded-2xl bg-slate-800/60 border border-slate-700/60 flex items-center justify-center text-2xl shadow-inner">
                   {currentSubjectObj.icon}
                 </div>
                 <div>
-                  <h5 className="text-base font-bold text-white mb-1">
-                    {currentSubjectObj.name}
-                  </h5>
-                  <p className="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">
-                    Is subject ke tests abhi add nahi hue hain. Jaise hi aap questions provide karenge, hum unhe SCQ, MSQ, aur NAT format me live add kar denge.
+                  <h5 className="text-sm font-bold text-white mb-1">{currentSubjectObj.name}</h5>
+                  <p className="text-xs text-slate-500 max-w-xs leading-relaxed">
+                    Tests for this subject are being prepared. Send questions in chat to activate instantly!
                   </p>
                 </div>
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 text-xs font-semibold">
-                  <span>💬 Questions chat me bhejein activate karne ke liye</span>
-                </div>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-[11px] font-semibold">
+                  ðŸ’¬ Send questions to activate
+                </span>
               </div>
             ) : (
-              <div className="space-y-4">
-                {currentSubjectObj.tests.map((test) => {
-                  const isLive = test.status === "available";
+              currentSubjectObj.tests.map((test) => {
+                const isLive = test.status === "available";
+                return (
+                  <div
+                    key={test.id}
+                    className={`relative rounded-2xl border overflow-hidden transition ${
+                      isLive
+                        ? "bg-gradient-to-br from-[#121929] to-[#182338] border-rose-500/30 shadow-lg shadow-rose-950/20"
+                        : "bg-white/[0.02] border-white/[0.06]"
+                    }`}
+                  >
+                    {/* Live ribbon */}
+                    {isLive && (
+                      <div className="absolute top-0 right-0 bg-gradient-to-l from-rose-500 to-amber-500 text-white font-black text-[8px] uppercase px-3 py-1 rounded-bl-xl tracking-wider">
+                        â˜… Live
+                      </div>
+                    )}
 
-                  return (
-                    <div
-                      key={test.id}
-                      className={`p-4 sm:p-5 rounded-2xl border transition relative overflow-hidden ${
-                        isLive
-                          ? "bg-gradient-to-br from-[#121929] to-[#182338] border-rose-500/40 shadow-xl shadow-rose-950/20"
-                          : "bg-white/[0.02] border-white/[0.06] hover:border-white/[0.12]"
-                      }`}
-                    >
-                      {isLive && (
-                        <div className="absolute top-0 right-0 bg-gradient-to-l from-rose-500 to-amber-500 text-white font-black text-[9px] uppercase px-3 py-1 rounded-bl-xl tracking-wider">
-                          ★ Live &amp; Ready to Attempt
+                    <div className="p-4 sm:p-5">
+                      {/* Test name + type badge */}
+                      <div className="flex items-start gap-2 mb-3 pr-12">
+                        <span className={`shrink-0 text-[10px] font-black uppercase px-2 py-0.5 rounded-md mt-0.5 ${
+                          isLive
+                            ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : "bg-white/5 text-slate-400 border border-white/10"
+                        }`}>
+                          TWT
+                        </span>
+                        <h5 className="text-sm font-extrabold text-white leading-snug">{test.name}</h5>
+                      </div>
+
+                      {/* Quick Chips */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-slate-800/80 border border-white/[0.07] text-slate-300 font-semibold">
+                          â±ï¸ {test.durationMinutes} min
+                        </span>
+                        <span className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-slate-800/80 border border-white/[0.07] text-slate-300 font-semibold">
+                          ðŸŽ¯ {test.totalMarks} marks
+                        </span>
+                        <span className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-slate-800/80 border border-white/[0.07] text-slate-300 font-semibold">
+                          â“ {test.totalQuestions} Qs
+                        </span>
+                        <span className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-300 font-semibold">
+                          {test.scqCount} SCQ
+                        </span>
+                        {test.msqCount > 0 && (
+                          <span className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 font-semibold">
+                            {test.msqCount} MSQ
+                          </span>
+                        )}
+                        {test.natCount > 0 && (
+                          <span className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 font-semibold">
+                            {test.natCount} NAT
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Topics â€” show first 4 + count */}
+                      {test.topics.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {test.topics.slice(0, 4).map((top, idx) => (
+                            <span
+                              key={idx}
+                              className="text-[10px] px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-400 border border-white/[0.05]"
+                            >
+                              {top}
+                            </span>
+                          ))}
+                          {test.topics.length > 4 && (
+                            <span className="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 border border-indigo-500/15 font-bold">
+                              +{test.topics.length - 4} more
+                            </span>
+                          )}
                         </div>
                       )}
 
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-3">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span
-                              className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md ${
-                                isLive
-                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
-                                  : "bg-white/5 text-slate-400 border border-white/10"
-                              }`}
-                            >
-                              {test.type}
-                            </span>
-                            <span className="text-[11px] font-mono font-bold text-slate-400">
-                              ⏱️ {test.durationMinutes} Mins • 🎯 {test.totalMarks} Marks • ❓ {test.totalQuestions} Questions
-                            </span>
-                          </div>
-                          <h5 className="text-sm sm:text-base font-extrabold text-white">
-                            {test.name}
-                          </h5>
-                        </div>
-                      </div>
-
-                      {/* Question Types Breakdown */}
-                      <div className="flex flex-wrap items-center gap-2 mb-3 text-[11px]">
-                        <span className="px-2 py-0.5 rounded-md bg-blue-500/10 border border-blue-500/20 text-blue-300 font-bold">
-                          SCQ: {test.scqCount} Qs (+1/-0.33, +2/-0.66)
+                      {/* Action Row */}
+                      <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/[0.05]">
+                        <span className={`text-[11px] font-semibold ${examModeChoice === "exam" ? "text-rose-400" : "text-emerald-400"}`}>
+                          {examModeChoice === "exam" ? "Real timer - Negative marking" : "Instant answers - No penalty"}
                         </span>
-                        <span className="px-2 py-0.5 rounded-md bg-purple-500/10 border border-purple-500/20 text-purple-300 font-bold">
-                          MSQ: {test.msqCount} Qs (Multi-Select, 0 Neg)
-                        </span>
-                        <span className="px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-300 font-bold">
-                          NAT: {test.natCount} Qs (Numerical, 0 Neg)
-                        </span>
-                      </div>
-
-                      {/* Topics Covered */}
-                      <div className="mb-4">
-                        <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1.5">
-                          Key Topics Covered:
-                        </div>
-                        <div className="flex flex-wrap gap-1.5 max-h-24 sm:max-h-36 overflow-y-auto pr-1 scrollbar-none">
-                          {test.topics.map((top, idx) => (
-                            <span
-                              key={idx}
-                              className="text-[10px] px-2 py-0.5 rounded-md bg-white/[0.04] text-slate-300 border border-white/[0.06]"
-                            >
-                              • {top}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="pt-3 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-3">
-                        <div className="text-[11px] text-slate-400">
-                          {examModeChoice === "exam" ? (
-                            <span className="text-rose-400 font-bold">⏱️ Real CBT Timer &amp; Negative Marking Enabled</span>
-                          ) : (
-                            <span className="text-emerald-400 font-bold">💡 Practice Mode (Instant Answers &amp; Hints)</span>
-                          )}
-                        </div>
                         <button
                           onClick={() => handleLaunchTest(test)}
-                          className="px-6 py-2.5 btn-3d-rose font-black text-xs rounded-xl cursor-pointer flex items-center gap-2 shadow-lg"
+                          className="px-5 py-2 rounded-xl font-black text-xs text-white cursor-pointer flex items-center gap-1.5 shadow-lg transition hover:scale-[1.03] active:scale-[0.97] shrink-0"
                           style={{
                             background: "linear-gradient(135deg, #e11d48, #be123c)",
                             border: "1px solid rgba(244,63,94,0.4)",
+                            boxShadow: "0 4px 14px rgba(225,29,72,0.25)",
                           }}
                         >
-                          <span>🚀 Start Test Now ({examModeChoice === "exam" ? "CBT Exam" : "Practice"})</span>
-                          <span>→</span>
+                          {examModeChoice === "exam" ? "Attempt Test \u2192" : "Practice Now \u2192"}
                         </button>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
+                  </div>
+                );
+              })
             )}
-
-            {/* Questions Addition Guide Box */}
-            <div className="p-4 rounded-2xl bg-indigo-950/20 border border-indigo-500/20 text-xs text-indigo-200 space-y-1.5">
-              <div className="font-bold text-white flex items-center gap-1.5">
-                <span>💡</span>
-                <span>Naye Subject ke Questions Kaise Add Honge?</span>
-              </div>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Aap subject-wise questions text ya screenshot chat me bhejein — hum SCQ (+1/-0.33, +2/-0.66), MSQ (multi-select check box), aur NAT (numeric fill-up box) ke saath test turant add kar denge!
-              </p>
-            </div>
-
           </div>
-
         </div>
-
       </div>
     </div>
   );
 }
+

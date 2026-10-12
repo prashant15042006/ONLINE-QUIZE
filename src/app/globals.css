@@ -13,6 +13,15 @@
   --card-bg:      rgba(10,15,30,0.85);
 }
 
+/* ═══ LIGHT MODE THEME ═══ */
+html.light {
+  --background: #f1f5f9;
+  --foreground: #0f172a;
+  --glass-bg:     rgba(255,255,255,0.80);
+  --glass-border: rgba(148,163,184,0.35);
+  --card-bg:      rgba(255,255,255,0.95);
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
@@ -23,7 +32,83 @@ body {
     radial-gradient(ellipse 60% 40% at 100% 80%, rgba(0,230,118,0.07) 0%, transparent 50%),
     radial-gradient(ellipse 50% 40% at 0% 60%, rgba(213,0,249,0.06) 0%, transparent 50%);
   background-attachment: fixed;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+/* Light mode body */
+html.light body {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(0,176,255,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 100% 80%, rgba(0,200,83,0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 50% 40% at 0% 60%, rgba(213,0,249,0.03) 0%, transparent 50%);
+  color: #0f172a;
+}
+
+/* Light mode: glass cards */
+html.light .glass-card {
+  background: rgba(255,255,255,0.85);
+  border-color: rgba(148,163,184,0.30);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+html.light .glass-card:hover {
+  border-color: rgba(0,176,255,0.35);
+  box-shadow: 0 8px 32px rgba(0,176,255,0.10);
+}
+
+/* Light mode: duo-card */
+html.light .duo-card {
+  background: rgba(255,255,255,0.90);
+  border-color: rgba(148,163,184,0.25);
+}
+
+/* Light mode: chapter-card */
+html.light .chapter-card {
+  background: rgba(255,255,255,0.80);
+  border-color: rgba(148,163,184,0.20);
+  color: #1e293b;
+}
+html.light .chapter-card:hover {
+  background: rgba(240,249,255,0.95);
+  border-color: rgba(0,176,255,0.4);
+}
+
+/* Light mode: stat-badge */
+html.light .stat-badge {
+  background: rgba(255,255,255,0.90);
+  border-color: rgba(148,163,184,0.25);
+  color: #0f172a;
+}
+
+/* Light mode: option buttons */
+html.light .option-default {
+  background: rgba(248,250,252,0.95);
+  border-color: rgba(148,163,184,0.40);
+  color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+html.light .option-default:hover:not(:disabled) {
+  background: rgba(224,242,254,0.90);
+  border-color: rgba(0,176,255,0.50);
+  color: #0369a1;
+  box-shadow: 0 2px 8px rgba(0,176,255,0.15);
+}
+
+/* Light mode: KaTeX */
+html.light .katex { color: #0f172a !important; }
+html.light .katex-block { background: rgba(0,176,255,0.05); border-color: rgba(0,176,255,0.2); }
+
+/* Light mode: solution table */
+html.light .solution-table th { background: rgba(0,176,255,0.10); color: #0369a1; border-color: rgba(0,176,255,0.2); }
+html.light .solution-table td { border-color: rgba(148,163,184,0.2); color: #334155; }
+html.light .solution-table tr:nth-child(even) td { background: rgba(248,250,252,0.80); }
+
+/* Light mode: scrollbar */
+html.light ::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.4); }
+html.light ::-webkit-scrollbar-thumb:hover { background: rgba(0,176,255,0.45); }
+
+/* Light mode: text colors adjustments */
+html.light .text-slate-400 { color: #64748b !important; }
+html.light .text-slate-500 { color: #94a3b8 !important; }
 
 /* Glass Card */
 .glass-card {

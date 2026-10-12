@@ -292,6 +292,7 @@ export default function Home() {
   const [isCurrentQBookmarked, setIsCurrentQBookmarked] = useState(false);
   const [mistakesCount, setMistakesCount] = useState(0);
   const [bookmarksCount, setBookmarksCount] = useState(0);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
 
   // Advanced CBT Exam Tools States
   const [isAutoNext, setIsAutoNext] = useState<boolean>(false);
@@ -317,10 +318,25 @@ export default function Home() {
       if (savedStreak) setStreakCount(parseInt(savedStreak, 10));
       const savedName = localStorage.getItem("examiq_name");
       if (savedName) setUserName(savedName);
+      const savedTheme = localStorage.getItem("examiq_theme") as "dark" | "light" | null;
+      if (savedTheme === "light") setTheme("light");
       setMistakesCount(getMistakes().length);
       setBookmarksCount(getBookmarks().length);
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      if (theme === "light") {
+        document.documentElement.classList.add("light");
+      } else {
+        document.documentElement.classList.remove("light");
+      }
+      localStorage.setItem("examiq_theme", theme);
+    }
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === "dark" ? "light" : "dark");
 
   const availableSubjects = useMemo(() => {
     if (!selectedExam) return [];
@@ -793,6 +809,17 @@ export default function Home() {
           <button onClick={() => setIsAIQuizGenModalOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/20 text-[11px] font-bold transition cursor-pointer">
             ✨ AI Quiz
           </button>
+          <button
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer border"
+            style={theme === "dark"
+              ? { background: "rgba(255,235,59,0.08)", color: "#fdd835", borderColor: "rgba(253,216,53,0.25)" }
+              : { background: "rgba(30,58,138,0.10)", color: "#1e40af", borderColor: "rgba(30,64,175,0.25)" }
+            }
+          >
+            {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+          </button>
           <div className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-full text-orange-400 font-bold text-[11px]">🔥 {streakCount}d</div>
           <div className="flex items-center gap-1.5 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-full text-cyan-300 font-bold text-[11px]">⚡ {userXP} XP</div>
         </div>
@@ -801,6 +828,15 @@ export default function Home() {
         <div className="flex md:hidden items-center gap-2">
           <div className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-full text-orange-400 font-bold text-[11px]">🔥 {streakCount}d</div>
           <div className="flex items-center gap-1 bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 rounded-full text-cyan-300 font-bold text-[11px]">⚡ {userXP}</div>
+          <button
+            onClick={toggleTheme}
+            className="w-9 h-9 rounded-xl border flex items-center justify-center text-base transition cursor-pointer"
+            style={theme === "dark"
+              ? { background: "rgba(255,235,59,0.08)", color: "#fdd835", borderColor: "rgba(253,216,53,0.2)" }
+              : { background: "rgba(30,58,138,0.10)", color: "#1e40af", borderColor: "rgba(30,64,175,0.2)" }
+            }
+            aria-label="Toggle theme"
+          >{theme === "dark" ? "☀️" : "🌙"}</button>
           <button onClick={() => setIsMobileDrawerOpen(true)} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-200 text-lg hover:bg-white/10 transition cursor-pointer" aria-label="Open menu">☰</button>
         </div>
       </header>
@@ -808,11 +844,11 @@ export default function Home() {
       {/* ═══════════════ MOBILE DRAWER ═══════════════ */}
       {isMobileDrawerOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-sm md:hidden animate-fadeIn">
-          <div className="w-4/5 max-w-xs bg-[#0d1117] h-full border-l border-white/[0.08] p-5 flex flex-col justify-between shadow-2xl">
+          <div className={`w-4/5 max-w-xs h-full border-l p-5 flex flex-col justify-between shadow-2xl ${theme === "light" ? "bg-white border-slate-200" : "bg-[#0d1117] border-white/[0.08]"}`}>
             <div className="space-y-5">
-              <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
-                <span className="font-extrabold text-white text-base">ExamiQ Menu</span>
-                <button onClick={() => setIsMobileDrawerOpen(false)} className="w-8 h-8 rounded-xl bg-white/5 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold cursor-pointer">✕</button>
+              <div className={`flex items-center justify-between border-b pb-4 ${theme === "light" ? "border-slate-200" : "border-white/[0.06]"}`}>
+                <span className={`font-extrabold text-base ${theme === "light" ? "text-slate-900" : "text-white"}`}>ExamiQ Menu</span>
+                <button onClick={() => setIsMobileDrawerOpen(false)} className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold cursor-pointer ${theme === "light" ? "bg-slate-100 text-slate-500 hover:text-slate-900" : "bg-white/5 text-slate-400 hover:text-white"}`}>✕</button>
               </div>
               <div className="space-y-2">
                 {[
@@ -825,14 +861,21 @@ export default function Home() {
                   { label: `🔖 Bookmarked Questions (${bookmarksCount})`, action: () => { setIsBookmarksModalOpen(true); setIsMobileDrawerOpen(false); } },
                   { label: "✨ AI Quiz Generator", action: () => { setIsAIQuizGenModalOpen(true); setIsMobileDrawerOpen(false); } },
                 ].map((item, i) => (
-                  <button key={i} onClick={item.action} className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold cursor-pointer transition ${item.active ? "bg-cyan-500/15 text-cyan-300 border border-cyan-500/20" : "bg-white/[0.04] text-slate-300 border border-white/[0.06] hover:bg-white/[0.07]"}`}>
+                  <button key={i} onClick={item.action} className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold cursor-pointer transition ${item.active ? "bg-cyan-500/15 text-cyan-600 border border-cyan-500/20" : theme === "light" ? "bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200" : "bg-white/[0.04] text-slate-300 border border-white/[0.06] hover:bg-white/[0.07]"}`}>
                     {item.label}
                   </button>
                 ))}
               </div>
+              {/* Theme Toggle in Drawer */}
+              <button
+                onClick={toggleTheme}
+                className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs font-bold cursor-pointer transition border ${theme === "dark" ? "bg-amber-500/10 text-amber-300 border-amber-500/20 hover:bg-amber-500/15" : "bg-slate-800/10 text-slate-700 border-slate-300 hover:bg-slate-100"}`}
+              >
+                {theme === "dark" ? "☀️ Switch to Light Mode" : "🌙 Switch to Dark Mode"}
+              </button>
             </div>
-            <div className="pt-4 border-t border-white/[0.06] text-center text-[11px] text-slate-500 font-medium">
-              Streak: <span className="text-orange-400 font-bold">{streakCount} Days</span> · XP: <span className="text-cyan-300 font-bold">{userXP}</span>
+            <div className={`pt-4 border-t text-center text-[11px] font-medium ${theme === "light" ? "border-slate-200 text-slate-500" : "border-white/[0.06] text-slate-500"}`}>
+              Streak: <span className="text-orange-400 font-bold">{streakCount} Days</span> · XP: <span className="text-cyan-500 font-bold">{userXP}</span>
             </div>
           </div>
         </div>
