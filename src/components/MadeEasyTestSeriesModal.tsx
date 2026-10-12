@@ -13,6 +13,7 @@ import { MADE_EASY_DS_TWT16_QUESTIONS } from "../data/madeEasyDSTest16";
 import { MADE_EASY_CN_TWT17_QUESTIONS } from "../data/madeEasyCNTest17";
 import { MADE_EASY_CN_TWT18_QUESTIONS } from "../data/madeEasyCNTest18";
 import { MADE_EASY_CD_TWT23_QUESTIONS } from "../data/madeEasyCDTest23";
+import { MADE_EASY_DBMS_TWT7_QUESTIONS } from "../data/madeEasyDBMSTest7";
 
 interface Props {
   isOpen: boolean;
@@ -212,7 +213,41 @@ export default function MadeEasyTestSeriesModal({
       shortName: "DBMS",
       icon: "🗄️",
       accent: "from-emerald-600 to-teal-600",
-      tests: [] as MadeEasyTestMeta[],
+      tests: [
+        {
+          id: "dbms-twt-7",
+          name: "GATE 2027 CS TOPIC WISE TEST - 7 (DBMS)",
+          testNumber: 7,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_DBMS_TWT7_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 10,
+          msqCount: 4,
+          natCount: 3,
+          topics: [
+            "ER Diagram to Relational Model (M:N PK)",
+            "Armstrong's Axioms & Functional Dependencies",
+            "B-Tree Insertions, Node Capacity & Splitting (NAT)",
+            "Normal Forms (2NF, 3NF, BCNF, 4NF)",
+            "Foreign Keys & ON DELETE CASCADE Cascade Deletions",
+            "Dense vs Sparse Index Disk Blocks Calculation (NAT)",
+            "ERD Reduction to Minimal BCNF Tables",
+            "B-Tree vs B+ Tree Node Structure & Search Time",
+            "Clustering, Secondary & Multilevel Indexing Principles",
+            "Candidate Keys & Prime Attributes Determination",
+            "Lossless Join & Dependency Preservation Decomposition",
+            "Canonical / Minimal Cover of Functional Dependencies",
+            "FD Set Equivalence & Covers Testing",
+            "Lossless/Dependency-Preserving Normal Form Decomposition",
+            "2NF & 3NF Violation Checks on Relation S",
+            "Superkeys Count via Candidate Keys (NAT)",
+            "Foreign Key NULL Values & Referential Integrity Constraints",
+          ],
+          chapterId: "dbms-gate-2027-twt-7",
+        },
+      ] as MadeEasyTestMeta[],
     },
     {
       key: "cn",
@@ -582,6 +617,12 @@ export default function MadeEasyTestSeriesModal({
     // CD TWT-23 — serve the 17 imported Compiler Design questions
     if (test.chapterId === "cd-gate-2027-twt-23") {
       onStartTest(MADE_EASY_CD_TWT23_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // DBMS TWT-7 — serve the 17 imported DBMS questions
+    if (test.chapterId === "dbms-gate-2027-twt-7") {
+      onStartTest(MADE_EASY_DBMS_TWT7_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }

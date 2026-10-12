@@ -9,6 +9,7 @@ import { MADE_EASY_DS_TWT16_CHAPTER } from "./madeEasyDSTest16";
 import { MADE_EASY_CN_TWT17_CHAPTER } from "./madeEasyCNTest17";
 import { MADE_EASY_CN_TWT18_CHAPTER } from "./madeEasyCNTest18";
 import { MADE_EASY_CD_TWT23_CHAPTER } from "./madeEasyCDTest23";
+import { MADE_EASY_DBMS_TWT7_CHAPTER } from "./madeEasyDBMSTest7";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -1730,7 +1731,8 @@ const gateCS_DBMS: Subject = {
           explanation: '### Solution\nCompute $(AB)^+$ step by step:\n1. Start: $\\{A, B\\}$\n2. AB→C: add C → $\\{A, B, C\\}$\n3. C→D: add D → $\\{A, B, C, D\\}$\n4. D→E: add E → $\\{A, B, C, D, E\\}$\n5. No more applicable FDs.\n\n$(AB)^+ = \\{A, B, C, D, E\\}$ → **AB is a superkey** (covers all attributes)'
         },
       ]
-    }
+    },
+    MADE_EASY_DBMS_TWT7_CHAPTER
   ]
 };
 
