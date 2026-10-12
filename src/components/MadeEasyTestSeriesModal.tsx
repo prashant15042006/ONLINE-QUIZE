@@ -8,6 +8,7 @@ import { MADE_EASY_APTITUDE_TWT11_QUESTIONS } from "../data/madeEasyAptitudeTest
 import { MADE_EASY_APTITUDE_TWT12_QUESTIONS } from "../data/madeEasyAptitudeTest12";
 import { MADE_EASY_OS_TWT13_QUESTIONS } from "../data/madeEasyOSTest13";
 import { MADE_EASY_OS_TWT14_QUESTIONS } from "../data/madeEasyOSTest14";
+import { MADE_EASY_DS_TWT15_QUESTIONS } from "../data/madeEasyDSTest15";
 
 interface Props {
   isOpen: boolean;
@@ -263,7 +264,36 @@ export default function MadeEasyTestSeriesModal({
       shortName: "DS & Algo",
       icon: "🌲",
       accent: "from-green-600 to-emerald-600",
-      tests: [] as MadeEasyTestMeta[],
+      tests: [
+        {
+          id: "ds-twt-15",
+          name: "GATE 2027 CS TOPIC WISE TEST - 15 (Programming & Data Structures)",
+          testNumber: 15,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_DS_TWT15_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 11,
+          msqCount: 2,
+          natCount: 4,
+          topics: [
+            "C Recursion & Pointer Side-Effects",
+            "Circular Queue Implementation",
+            "Lower Triangular Matrix Indexing",
+            "Static Variables & Extern in C",
+            "Dynamic Memory & Memory Leaks",
+            "Circular Queue with Linked List",
+            "Stack & Queue Manipulation",
+            "Pointer to Array & 2D Arrays",
+            "Postfix Expression Stack Depth",
+            "Multi-dimensional Array Pointer Equivalence",
+            "Modulo Loop Termination Condition",
+            "Short-Circuit Operator Evaluation",
+          ],
+          chapterId: "ds-gate-2027-twt-15",
+        },
+      ] as MadeEasyTestMeta[],
     },
     {
       key: "dl",
@@ -394,6 +424,12 @@ export default function MadeEasyTestSeriesModal({
     // OS TWT-14 — serve the 17 imported OS questions (MSQ + SCQ + NAT)
     if (test.chapterId === "os-gate-2027-twt-14") {
       onStartTest(MADE_EASY_OS_TWT14_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // DS TWT-15 — serve the 17 imported DS & C Programming questions (SCQ + MSQ + NAT)
+    if (test.chapterId === "ds-gate-2027-twt-15") {
+      onStartTest(MADE_EASY_DS_TWT15_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }
