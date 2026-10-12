@@ -10,6 +10,7 @@ import { MADE_EASY_OS_TWT13_QUESTIONS } from "../data/madeEasyOSTest13";
 import { MADE_EASY_OS_TWT14_QUESTIONS } from "../data/madeEasyOSTest14";
 import { MADE_EASY_DS_TWT15_QUESTIONS } from "../data/madeEasyDSTest15";
 import { MADE_EASY_DS_TWT16_QUESTIONS } from "../data/madeEasyDSTest16";
+import { MADE_EASY_CN_TWT17_QUESTIONS } from "../data/madeEasyCNTest17";
 
 interface Props {
   isOpen: boolean;
@@ -217,7 +218,36 @@ export default function MadeEasyTestSeriesModal({
       shortName: "CN",
       icon: "🌐",
       accent: "from-indigo-600 to-sky-600",
-      tests: [] as MadeEasyTestMeta[],
+      tests: [
+        {
+          id: "cn-twt-17",
+          name: "GATE 2027 CS TOPIC WISE TEST - 17 (Computer Networks)",
+          testNumber: 17,
+          type: "Topic Wise Test",
+          totalQuestions: MADE_EASY_CN_TWT17_QUESTIONS.length,
+          totalMarks: 25,
+          durationMinutes: 45,
+          status: "available",
+          scqCount: 5,
+          msqCount: 5,
+          natCount: 7,
+          topics: [
+            "Binary Exponential Backoff",
+            "IPv4 Header & HTTP Protocols",
+            "CRC Polynomial Division",
+            "Hamming Distance & Code",
+            "Network Devices (Hub, Bridge, Switch)",
+            "CSMA/CD Data Rate & Cable Length",
+            "Stop-and-Wait Utilization & Sequence Numbers",
+            "Switch Interconnection Links",
+            "Selective Repeat Window Size & Bits",
+            "DNS Iterative Resolution Delays",
+            "Sliding Window Protocol Comparison",
+            "Collision & Broadcast Domains",
+          ],
+          chapterId: "cn-gate-2027-twt-17",
+        },
+      ] as MadeEasyTestMeta[],
     },
     {
       key: "toc",
@@ -465,6 +495,12 @@ export default function MadeEasyTestSeriesModal({
     // DS TWT-16 — serve the 17 imported DS questions (BST, AVL, LL, Hash)
     if (test.chapterId === "ds-gate-2027-twt-16") {
       onStartTest(MADE_EASY_DS_TWT16_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
+      onClose();
+      return;
+    }
+    // CN TWT-17 — serve the 17 imported CN questions
+    if (test.chapterId === "cn-gate-2027-twt-17") {
+      onStartTest(MADE_EASY_CN_TWT17_QUESTIONS, test.name, examModeChoice, test.durationMinutes);
       onClose();
       return;
     }

@@ -6,6 +6,7 @@ import { MADE_EASY_OS_TWT13_CHAPTER } from "./madeEasyOSTest13";
 import { MADE_EASY_OS_TWT14_CHAPTER } from "./madeEasyOSTest14";
 import { MADE_EASY_DS_TWT15_CHAPTER } from "./madeEasyDSTest15";
 import { MADE_EASY_DS_TWT16_CHAPTER } from "./madeEasyDSTest16";
+import { MADE_EASY_CN_TWT17_CHAPTER } from "./madeEasyCNTest17";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -1838,7 +1839,8 @@ const gateCS_CN: Subject = {
           explanation: '### Solution\n1. Client SYN consumes 1 sequence number: `seq = 1000`.\n2. Server acknowledges next expected byte: `ack = 1000 + 1 = 1001` and sends its own initial sequence: `seq = 5000`.\n3. Server SYN also consumes 1 sequence number, so Client final ACK acknowledges: `ack = 5000 + 1 = 5001`.\n\n**Answer: 1001 and 5001**.'
         },
       ]
-    }
+    },
+    MADE_EASY_CN_TWT17_CHAPTER
   ]
 };
 
