@@ -48,6 +48,78 @@ export interface MadeEasyPaper {
   questions: Question[];
 }
 
+// Subject color system: distinct, pleasant, non-red colors for every subject
+const getSubjectColorClasses = (subjectKey: string) => {
+  switch (subjectKey) {
+    case "mock":
+      return {
+        badge: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+        pill: "bg-amber-500/20 text-amber-300",
+        borderHover: "hover:border-amber-500/50",
+      };
+    case "os":
+      return {
+        badge: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
+        pill: "bg-cyan-500/20 text-cyan-300",
+        borderHover: "hover:border-cyan-500/50",
+      };
+    case "cn":
+      return {
+        badge: "bg-indigo-500/15 text-indigo-300 border-indigo-500/30",
+        pill: "bg-indigo-500/20 text-indigo-300",
+        borderHover: "hover:border-indigo-500/50",
+      };
+    case "ds_algo":
+      return {
+        badge: "bg-emerald-500/15 text-emerald-300 border-emerald-500/30",
+        pill: "bg-emerald-500/20 text-emerald-300",
+        borderHover: "hover:border-emerald-500/50",
+      };
+    case "coa":
+      return {
+        badge: "bg-sky-500/15 text-sky-300 border-sky-500/30",
+        pill: "bg-sky-500/20 text-sky-300",
+        borderHover: "hover:border-sky-500/50",
+      };
+    case "dbms":
+      return {
+        badge: "bg-teal-500/15 text-teal-300 border-teal-500/30",
+        pill: "bg-teal-500/20 text-teal-300",
+        borderHover: "hover:border-teal-500/50",
+      };
+    case "toc":
+      return {
+        badge: "bg-purple-500/15 text-purple-300 border-purple-500/30",
+        pill: "bg-purple-500/20 text-purple-300",
+        borderHover: "hover:border-purple-500/50",
+      };
+    case "cd":
+      return {
+        badge: "bg-orange-500/15 text-orange-300 border-orange-500/30",
+        pill: "bg-orange-500/20 text-orange-300",
+        borderHover: "hover:border-orange-500/50",
+      };
+    case "dm":
+      return {
+        badge: "bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30",
+        pill: "bg-fuchsia-500/20 text-fuchsia-300",
+        borderHover: "hover:border-fuchsia-500/50",
+      };
+    case "ga":
+      return {
+        badge: "bg-lime-500/15 text-lime-300 border-lime-500/30",
+        pill: "bg-lime-500/20 text-lime-300",
+        borderHover: "hover:border-lime-500/50",
+      };
+    default:
+      return {
+        badge: "bg-blue-500/15 text-blue-300 border-blue-500/30",
+        pill: "bg-blue-500/20 text-blue-300",
+        borderHover: "hover:border-blue-500/50",
+      };
+  }
+};
+
 export default function MadeEasyTestSeriesModal({
   isOpen,
   onClose,
@@ -509,18 +581,18 @@ export default function MadeEasyTestSeriesModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4 animate-fade-in">
       <div className="bg-[#0b101b] border border-slate-700/80 rounded-3xl max-w-4xl w-full p-4 sm:p-6 text-slate-100 shadow-2xl relative max-h-[92vh] flex flex-col overflow-hidden">
         
-        {/* ── Sleek Modal Top Header ── */}
+        {/* ── Top Header Bar (Clean, Blue/Indigo Aesthetic - Not Red) ── */}
         <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-3 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 via-rose-600 to-amber-500 flex items-center justify-center text-xl shadow-lg shadow-rose-500/25">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-cyan-400 flex items-center justify-center text-xl shadow-lg shadow-blue-500/25">
               🎯
             </div>
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-extrabold text-white text-base tracking-tight">
                   MADE EASY Online Test Series
                 </h3>
-                <span className="text-[10px] font-black uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
+                <span className="text-[10px] font-black uppercase tracking-wider text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/25">
                   GATE CS 2027
                 </span>
               </div>
@@ -539,23 +611,25 @@ export default function MadeEasyTestSeriesModal({
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════
-            VIEW 1: DETAILED TEST INFORMATION & SYLLABUS ROADMAP
+            VIEW 1: DETAILED TEST SYLLABUS & EXAM INFORMATION
         ══════════════════════════════════════════════════════════════════ */}
         {selectedTest ? (
           <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-            {/* Breadcrumb / Navigation Bar */}
-            <div className="flex items-center justify-between bg-slate-900/80 px-4 py-2.5 rounded-2xl border border-slate-800">
+            {/* Prominent Back Button & Test Breadcrumb (High Visibility - Not Red!) */}
+            <div className="flex items-center justify-between bg-slate-900/90 px-3.5 py-2.5 rounded-2xl border border-slate-800 shadow-sm gap-2">
               <button
                 onClick={() => setSelectedTest(null)}
-                className="text-xs font-bold text-rose-400 hover:text-rose-300 flex items-center gap-1.5 transition cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold flex items-center gap-2 border border-slate-700 shadow-md transition cursor-pointer active:scale-95 shrink-0"
               >
-                ← Back to All Tests
+                <span className="text-sm font-black">←</span>
+                <span>Back to All Tests</span>
               </button>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-white truncate max-w-[200px] sm:max-w-none">
+              
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-xs font-bold text-white truncate max-w-[180px] sm:max-w-none">
                   {selectedTest.title}
                 </span>
-                <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700 shrink-0">
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${getSubjectColorClasses(selectedTest.subjectKey).badge}`}>
                   {selectedTest.badge}
                 </span>
               </div>
@@ -567,15 +641,15 @@ export default function MadeEasyTestSeriesModal({
               {/* LEFT CARD: EXAM INFORMATION */}
               <div className="md:col-span-5 bg-[#0f172a]/90 border border-slate-700/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xl">
                 <div>
-                  <div className="flex items-center gap-2 text-slate-300 font-bold text-sm mb-4">
-                    <span className="text-rose-400 text-base">ⓘ</span>
+                  <div className="flex items-center gap-2 text-cyan-400 font-bold text-sm mb-4">
+                    <span className="text-base">ⓘ</span>
                     <span>Test Overview &amp; Format</span>
                   </div>
 
-                  {/* 3 Stat Boxes */}
+                  {/* 3 Stat Boxes (Pleasant Colors, Non-Red Timer) */}
                   <div className="grid grid-cols-3 gap-2 mb-4">
                     <div className="bg-[#1e293b]/70 border border-slate-700/60 rounded-xl p-2.5 text-center">
-                      <div className="text-lg sm:text-xl font-extrabold text-white">{selectedTest.totalMarks}</div>
+                      <div className="text-lg sm:text-xl font-extrabold text-emerald-400">{selectedTest.totalMarks}</div>
                       <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Marks</div>
                     </div>
 
@@ -584,13 +658,13 @@ export default function MadeEasyTestSeriesModal({
                       <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Questions</div>
                     </div>
 
-                    <div className="bg-[#1e293b]/70 border border-rose-500/40 rounded-xl p-2.5 text-center relative overflow-hidden">
-                      <div className="text-lg sm:text-xl font-extrabold text-rose-400">{selectedTest.durationMinutes}m</div>
-                      <div className="text-[9px] font-bold text-rose-300 uppercase tracking-wider">Duration</div>
+                    <div className="bg-[#1e293b]/70 border border-cyan-500/40 rounded-xl p-2.5 text-center relative overflow-hidden">
+                      <div className="text-lg sm:text-xl font-extrabold text-cyan-400">{selectedTest.durationMinutes}m</div>
+                      <div className="text-[9px] font-bold text-cyan-300 uppercase tracking-wider">Duration</div>
                     </div>
                   </div>
 
-                  {/* Mode Selector Tabs */}
+                  {/* Mode Selector Tabs (Blue & Emerald - Not Red) */}
                   <div className="mb-4 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800">
                     <div className="text-[10px] font-bold text-slate-400 mb-1 px-1">Select Attempt Mode:</div>
                     <div className="grid grid-cols-2 gap-1.5">
@@ -599,7 +673,7 @@ export default function MadeEasyTestSeriesModal({
                         onClick={() => setChosenMode("exam")}
                         className={`py-1.5 px-2 rounded-lg text-xs font-bold transition cursor-pointer border ${
                           chosenMode === "exam"
-                            ? "bg-rose-600 border-rose-500 text-white shadow-md"
+                            ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-600/30 font-black"
                             : "bg-slate-800 border-slate-700 text-slate-300 hover:text-white"
                         }`}
                       >
@@ -610,7 +684,7 @@ export default function MadeEasyTestSeriesModal({
                         onClick={() => setChosenMode("practice")}
                         className={`py-1.5 px-2 rounded-lg text-xs font-bold transition cursor-pointer border ${
                           chosenMode === "practice"
-                            ? "bg-emerald-600 border-emerald-500 text-white shadow-md"
+                            ? "bg-emerald-600 border-emerald-500 text-white shadow-md shadow-emerald-600/30 font-black"
                             : "bg-slate-800 border-slate-700 text-slate-300 hover:text-white"
                         }`}
                       >
@@ -643,7 +717,7 @@ export default function MadeEasyTestSeriesModal({
                       <span className="flex items-center gap-1.5 text-slate-400">
                         <span>⚖️</span> Negative Marking
                       </span>
-                      <span className="font-bold text-rose-400">−0.33 / −0.66 (SCQ)</span>
+                      <span className="font-bold text-slate-200">−0.33 / −0.66 (SCQ)</span>
                     </div>
                   </div>
                 </div>
@@ -671,27 +745,27 @@ export default function MadeEasyTestSeriesModal({
                 </div>
               </div>
 
-              {/* RIGHT CARD: SYLLABUS TOPICS CHECKLIST */}
+              {/* RIGHT CARD: SYLLABUS TOPICS CHECKLIST (Clean Blue/Indigo Style) */}
               <div className="md:col-span-7 bg-[#0f172a]/90 border border-slate-700/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xl">
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2 text-slate-300 font-bold text-sm">
-                      <span className="text-rose-400 text-base">⊞</span>
+                    <div className="flex items-center gap-2 text-cyan-400 font-bold text-sm">
+                      <span className="text-base">⊞</span>
                       <span>Syllabus &amp; Core Concepts</span>
                     </div>
-                    <span className="text-[11px] bg-rose-500/15 text-rose-300 border border-rose-500/25 font-bold px-2 py-0.5 rounded-full">
+                    <span className="text-[11px] bg-blue-500/15 text-blue-300 border border-blue-500/25 font-bold px-2.5 py-0.5 rounded-full">
                       {selectedTest.topics.length} Key Topics
                     </span>
                   </div>
 
                   {/* Topics List: Clean, uncluttered checklist */}
-                  <div className="space-y-1.5 max-h-[350px] overflow-y-auto pr-1">
+                  <div className="space-y-2 max-h-[350px] overflow-y-auto pr-1">
                     {selectedTest.topics.map((topic, idx) => (
                       <div
                         key={idx}
-                        className="p-2 sm:p-2.5 rounded-xl text-xs font-medium transition flex items-center gap-2.5 bg-[#1e293b]/60 border border-slate-700/60 text-slate-200 hover:border-slate-500"
+                        className="p-2.5 rounded-xl text-xs font-medium transition flex items-center gap-3 bg-[#1e293b]/60 border border-slate-700/60 text-slate-200 hover:border-slate-500"
                       >
-                        <span className="w-5 h-5 rounded-lg bg-black/40 text-rose-300 font-black text-[10px] flex items-center justify-center shrink-0">
+                        <span className="w-5 h-5 rounded-lg bg-blue-500/20 text-blue-300 font-black text-[10px] flex items-center justify-center shrink-0">
                           {idx + 1}
                         </span>
                         <span className="leading-snug">{topic}</span>
@@ -711,9 +785,10 @@ export default function MadeEasyTestSeriesModal({
                   <span>Topic Wise Test • SCQ / MSQ / NAT Format</span>
                   <button
                     onClick={() => handleStartExam(selectedTest, chosenMode)}
-                    className="text-rose-400 hover:text-rose-300 font-bold cursor-pointer transition"
+                    className="text-cyan-400 hover:text-cyan-300 font-bold cursor-pointer transition flex items-center gap-1"
                   >
-                    Start Test Now →
+                    <span>Start Test Now</span>
+                    <span>→</span>
                   </button>
                 </div>
               </div>
@@ -735,7 +810,7 @@ export default function MadeEasyTestSeriesModal({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Filter by subject or topic (e.g. Paging, TCP, B-Tree, Cache, Grammars)..."
-                  className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-rose-500 transition"
+                  className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-blue-500 transition"
                 />
                 {searchQuery && (
                   <button
@@ -747,7 +822,7 @@ export default function MadeEasyTestSeriesModal({
                 )}
               </div>
 
-              {/* Subject Filter Pills */}
+              {/* Subject Filter Pills (Indigo/Blue Active State - Not Harsh Red) */}
               <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
                 {subjectFilters.map((f) => {
                   const isSelected = selectedSubjectFilter === f.key;
@@ -757,7 +832,7 @@ export default function MadeEasyTestSeriesModal({
                       onClick={() => setSelectedSubjectFilter(f.key)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 border ${
                         isSelected
-                          ? "bg-rose-600 border-rose-500 text-white font-bold shadow-md shadow-rose-600/20"
+                          ? "bg-gradient-to-r from-blue-600 to-indigo-600 border-blue-400 text-white font-bold shadow-md shadow-blue-600/25"
                           : "bg-slate-800/80 border-slate-700/70 text-slate-300 hover:text-white hover:bg-slate-700/80"
                       }`}
                     >
@@ -777,92 +852,90 @@ export default function MadeEasyTestSeriesModal({
                   <p className="font-semibold text-white">No tests found matching &quot;{searchQuery}&quot;</p>
                   <button
                     onClick={() => { setSearchQuery(""); setSelectedSubjectFilter("all"); }}
-                    className="text-rose-400 hover:underline font-bold"
+                    className="text-blue-400 hover:underline font-bold"
                   >
                     Reset filters
                   </button>
                 </div>
               ) : (
-                filteredTests.map((test) => (
-                  <div
-                    key={test.id}
-                    className="bg-slate-950/90 border border-slate-800 hover:border-rose-500/50 p-4 rounded-2xl transition-all duration-200 flex flex-col justify-between group shadow-lg"
-                  >
-                    <div>
-                      {/* Top Row: Subject Badge + Duration/Marks */}
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20 flex items-center gap-1">
-                          <span>{test.subjectIcon}</span>
-                          <span>{test.badge} • {test.subjectName}</span>
-                        </span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                            {test.totalMarks} Marks
+                filteredTests.map((test) => {
+                  const colorScheme = getSubjectColorClasses(test.subjectKey);
+                  return (
+                    <div
+                      key={test.id}
+                      className={`bg-slate-950/90 border border-slate-800 ${colorScheme.borderHover} p-4 rounded-2xl transition-all duration-200 flex flex-col justify-between group shadow-lg`}
+                    >
+                      <div>
+                        {/* Top Row: Distinct Subject Color Badge + Marks/Timer */}
+                        <div className="flex justify-between items-center mb-2.5">
+                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${colorScheme.badge}`}>
+                            <span>{test.subjectIcon}</span>
+                            <span>{test.badge} • {test.subjectName}</span>
                           </span>
-                          <span className="text-[10px] text-rose-300 font-bold bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
-                            ⏱ {test.durationMinutes}m
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                              {test.totalMarks} Marks
+                            </span>
+                            <span className="text-[10px] text-cyan-300 font-bold bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+                              ⏱ {test.durationMinutes}m
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Clean Prominent Title */}
+                        <h4 className="font-bold text-white text-sm sm:text-base group-hover:text-blue-300 transition mb-2.5 leading-snug">
+                          {test.title}
+                        </h4>
+
+                        {/* Question Breakdown Chips (SCQ, MSQ, NAT) */}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-[10px] font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/25 px-2 py-0.5 rounded-md">
+                            {test.scqCount} SCQ
+                          </span>
+                          {test.msqCount > 0 && (
+                            <span className="text-[10px] font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/25 px-2 py-0.5 rounded-md">
+                              {test.msqCount} MSQ
+                            </span>
+                          )}
+                          {test.natCount > 0 && (
+                            <span className="text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/25 px-2 py-0.5 rounded-md">
+                              {test.natCount} NAT
+                            </span>
+                          )}
+                          <span className="text-[10px] text-slate-400 font-medium ml-auto">
+                            {test.totalQuestions} Questions
                           </span>
                         </div>
                       </div>
 
-                      {/* Clean Prominent Title */}
-                      <h4 className="font-bold text-white text-sm sm:text-base group-hover:text-rose-300 transition mb-2 leading-snug">
-                        {test.title}
-                      </h4>
-
-                      {/* Question Breakdown Chips */}
-                      <div className="flex items-center gap-1.5 flex-wrap mb-2">
-                        <span className="text-[10px] font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/25 px-2 py-0.5 rounded-md">
-                          {test.scqCount} SCQ
-                        </span>
-                        {test.msqCount > 0 && (
-                          <span className="text-[10px] font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/25 px-2 py-0.5 rounded-md">
-                            {test.msqCount} MSQ
-                          </span>
-                        )}
-                        {test.natCount > 0 && (
-                          <span className="text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/25 px-2 py-0.5 rounded-md">
-                            {test.natCount} NAT
-                          </span>
-                        )}
-                        <span className="text-[10px] text-slate-500 font-medium ml-auto">
-                          {test.totalQuestions} Questions
-                        </span>
-                      </div>
-
-                      {/* Key Topics Preview */}
-                      <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                        {test.topics.slice(0, 3).join(" • ")}
-                      </p>
-                    </div>
-
-                    {/* Action Footer */}
-                    <div className="mt-3.5 pt-3 border-t border-slate-900 flex items-center justify-between gap-2">
-                      <button
-                        onClick={() => setSelectedTest(test)}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl cursor-pointer border border-slate-700 transition"
-                      >
-                        Syllabus 📋
-                      </button>
-
-                      <div className="flex items-center gap-1.5">
+                      {/* Action Footer */}
+                      <div className="mt-3.5 pt-3 border-t border-slate-900 flex items-center justify-between gap-2">
                         <button
-                          onClick={() => handleStartExam(test, "practice")}
-                          className="px-2.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white text-xs font-medium rounded-xl cursor-pointer border border-white/10 transition"
-                          title="Practice with instant answers"
+                          onClick={() => setSelectedTest(test)}
+                          className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl cursor-pointer border border-slate-700 transition"
                         >
-                          Practice 💡
+                          Syllabus 📋
                         </button>
-                        <button
-                          onClick={() => handleStartExam(test, "exam")}
-                          className="px-3.5 py-1.5 btn-3d-green text-xs font-bold rounded-xl cursor-pointer shadow-md"
-                        >
-                          Attempt 🚀
-                        </button>
+
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => handleStartExam(test, "practice")}
+                            className="px-2.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white text-xs font-medium rounded-xl cursor-pointer border border-white/10 transition"
+                            title="Practice with instant answers"
+                          >
+                            Practice 💡
+                          </button>
+                          <button
+                            onClick={() => handleStartExam(test, "exam")}
+                            className="px-3.5 py-1.5 btn-3d-green text-xs font-bold rounded-xl cursor-pointer shadow-md"
+                          >
+                            Attempt 🚀
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
           </>
