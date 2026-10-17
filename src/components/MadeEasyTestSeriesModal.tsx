@@ -30,10 +30,12 @@ interface Props {
 
 export interface MadeEasyPaper {
   id: string;
-  name: string;
   testNumber: number;
+  badge: string;
+  title: string;
   subjectKey: string;
   subjectName: string;
+  subjectIcon: string;
   type: "Topic Wise Test" | "Full Syllabus Mock";
   totalQuestions: number;
   totalMarks: number;
@@ -53,9 +55,9 @@ export default function MadeEasyTestSeriesModal({
   onStartTest,
 }: Props) {
   const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedTest, setSelectedTest] = useState<MadeEasyPaper | null>(null);
   const [chosenMode, setChosenMode] = useState<"exam" | "practice">("exam");
-  const [previewTopicIndex, setPreviewTopicIndex] = useState<number | null>(null);
 
   // Reliable COA Twt-5 questions
   const coaQuestions = useMemo(() => {
@@ -69,10 +71,12 @@ export default function MadeEasyTestSeriesModal({
   const allTests: MadeEasyPaper[] = useMemo(() => [
     {
       id: "me-cs-demo-full",
-      name: "GATE 2027 CS Full Syllabus Mock Test (Demo Test)",
       testNumber: 1,
+      badge: "Full Mock",
+      title: "CS Full Length Mock: Complete GATE 2027 Pattern",
       subjectKey: "mock",
-      subjectName: "Full Mock Test",
+      subjectName: "Full Mock",
+      subjectIcon: "🏆",
       type: "Full Syllabus Mock",
       totalQuestions: 65,
       totalMarks: 100,
@@ -81,7 +85,7 @@ export default function MadeEasyTestSeriesModal({
       msqCount: 11,
       natCount: 11,
       topics: [
-        "General Aptitude (Verbal & Quantitative Reasoning)",
+        "General Aptitude (Verbal & Numerical Ability)",
         "Engineering Mathematics (Calculus, Linear Algebra, Probability)",
         "Computer Organization & Architecture (COA)",
         "Operating Systems (OS)",
@@ -91,17 +95,19 @@ export default function MadeEasyTestSeriesModal({
         "Compiler Design (CD)",
         "Data Structures & Algorithms (DS & Algo)",
         "Digital Logic Design (DL)",
-        "Discrete Mathematics & Combinatorics",
+        "Discrete Mathematics & Graph Theory",
       ],
       chapterId: "me-cs-demo-test",
       questions: MADE_EASY_DEMO_TEST_QUESTIONS,
     },
     {
       id: "coa-twt-5",
-      name: "GATE 2027 CS TOPIC WISE TEST - 5 (COA)",
       testNumber: 5,
+      badge: "TWT 05",
+      title: "COA: Instruction Pipelining, Hazards & Addressing Modes",
       subjectKey: "coa",
       subjectName: "COA",
+      subjectIcon: "🖥️",
       type: "Topic Wise Test",
       totalQuestions: coaQuestions.length || 17,
       totalMarks: 25,
@@ -111,22 +117,24 @@ export default function MadeEasyTestSeriesModal({
       natCount: 2,
       topics: [
         "Instruction Pipelining & CPI Calculations",
-        "Pipeline Speedup & Branch Penalty Hazards",
-        "CISC Micro-operations & Hazard Mitigation",
+        "Pipeline Speedup & Branch Penalty Mitigation",
+        "CISC Micro-operations & Hazard Detection",
         "Addressing Modes & Memory Reference Calculations",
-        "Control Memory & Microprogrammed Control Unit",
+        "Control Memory & Microprogrammed Control Units",
         "IEEE-754 Single & Double Precision Floating Point",
-        "RAW / WAR / WAW Data Dependencies & Forwarding",
+        "RAW, WAR & WAW Data Dependencies & Forwarding",
       ],
       chapterId: "coa-gate-2027-twt-5",
       questions: coaQuestions,
     },
     {
       id: "os-twt-13",
-      name: "GATE 2027 CS TOPIC WISE TEST - 13 (Operating Systems)",
       testNumber: 13,
+      badge: "TWT 13",
+      title: "OS: Virtual Memory, Paging, Page Replacement & Deadlocks",
       subjectKey: "os",
       subjectName: "Operating Systems",
+      subjectIcon: "⚙️",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_OS_TWT13_QUESTIONS.length,
       totalMarks: 25,
@@ -153,10 +161,12 @@ export default function MadeEasyTestSeriesModal({
     },
     {
       id: "os-twt-14",
-      name: "GATE 2027 CS TOPIC WISE TEST - 14 (Operating Systems)",
       testNumber: 14,
+      badge: "TWT 14",
+      title: "OS: CPU Scheduling, Semaphores, Threads & Concurrency",
       subjectKey: "os",
       subjectName: "Operating Systems",
+      subjectIcon: "⚙️",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_OS_TWT14_QUESTIONS.length,
       totalMarks: 25,
@@ -181,10 +191,12 @@ export default function MadeEasyTestSeriesModal({
     },
     {
       id: "dbms-twt-7",
-      name: "GATE 2027 CS TOPIC WISE TEST - 7 (DBMS)",
       testNumber: 7,
+      badge: "TWT 07",
+      title: "DBMS: Relational Model, Normalization, B-Trees & Indexing",
       subjectKey: "dbms",
       subjectName: "DBMS",
+      subjectIcon: "🗄️",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_DBMS_TWT7_QUESTIONS.length,
       totalMarks: 25,
@@ -208,10 +220,12 @@ export default function MadeEasyTestSeriesModal({
     },
     {
       id: "cn-twt-17",
-      name: "GATE 2027 CS TOPIC WISE TEST - 17 (Computer Networks)",
       testNumber: 17,
+      badge: "TWT 17",
+      title: "CN: Data Link Layer, CSMA/CD, CRC, Hamming & Flow Control",
       subjectKey: "cn",
       subjectName: "Computer Networks",
+      subjectIcon: "🌐",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_CN_TWT17_QUESTIONS.length,
       totalMarks: 25,
@@ -235,10 +249,12 @@ export default function MadeEasyTestSeriesModal({
     },
     {
       id: "cn-twt-18",
-      name: "GATE 2027 CS TOPIC WISE TEST - 18 (Computer Networks)",
       testNumber: 18,
+      badge: "TWT 18",
+      title: "CN: IPv4 Subnetting, CIDR, OSPF Routing & TCP Handshake",
       subjectKey: "cn",
       subjectName: "Computer Networks",
+      subjectIcon: "🌐",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_CN_TWT18_QUESTIONS.length,
       totalMarks: 25,
@@ -263,10 +279,12 @@ export default function MadeEasyTestSeriesModal({
     },
     {
       id: "toc-twt-1",
-      name: "GATE 2027 CS TOPIC WISE TEST - 1 (TOC)",
       testNumber: 1,
+      badge: "TWT 01",
+      title: "TOC: Finite Automata, Regular Expressions & Grammars",
       subjectKey: "toc",
       subjectName: "Theory of Computation",
+      subjectIcon: "🔤",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_TOC_TWT1_QUESTIONS.length,
       totalMarks: 25,
@@ -288,10 +306,12 @@ export default function MadeEasyTestSeriesModal({
     },
     {
       id: "cd-twt-23",
-      name: "GATE 2027 CS TOPIC WISE TEST - 23 (Compiler Design)",
       testNumber: 23,
+      badge: "TWT 23",
+      title: "Compiler Design: Lexical Analysis, SDTS & Code Optimization",
       subjectKey: "cd",
       subjectName: "Compiler Design",
+      subjectIcon: "⚡",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_CD_TWT23_QUESTIONS.length,
       totalMarks: 25,
@@ -314,10 +334,12 @@ export default function MadeEasyTestSeriesModal({
     },
     {
       id: "ds-twt-15",
-      name: "GATE 2027 CS TOPIC WISE TEST - 15 (Programming & DS)",
       testNumber: 15,
+      badge: "TWT 15",
+      title: "Data Structures: C Recursion, Pointers, Arrays & Queues",
       subjectKey: "ds_algo",
       subjectName: "Data Structures",
+      subjectIcon: "🌲",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_DS_TWT15_QUESTIONS.length,
       totalMarks: 25,
@@ -339,10 +361,12 @@ export default function MadeEasyTestSeriesModal({
     },
     {
       id: "ds-twt-16",
-      name: "GATE 2027 CS TOPIC WISE TEST - 16 (Advanced DS)",
       testNumber: 16,
+      badge: "TWT 16",
+      title: "Data Structures: BST, AVL Trees, Linked Lists & Hashing",
       subjectKey: "ds_algo",
       subjectName: "Data Structures",
+      subjectIcon: "🌲",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_DS_TWT16_QUESTIONS.length,
       totalMarks: 25,
@@ -364,10 +388,12 @@ export default function MadeEasyTestSeriesModal({
     },
     {
       id: "dm-twt-21",
-      name: "GATE 2027 CS TOPIC WISE TEST - 21 (Discrete Mathematics)",
       testNumber: 21,
+      badge: "TWT 21",
+      title: "Discrete Math: Combinatorics, Logic, Relations & Functions",
       subjectKey: "dm",
       subjectName: "Discrete Math",
+      subjectIcon: "📐",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_DM_TWT21_QUESTIONS.length,
       totalMarks: 25,
@@ -389,10 +415,12 @@ export default function MadeEasyTestSeriesModal({
     },
     {
       id: "ga-twt-11",
-      name: "GATE 2027 CS TOPIC WISE TEST - 11 (General Aptitude - Quant)",
       testNumber: 11,
+      badge: "TWT 11",
+      title: "General Aptitude: Quantitative Ability & Spatial Reasoning",
       subjectKey: "ga",
-      subjectName: "General Aptitude",
+      subjectName: "Aptitude",
+      subjectIcon: "📊",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_APTITUDE_TWT11_QUESTIONS.length,
       totalMarks: 25,
@@ -414,10 +442,12 @@ export default function MadeEasyTestSeriesModal({
     },
     {
       id: "ga-twt-12",
-      name: "GATE 2027 CS TOPIC WISE TEST - 12 (General Aptitude - Verbal)",
       testNumber: 12,
+      badge: "TWT 12",
+      title: "General Aptitude: Verbal Ability, Logic & Comprehension",
       subjectKey: "ga",
-      subjectName: "General Aptitude",
+      subjectName: "Aptitude",
+      subjectIcon: "📊",
       type: "Topic Wise Test",
       totalQuestions: MADE_EASY_APTITUDE_TWT12_QUESTIONS.length,
       totalMarks: 25,
@@ -439,25 +469,37 @@ export default function MadeEasyTestSeriesModal({
   ], [coaQuestions]);
 
   const subjectFilters = [
-    { key: "all", label: `All Tests (${allTests.length})` },
-    { key: "mock", label: "Full Mock (1)" },
-    { key: "coa", label: "COA (1)" },
-    { key: "os", label: "OS (2)" },
-    { key: "dbms", label: "DBMS (1)" },
-    { key: "cn", label: "CN (2)" },
-    { key: "toc", label: "TOC (1)" },
-    { key: "cd", label: "CD (1)" },
-    { key: "ds_algo", label: "DS & Algo (2)" },
-    { key: "dm", label: "Discrete Math (1)" },
-    { key: "ga", label: "General Aptitude (2)" },
+    { key: "all", label: `All Tests (${allTests.length})`, icon: "📚" },
+    { key: "mock", label: "Full Mock", icon: "🏆" },
+    { key: "os", label: "Operating Systems", icon: "⚙️" },
+    { key: "cn", label: "Computer Networks", icon: "🌐" },
+    { key: "ds_algo", label: "Data Structures", icon: "🌲" },
+    { key: "coa", label: "COA", icon: "🖥️" },
+    { key: "dbms", label: "DBMS", icon: "🗄️" },
+    { key: "toc", label: "TOC", icon: "🔤" },
+    { key: "cd", label: "Compiler Design", icon: "⚡" },
+    { key: "dm", label: "Discrete Math", icon: "📐" },
+    { key: "ga", label: "Aptitude", icon: "📊" },
   ];
 
-  const filteredTests = selectedSubjectFilter === "all"
-    ? allTests
-    : allTests.filter((t) => t.subjectKey === selectedSubjectFilter);
+  const filteredTests = useMemo(() => {
+    return allTests.filter((test) => {
+      if (selectedSubjectFilter !== "all" && test.subjectKey !== selectedSubjectFilter) {
+        return false;
+      }
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase().trim();
+        const matchesTitle = test.title.toLowerCase().includes(q);
+        const matchesSubject = test.subjectName.toLowerCase().includes(q);
+        const matchesTopic = test.topics.some((t) => t.toLowerCase().includes(q));
+        if (!matchesTitle && !matchesSubject && !matchesTopic) return false;
+      }
+      return true;
+    });
+  }, [allTests, selectedSubjectFilter, searchQuery]);
 
   const handleStartExam = (test: MadeEasyPaper, mode: "exam" | "practice") => {
-    onStartTest(test.questions, test.name, mode, test.durationMinutes);
+    onStartTest(test.questions, test.title, mode, test.durationMinutes);
     onClose();
   };
 
@@ -467,49 +509,54 @@ export default function MadeEasyTestSeriesModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-4 animate-fade-in">
       <div className="bg-[#0b101b] border border-slate-700/80 rounded-3xl max-w-4xl w-full p-4 sm:p-6 text-slate-100 shadow-2xl relative max-h-[92vh] flex flex-col overflow-hidden">
         
-        {/* Modal Top Header */}
+        {/* ── Sleek Modal Top Header ── */}
         <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-3 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center text-xl shadow-lg shadow-rose-500/20">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-rose-500 via-rose-600 to-amber-500 flex items-center justify-center text-xl shadow-lg shadow-rose-500/25">
               🎯
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="font-extrabold text-white text-base">MADE EASY Online Test Series</h3>
+                <h3 className="font-extrabold text-white text-base tracking-tight">
+                  MADE EASY Online Test Series
+                </h3>
                 <span className="text-[10px] font-black uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
-                  GATE CS &amp; IT 2027
+                  GATE CS 2027
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">Authentic Topic Wise &amp; Full Mock Tests with Official CBT Timer &amp; Marking</p>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Authentic Topic Wise &amp; Full Mock Tests • Real CBT Countdown Timer &amp; Negative Marking
+              </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+            className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer text-sm font-bold"
+            aria-label="Close"
           >
             ✕
           </button>
         </div>
 
         {/* ══════════════════════════════════════════════════════════════════
-            VIEW 1: DETAILED TEST INFORMATION & TOPIC LINKS (MATCHES PYQ STYLE)
+            VIEW 1: DETAILED TEST INFORMATION & SYLLABUS ROADMAP
         ══════════════════════════════════════════════════════════════════ */}
         {selectedTest ? (
           <div className="flex-1 overflow-y-auto space-y-4 pr-1">
             {/* Breadcrumb / Navigation Bar */}
             <div className="flex items-center justify-between bg-slate-900/80 px-4 py-2.5 rounded-2xl border border-slate-800">
               <button
-                onClick={() => { setSelectedTest(null); setPreviewTopicIndex(null); }}
+                onClick={() => setSelectedTest(null)}
                 className="text-xs font-bold text-rose-400 hover:text-rose-300 flex items-center gap-1.5 transition cursor-pointer"
               >
                 ← Back to All Tests
               </button>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-black text-white truncate max-w-[200px] sm:max-w-none">
-                  {selectedTest.name}
+                <span className="text-xs font-bold text-white truncate max-w-[200px] sm:max-w-none">
+                  {selectedTest.title}
                 </span>
                 <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full border border-slate-700 shrink-0">
-                  {selectedTest.subjectName}
+                  {selectedTest.badge}
                 </span>
               </div>
             </div>
@@ -522,35 +569,35 @@ export default function MadeEasyTestSeriesModal({
                 <div>
                   <div className="flex items-center gap-2 text-slate-300 font-bold text-sm mb-4">
                     <span className="text-rose-400 text-base">ⓘ</span>
-                    <span>Test Information</span>
+                    <span>Test Overview &amp; Format</span>
                   </div>
 
                   {/* 3 Stat Boxes */}
-                  <div className="grid grid-cols-3 gap-2 mb-5">
+                  <div className="grid grid-cols-3 gap-2 mb-4">
                     <div className="bg-[#1e293b]/70 border border-slate-700/60 rounded-xl p-2.5 text-center">
-                      <div className="text-lg sm:text-xl font-black text-white">{selectedTest.totalMarks}</div>
-                      <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Max Marks</div>
+                      <div className="text-lg sm:text-xl font-extrabold text-white">{selectedTest.totalMarks}</div>
+                      <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Marks</div>
                     </div>
 
                     <div className="bg-[#1e293b]/70 border border-slate-700/60 rounded-xl p-2.5 text-center">
-                      <div className="text-lg sm:text-xl font-black text-white">{selectedTest.totalQuestions}</div>
+                      <div className="text-lg sm:text-xl font-extrabold text-white">{selectedTest.totalQuestions}</div>
                       <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Questions</div>
                     </div>
 
                     <div className="bg-[#1e293b]/70 border border-rose-500/40 rounded-xl p-2.5 text-center relative overflow-hidden">
-                      <div className="text-lg sm:text-xl font-black text-rose-400">{selectedTest.durationMinutes}m</div>
+                      <div className="text-lg sm:text-xl font-extrabold text-rose-400">{selectedTest.durationMinutes}m</div>
                       <div className="text-[9px] font-bold text-rose-300 uppercase tracking-wider">Duration</div>
                     </div>
                   </div>
 
                   {/* Mode Selector Tabs */}
-                  <div className="mb-5 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800">
-                    <div className="text-[10px] font-bold text-slate-400 mb-1 px-1">Select Test Mode:</div>
+                  <div className="mb-4 bg-slate-900/90 p-1.5 rounded-xl border border-slate-800">
+                    <div className="text-[10px] font-bold text-slate-400 mb-1 px-1">Select Attempt Mode:</div>
                     <div className="grid grid-cols-2 gap-1.5">
                       <button
                         type="button"
                         onClick={() => setChosenMode("exam")}
-                        className={`py-1.5 px-2 rounded-lg text-xs font-black transition cursor-pointer border ${
+                        className={`py-1.5 px-2 rounded-lg text-xs font-bold transition cursor-pointer border ${
                           chosenMode === "exam"
                             ? "bg-rose-600 border-rose-500 text-white shadow-md"
                             : "bg-slate-800 border-slate-700 text-slate-300 hover:text-white"
@@ -561,7 +608,7 @@ export default function MadeEasyTestSeriesModal({
                       <button
                         type="button"
                         onClick={() => setChosenMode("practice")}
-                        className={`py-1.5 px-2 rounded-lg text-xs font-black transition cursor-pointer border ${
+                        className={`py-1.5 px-2 rounded-lg text-xs font-bold transition cursor-pointer border ${
                           chosenMode === "practice"
                             ? "bg-emerald-600 border-emerald-500 text-white shadow-md"
                             : "bg-slate-800 border-slate-700 text-slate-300 hover:text-white"
@@ -572,25 +619,25 @@ export default function MadeEasyTestSeriesModal({
                     </div>
                   </div>
 
-                  {/* Benchmark & Marking Breakdown */}
-                  <div className="space-y-2.5 mb-6 text-xs text-slate-300">
+                  {/* Marking Breakdown */}
+                  <div className="space-y-2 mb-5 text-xs text-slate-300">
                     <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
                       <span className="flex items-center gap-1.5 text-slate-400">
                         <span>📝</span> Single Choice (SCQ)
                       </span>
-                      <span className="font-bold text-blue-400">{selectedTest.scqCount} Questions</span>
+                      <span className="font-bold text-blue-400">{selectedTest.scqCount} Qs</span>
                     </div>
                     <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
                       <span className="flex items-center gap-1.5 text-slate-400">
                         <span>☑️</span> Multi-Select (MSQ)
                       </span>
-                      <span className="font-bold text-purple-400">{selectedTest.msqCount} Questions</span>
+                      <span className="font-bold text-purple-400">{selectedTest.msqCount} Qs</span>
                     </div>
                     <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
                       <span className="flex items-center gap-1.5 text-slate-400">
                         <span>🔢</span> Numerical (NAT)
                       </span>
-                      <span className="font-bold text-amber-400">{selectedTest.natCount} Questions</span>
+                      <span className="font-bold text-amber-400">{selectedTest.natCount} Qs</span>
                     </div>
                     <div className="flex items-center justify-between py-1 border-b border-slate-800/80">
                       <span className="flex items-center gap-1.5 text-slate-400">
@@ -605,78 +652,66 @@ export default function MadeEasyTestSeriesModal({
                 <div className="space-y-2 pt-2 border-t border-slate-800">
                   <button
                     onClick={() => handleStartExam(selectedTest, chosenMode)}
-                    className="w-full py-3 btn-3d-green font-black text-xs sm:text-sm rounded-xl cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30"
+                    className="w-full py-3 btn-3d-green font-extrabold text-xs sm:text-sm rounded-xl cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30"
                   >
                     <span>{chosenMode === "exam" ? `Start CBT Exam (${selectedTest.durationMinutes}m) 🚀` : "Start Practice Session 💡"}</span>
                   </button>
 
                   <div className="flex items-center justify-between pt-1">
                     <button
-                      onClick={() => { setSelectedTest(null); setPreviewTopicIndex(null); }}
-                      className="text-[11px] text-slate-400 hover:text-white font-bold flex items-center gap-1 cursor-pointer transition"
+                      onClick={() => setSelectedTest(null)}
+                      className="text-[11px] text-slate-400 hover:text-white font-medium flex items-center gap-1 cursor-pointer transition"
                     >
                       <span>🔍</span> Explore More Tests
                     </button>
                     <span className="text-[11px] text-emerald-400 font-bold">
-                      100% Authentic Pattern
+                      Exact GATE Marking
                     </span>
                   </div>
                 </div>
               </div>
 
-              {/* RIGHT CARD: SYLLABUS & TOPIC LINKS */}
+              {/* RIGHT CARD: SYLLABUS TOPICS CHECKLIST */}
               <div className="md:col-span-7 bg-[#0f172a]/90 border border-slate-700/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-xl">
                 <div>
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2 text-slate-300 font-bold text-sm">
                       <span className="text-rose-400 text-base">⊞</span>
-                      <span>Syllabus &amp; Core Topics</span>
+                      <span>Syllabus &amp; Core Concepts</span>
                     </div>
-                    <span className="text-xs bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold px-2.5 py-0.5 rounded-full">
-                      {selectedTest.topics.length} Topics
+                    <span className="text-[11px] bg-rose-500/15 text-rose-300 border border-rose-500/25 font-bold px-2 py-0.5 rounded-full">
+                      {selectedTest.topics.length} Key Topics
                     </span>
                   </div>
 
-                  {/* Topics Grid: Clickable or previewable topics */}
-                  <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
-                    {selectedTest.topics.map((topic, idx) => {
-                      const isHovered = previewTopicIndex === idx;
-                      return (
-                        <div
-                          key={idx}
-                          onMouseEnter={() => setPreviewTopicIndex(idx)}
-                          className={`p-2.5 rounded-xl text-xs font-semibold transition flex items-center justify-between border ${
-                            isHovered
-                              ? "bg-rose-500/20 border-rose-400 text-white"
-                              : "bg-[#1e293b]/70 border-slate-700/70 text-slate-300"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 rounded-lg bg-black/40 text-rose-300 font-black text-[10px] flex items-center justify-center shrink-0">
-                              {idx + 1}
-                            </span>
-                            <span>{topic}</span>
-                          </div>
-                          <span className="text-[10px] text-slate-500 font-bold">GATE 2027</span>
-                        </div>
-                      );
-                    })}
+                  {/* Topics List: Clean, uncluttered checklist */}
+                  <div className="space-y-1.5 max-h-[350px] overflow-y-auto pr-1">
+                    {selectedTest.topics.map((topic, idx) => (
+                      <div
+                        key={idx}
+                        className="p-2 sm:p-2.5 rounded-xl text-xs font-medium transition flex items-center gap-2.5 bg-[#1e293b]/60 border border-slate-700/60 text-slate-200 hover:border-slate-500"
+                      >
+                        <span className="w-5 h-5 rounded-lg bg-black/40 text-rose-300 font-black text-[10px] flex items-center justify-center shrink-0">
+                          {idx + 1}
+                        </span>
+                        <span className="leading-snug">{topic}</span>
+                      </div>
+                    ))}
                   </div>
 
-                  {/* Question preview / tip box */}
-                  <div className="mt-4 p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
+                  {/* Tip Callout Box */}
+                  <div className="mt-3.5 p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
                     <div className="text-slate-400 text-[11px] flex items-center justify-between">
-                      <span>💡 MSQ (Multiple Select) and NAT questions have ZERO negative marking!</span>
-                      <span className="text-emerald-400 font-bold">Official Marking</span>
+                      <span>💡 <strong>Tip:</strong> MSQ (Multi-Select) and NAT questions carry <strong>0 negative penalty</strong>.</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-                  <span>Topic Wise Test • SCQ / MSQ / NAT Breakdown</span>
+                  <span>Topic Wise Test • SCQ / MSQ / NAT Format</span>
                   <button
                     onClick={() => handleStartExam(selectedTest, chosenMode)}
-                    className="text-rose-400 hover:text-rose-300 font-bold cursor-pointer"
+                    className="text-rose-400 hover:text-rose-300 font-bold cursor-pointer transition"
                   >
                     Start Test Now →
                   </button>
@@ -687,77 +722,148 @@ export default function MadeEasyTestSeriesModal({
           </div>
         ) : (
           /* ══════════════════════════════════════════════════════════════════
-              VIEW 2: LIST OF ALL TESTS WITH SUBJECT FILTER (IDENTICAL TO PYQ)
+              VIEW 2: CLEAN TEST CARDS LIST WITH SUBJECT TABS & SEARCH
           ══════════════════════════════════════════════════════════════════ */
           <>
-            {/* Subject Filter Pills */}
-            <div className="flex gap-2 overflow-x-auto pb-2.5 mb-2 shrink-0 scrollbar-none">
-              {subjectFilters.map((f) => (
-                <button
-                  key={f.key}
-                  onClick={() => setSelectedSubjectFilter(f.key)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer border ${
-                    selectedSubjectFilter === f.key
-                      ? "bg-rose-600 border-rose-500 text-white font-black shadow-md"
-                      : "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
+            {/* Search & Subject Tabs Bar */}
+            <div className="space-y-2 mb-3 shrink-0">
+              {/* Quick Search Input */}
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Filter by subject or topic (e.g. Paging, TCP, B-Tree, Cache, Grammars)..."
+                  className="w-full pl-8 pr-7 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-rose-500 transition"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Subject Filter Pills */}
+              <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                {subjectFilters.map((f) => {
+                  const isSelected = selectedSubjectFilter === f.key;
+                  return (
+                    <button
+                      key={f.key}
+                      onClick={() => setSelectedSubjectFilter(f.key)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition cursor-pointer flex items-center gap-1.5 border ${
+                        isSelected
+                          ? "bg-rose-600 border-rose-500 text-white font-bold shadow-md shadow-rose-600/20"
+                          : "bg-slate-800/80 border-slate-700/70 text-slate-300 hover:text-white hover:bg-slate-700/80"
+                      }`}
+                    >
+                      <span>{f.icon}</span>
+                      <span>{f.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Tests Grid (Matching PYQ Papers Grid layout) */}
+            {/* Tests Grid: Clean 2-column layout (1-column on mobile) */}
             <div className="flex-1 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3 pr-1">
-              {filteredTests.map((test) => (
-                <div
-                  key={test.id}
-                  className="bg-slate-950/90 border border-slate-800 hover:border-rose-500/50 p-4 rounded-2xl transition flex flex-col justify-between group shadow-lg"
-                >
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-[10px] font-black uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20">
-                        {test.type === "Full Syllabus Mock" ? "Full Length Mock" : `TWT #${test.testNumber} • ${test.subjectName}`}
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                          {test.totalMarks} Marks
+              {filteredTests.length === 0 ? (
+                <div className="col-span-full py-12 text-center text-slate-400 text-xs space-y-2">
+                  <div className="text-3xl">🔍</div>
+                  <p className="font-semibold text-white">No tests found matching &quot;{searchQuery}&quot;</p>
+                  <button
+                    onClick={() => { setSearchQuery(""); setSelectedSubjectFilter("all"); }}
+                    className="text-rose-400 hover:underline font-bold"
+                  >
+                    Reset filters
+                  </button>
+                </div>
+              ) : (
+                filteredTests.map((test) => (
+                  <div
+                    key={test.id}
+                    className="bg-slate-950/90 border border-slate-800 hover:border-rose-500/50 p-4 rounded-2xl transition-all duration-200 flex flex-col justify-between group shadow-lg"
+                  >
+                    <div>
+                      {/* Top Row: Subject Badge + Duration/Marks */}
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2.5 py-0.5 rounded-full border border-rose-500/20 flex items-center gap-1">
+                          <span>{test.subjectIcon}</span>
+                          <span>{test.badge} • {test.subjectName}</span>
                         </span>
-                        <span className="text-[10px] text-rose-300 font-bold bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
-                          ⏱ {test.durationMinutes}m
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                            {test.totalMarks} Marks
+                          </span>
+                          <span className="text-[10px] text-rose-300 font-bold bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
+                            ⏱ {test.durationMinutes}m
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Clean Prominent Title */}
+                      <h4 className="font-bold text-white text-sm sm:text-base group-hover:text-rose-300 transition mb-2 leading-snug">
+                        {test.title}
+                      </h4>
+
+                      {/* Question Breakdown Chips */}
+                      <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                        <span className="text-[10px] font-semibold bg-blue-500/15 text-blue-300 border border-blue-500/25 px-2 py-0.5 rounded-md">
+                          {test.scqCount} SCQ
+                        </span>
+                        {test.msqCount > 0 && (
+                          <span className="text-[10px] font-semibold bg-purple-500/15 text-purple-300 border border-purple-500/25 px-2 py-0.5 rounded-md">
+                            {test.msqCount} MSQ
+                          </span>
+                        )}
+                        {test.natCount > 0 && (
+                          <span className="text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/25 px-2 py-0.5 rounded-md">
+                            {test.natCount} NAT
+                          </span>
+                        )}
+                        <span className="text-[10px] text-slate-500 font-medium ml-auto">
+                          {test.totalQuestions} Questions
                         </span>
                       </div>
+
+                      {/* Key Topics Preview */}
+                      <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                        {test.topics.slice(0, 3).join(" • ")}
+                      </p>
                     </div>
-                    <h4 className="font-extrabold text-white text-sm group-hover:text-rose-300 transition mb-1 leading-snug">
-                      {test.name}
-                    </h4>
-                    <p className="text-[11px] text-slate-400 line-clamp-2">
-                      {test.totalQuestions} Questions ({test.scqCount} SCQ, {test.msqCount} MSQ, {test.natCount} NAT) • {test.topics.slice(0, 3).join(", ")}
-                    </p>
-                  </div>
 
-                  <div className="mt-4 pt-3 border-t border-slate-900 flex items-center justify-between gap-2 flex-wrap">
-                    <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                      GATE 2027 Pattern
-                    </span>
-
-                    <div className="flex items-center gap-1.5">
+                    {/* Action Footer */}
+                    <div className="mt-3.5 pt-3 border-t border-slate-900 flex items-center justify-between gap-2">
                       <button
                         onClick={() => setSelectedTest(test)}
-                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl cursor-pointer border border-slate-700 transition"
+                        className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl cursor-pointer border border-slate-700 transition"
                       >
-                        Test Info 📋
+                        Syllabus 📋
                       </button>
-                      <button
-                        onClick={() => handleStartExam(test, "exam")}
-                        className="px-3.5 py-1.5 btn-3d-green text-xs font-bold rounded-xl cursor-pointer shadow-md"
-                      >
-                        Attempt {test.durationMinutes}m 🚀
-                      </button>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => handleStartExam(test, "practice")}
+                          className="px-2.5 py-1.5 bg-white/[0.04] hover:bg-white/[0.08] text-slate-300 hover:text-white text-xs font-medium rounded-xl cursor-pointer border border-white/10 transition"
+                          title="Practice with instant answers"
+                        >
+                          Practice 💡
+                        </button>
+                        <button
+                          onClick={() => handleStartExam(test, "exam")}
+                          className="px-3.5 py-1.5 btn-3d-green text-xs font-bold rounded-xl cursor-pointer shadow-md"
+                        >
+                          Attempt 🚀
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </>
         )}
