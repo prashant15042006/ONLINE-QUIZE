@@ -685,9 +685,10 @@ export default function Home() {
     setSkippedCount(skipped);
 
     const percentage = Math.max(0, Math.round((correct / activeQuestions.length) * 100));
-    const newXP = userXP + calculatedScore;
+    const roundedScore = Math.round(calculatedScore * 100) / 100;
+    const newXP = Math.round((userXP + roundedScore) * 100) / 100;
     setUserXP(newXP);
-    setEarnedXP(calculatedScore);
+    setEarnedXP(roundedScore);
     setDailyQuizzesDone(prev => prev + 1);
     if (typeof window !== "undefined") localStorage.setItem("examiq_xp", newXP.toString());
 
@@ -1916,7 +1917,7 @@ export default function Home() {
               <span className="text-xl">🏆</span>
               <div>
                 <h3 className="text-xs font-black text-white uppercase tracking-wider">Exam Results Overview</h3>
-                <p className="text-[10px] text-slate-400">{activeQuestions.length} Questions Attempted · Score: {score} pts</p>
+                <p className="text-[10px] text-slate-400">{activeQuestions.length} Questions Attempted · Score: {Number.isInteger(score) ? score : score.toFixed(2)} pts</p>
               </div>
             </div>
             <button
@@ -1970,7 +1971,7 @@ export default function Home() {
             {/* Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
-                { label: "XP Earned", value: `+${earnedXP}`, color: "#00e676", bg: "bg-emerald-500/[0.07]", border: "border-emerald-500/20" },
+                { label: "XP Earned", value: `+${Number.isInteger(earnedXP) ? earnedXP : earnedXP.toFixed(2)}`, color: "#00e676", bg: "bg-emerald-500/[0.07]", border: "border-emerald-500/20" },
                 { label: "Accuracy", value: `${activeQuestions.length > 0 ? Math.round((correctCount / activeQuestions.length) * 100) : 0}%`, color: "#00b0ff", bg: "bg-cyan-500/[0.07]", border: "border-cyan-500/20" },
                 { label: "Correct", value: `${correctCount}/${activeQuestions.length}`, color: "#00e676", bg: "bg-emerald-500/[0.07]", border: "border-emerald-500/20" },
                 { label: "Time", value: formatTime(timeTakenSeconds), color: "#ffab00", bg: "bg-amber-500/[0.07]", border: "border-amber-500/20" },
