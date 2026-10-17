@@ -925,98 +925,101 @@ export default function Home() {
             {/* 🎯 MADE EASY – Featured Hero Button */}
             <button
               onClick={() => setIsMadeEasyModalOpen(true)}
-              className="px-4 py-2 rounded-xl text-xs font-black cursor-pointer flex items-center gap-1.5 shadow-xl transition hover:scale-[1.03]"
+              className="px-5 py-2.5 rounded-xl text-sm font-black cursor-pointer flex items-center gap-2 shadow-xl transition hover:scale-[1.03] active:scale-[0.98]"
               style={{
                 background: "linear-gradient(135deg, #be123c, #9f1239, #7c3aed)",
                 border: "1px solid rgba(225,29,72,0.5)",
-                boxShadow: "0 0 20px rgba(225,29,72,0.25)",
+                boxShadow: "0 0 20px rgba(225,29,72,0.3)",
               }}
             >
-              🎯 MADE EASY Test Series (GATE)
-              <span className="text-[9px] bg-white/20 px-1.5 py-0.5 rounded-full font-black">OTS</span>
+              🎯 MADE EASY Test Series (GATE 2027)
+              <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-black">14 LIVE</span>
             </button>
-            <button onClick={() => setIsGatePyqModalOpen(true)} className="px-4 py-2 btn-3d-amber rounded-xl text-xs font-black cursor-pointer flex items-center gap-1.5 shadow-lg">
+            <button onClick={() => setIsGatePyqModalOpen(true)} className="px-4 py-2.5 btn-3d-amber rounded-xl text-xs font-black cursor-pointer flex items-center gap-1.5 shadow-lg">
               📜 GATE Year-Wise PYQ (2015-2024)
             </button>
-            <button onClick={() => setShowAnalyticsView(false)} className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${!showAnalyticsView ? "btn-3d-blue" : "btn-3d-slate"}`}>
+            <button onClick={() => setShowAnalyticsView(false)} className={`px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${!showAnalyticsView ? "btn-3d-blue" : "btn-3d-slate"}`}>
               🗺️ Learning Pathway
             </button>
-            <button onClick={() => setShowAnalyticsView(true)} className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${showAnalyticsView ? "btn-3d-blue" : "btn-3d-slate"}`}>
+            <button onClick={() => setShowAnalyticsView(true)} className={`px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${showAnalyticsView ? "btn-3d-blue" : "btn-3d-slate"}`}>
               📊 Analytics
             </button>
-            <button onClick={() => setIsRankEstimatorOpen(true)} className="px-4 py-2 btn-3d-slate rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5">
+            <button onClick={() => setIsRankEstimatorOpen(true)} className="px-4 py-2.5 btn-3d-slate rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5">
               📊 Rank Estimator
             </button>
-            <button onClick={() => setIsHighlightedTopicsOpen(true)} className="px-4 py-2 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-lg" style={{background:"linear-gradient(135deg,#7c3aed,#db2777)",border:"1px solid rgba(219,39,119,0.4)"}}>
+            <button onClick={() => setIsHighlightedTopicsOpen(true)} className="px-4 py-2.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-lg" style={{background:"linear-gradient(135deg,#7c3aed,#db2777)",border:"1px solid rgba(219,39,119,0.4)"}}>
               🔥 Must-Do Topics
             </button>
           </div>
 
           {/* ── MADE EASY Featured Banner Card ── */}
           <div
-            className="relative overflow-hidden rounded-3xl p-5 sm:p-6 cursor-pointer group transition hover:scale-[1.01]"
+            className="relative overflow-hidden rounded-3xl p-6 sm:p-7 cursor-pointer group transition hover:scale-[1.01] duration-200"
             style={{
-              background: "linear-gradient(135deg, #1a0010 0%, #2d0a2d 40%, #0a0a2a 100%)",
-              border: "1px solid rgba(225,29,72,0.3)",
-              boxShadow: "0 0 30px rgba(225,29,72,0.08)",
+              background: "linear-gradient(135deg, #180010 0%, #2b082c 40%, #0d0c2c 100%)",
+              border: "1px solid rgba(225,29,72,0.4)",
+              boxShadow: "0 0 32px rgba(225,29,72,0.15)",
             }}
             onClick={() => setIsMadeEasyModalOpen(true)}
           >
-            <div className="absolute -right-8 -top-8 w-40 h-40 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -right-4 bottom-0 w-32 h-32 bg-violet-600/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
+            <div className="absolute -right-8 -top-8 w-44 h-44 bg-rose-600/15 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -right-4 bottom-0 w-36 h-36 bg-violet-600/15 rounded-full blur-2xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
+              <div className="flex items-start sm:items-center gap-4.5">
                 <div
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shrink-0 font-black"
+                  className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0 font-black shadow-lg"
                   style={{
                     background: "linear-gradient(135deg, #be123c, #7c3aed)",
-                    boxShadow: "0 4px 16px rgba(190,18,60,0.4)",
+                    boxShadow: "0 6px 20px rgba(190,18,60,0.45)",
                   }}
                 >
                   🎯
                 </div>
-                <div>
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-2.5 py-0.5 rounded-full border border-rose-500/30">
-                      🏆 Official Pattern
+                <div className="space-y-1.5">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-3 py-1 rounded-full border border-rose-500/35">
+                      🏆 Official Test Series
                     </span>
-                    <span className="text-[10px] font-black text-amber-300 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
-                      MSQ Multi-Select ✓
+                    <span className="text-xs font-black text-amber-300 bg-amber-500/15 px-2.5 py-1 rounded-md border border-amber-500/30">
+                      SCQ • MSQ • NAT
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20">
-                      14+ Tests Live 🟢
+                    <span className="text-xs font-bold text-emerald-300 bg-emerald-500/15 px-2.5 py-1 rounded-md border border-emerald-500/30 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                      14 Tests Live Now
                     </span>
                   </div>
-                  <h3 className="text-base sm:text-lg font-extrabold text-white">
+                  <h3 className="text-lg sm:text-2xl font-black text-white tracking-tight">
                     MADE EASY Online Test Series (OTS) — GATE CS & IT 2027
                   </h3>
-                  <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">
-                    Topic-wise & Subject Tests with authentic SCQ / MSQ / NAT pattern · Exact GATE marking (+1/−0.33, +2/−0.66, MSQ 0 negative) · Real CBT Timer
+                  <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
+                    Topic-wise tests & Full Mocks with authentic marking (+1/−0.33, +2/−0.66) · Multi-Select (MSQ) & Numerical (NAT) with zero negative penalty · Real CBT examination interface.
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-2 shrink-0">
-                <div className="flex gap-3 text-center">
+              <div className="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-4 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/[0.08]">
+                <div className="flex gap-4 sm:gap-5 text-center">
                   {[
-                    { val: "10+", lbl: "Subjects" },
-                    { val: "30+", lbl: "Tests Planned" },
-                    { val: "14+", lbl: "Tests Live" },
+                    { val: "10", lbl: "Subjects" },
+                    { val: "14", lbl: "Live Tests" },
+                    { val: "286+", lbl: "Questions" },
                   ].map((s, i) => (
                     <div key={i} className="text-center">
-                      <div className="text-lg font-black text-white">{s.val}</div>
-                      <div className="text-[10px] text-slate-500 font-medium">{s.lbl}</div>
+                      <div className="text-xl sm:text-2xl font-black text-white">{s.val}</div>
+                      <div className="text-xs text-slate-400 font-semibold">{s.lbl}</div>
                     </div>
                   ))}
                 </div>
                 <button
-                  className="px-5 py-2.5 rounded-xl text-xs font-black text-white cursor-pointer group-hover:shadow-lg transition flex items-center gap-1.5"
+                  className="px-6 py-3 rounded-xl text-sm font-black text-white cursor-pointer group-hover:shadow-xl transition flex items-center gap-2 shrink-0"
                   style={{
-                    background: "linear-gradient(135deg, #e11d48, #9f1239)",
-                    border: "1px solid rgba(244,63,94,0.4)",
+                    background: "linear-gradient(135deg, #e11d48, #be123c, #9f1239)",
+                    border: "1px solid rgba(244,63,94,0.5)",
+                    boxShadow: "0 4px 16px rgba(225,29,72,0.35)",
                   }}
                   onClick={(e) => { e.stopPropagation(); setIsMadeEasyModalOpen(true); }}
                 >
-                  Attempt Tests Now →
+                  <span>Open OTS Dashboard</span>
+                  <span>→</span>
                 </button>
               </div>
             </div>
@@ -1134,36 +1137,38 @@ export default function Home() {
 
                 {/* 🎯 MADE EASY Test Series Sidebar Card */}
                 <div
-                  className="p-5 space-y-3 rounded-3xl cursor-pointer group transition hover:scale-[1.01]"
+                  className="p-5 sm:p-6 space-y-3.5 rounded-3xl cursor-pointer group transition hover:scale-[1.01] duration-200"
                   style={{
-                    background: "linear-gradient(135deg, #1a0010, #2d0a2d)",
-                    border: "1px solid rgba(225,29,72,0.35)",
-                    boxShadow: "0 0 18px rgba(225,29,72,0.08)",
+                    background: "linear-gradient(135deg, #1c0012, #2e0a2f)",
+                    border: "1px solid rgba(225,29,72,0.4)",
+                    boxShadow: "0 0 22px rgba(225,29,72,0.12)",
                   }}
                   onClick={() => setIsMadeEasyModalOpen(true)}
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-2.5 py-1 rounded-full border border-rose-500/30">
-                      🎯 MADE EASY OTS
+                    <span className="text-xs font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-3 py-1 rounded-full border border-rose-500/35">
+                      🎯 MADE EASY OTS 2027
                     </span>
-                    <span className="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
-                      1 Test Live
+                    <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse" />
+                      14 Tests Live
                     </span>
                   </div>
-                  <h4 className="font-extrabold text-white text-sm leading-snug">
-                    GATE 2027 CS Online Test Series
+                  <h4 className="font-extrabold text-white text-base leading-snug">
+                    GATE 2027 CS &amp; IT Online Test Series
                   </h4>
-                  <p className="text-[11px] text-rose-100/60 leading-relaxed">
-                    COA Topic Wise Test - 5 is ready! SCQ / MSQ / NAT pattern with real CBT timer & negative marking.
+                  <p className="text-xs text-rose-100/70 leading-relaxed">
+                    Topic Wise Tests &amp; Full Mocks ready with authentic SCQ / MSQ / NAT marking and CBT timer simulator.
                   </p>
                   <div className="flex items-center justify-between pt-1">
-                    <div className="flex gap-1.5">
-                      <span className="text-[10px] bg-blue-500/10 border border-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded font-bold">SCQ</span>
-                      <span className="text-[10px] bg-purple-500/10 border border-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-bold">MSQ</span>
-                      <span className="text-[10px] bg-amber-500/10 border border-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-bold">NAT</span>
+                    <div className="flex gap-2">
+                      <span className="text-xs bg-blue-500/15 border border-blue-500/30 text-blue-300 px-2 py-0.5 rounded-md font-bold">SCQ</span>
+                      <span className="text-xs bg-purple-500/15 border border-purple-500/30 text-purple-300 px-2 py-0.5 rounded-md font-bold">MSQ</span>
+                      <span className="text-xs bg-amber-500/15 border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded-md font-bold">NAT</span>
                     </div>
-                    <span className="text-xs font-black text-rose-300 group-hover:translate-x-1 transition">Attempt →</span>
+                    <span className="text-sm font-black text-rose-300 group-hover:translate-x-1 transition flex items-center gap-1">
+                      Dashboard →
+                    </span>
                   </div>
                 </div>
 
