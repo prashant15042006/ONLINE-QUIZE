@@ -771,10 +771,10 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-[#07090f] text-slate-100 flex flex-col font-sans safe-bottom-padding">
+    <main className={`min-h-screen ${theme === "light" ? "bg-[#f8fafc] text-slate-900" : "bg-[#07090f] text-slate-100"} flex flex-col font-sans safe-bottom-padding transition-colors duration-200`}>
 
       {/* ═══════════════ HEADER ═══════════════ */}
-      <header className="sticky top-0 z-40 bg-[#07090f]/80 backdrop-blur-xl border-b border-white/[0.06] px-4 sm:px-8 py-3 flex items-center justify-between">
+      <header className={`sticky top-0 z-40 ${theme === "light" ? "bg-white/90 border-slate-200/90 shadow-sm" : "bg-[#07090f]/80 border-white/[0.06]"} backdrop-blur-xl border-b px-4 sm:px-8 py-3 flex items-center justify-between transition-colors duration-200`}>
         <div onClick={() => setCurrentScreen("dashboard")} className="flex items-center gap-3 cursor-pointer group">
           <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-lg shadow-cyan-500/10 group-hover:shadow-cyan-500/25 group-hover:scale-105 transition border border-white/10">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -956,47 +956,49 @@ export default function Home() {
           <div
             className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-6 cursor-pointer group transition hover:scale-[1.01] duration-200"
             style={{
-              background: "linear-gradient(135deg, #180010 0%, #2b082c 40%, #0d0c2c 100%)",
-              border: "1px solid rgba(225,29,72,0.4)",
-              boxShadow: "0 0 28px rgba(225,29,72,0.12)",
+              background: theme === "light"
+                ? "linear-gradient(135deg, #fff1f2 0%, #fdf2f8 50%, #f5f3ff 100%)"
+                : "linear-gradient(135deg, #180010 0%, #2b082c 40%, #0d0c2c 100%)",
+              border: theme === "light" ? "1px solid rgba(244,63,94,0.3)" : "1px solid rgba(225,29,72,0.4)",
+              boxShadow: theme === "light" ? "0 4px 20px rgba(225,29,72,0.08)" : "0 0 28px rgba(225,29,72,0.12)",
             }}
             onClick={() => setIsMadeEasyModalOpen(true)}
           >
-            <div className="absolute -right-8 -top-8 w-44 h-44 bg-rose-600/15 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -right-4 bottom-0 w-36 h-36 bg-violet-600/15 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -right-8 -top-8 w-44 h-44 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -right-4 bottom-0 w-36 h-36 bg-violet-600/10 rounded-full blur-2xl pointer-events-none" />
             <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-start sm:items-center gap-3.5">
                 <div
                   className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shrink-0 font-black shadow-lg"
                   style={{
                     background: "linear-gradient(135deg, #be123c, #7c3aed)",
-                    boxShadow: "0 4px 16px rgba(190,18,60,0.45)",
+                    boxShadow: "0 4px 16px rgba(190,18,60,0.35)",
                   }}
                 >
                   🎯
                 </div>
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-2.5 py-0.5 rounded-full border border-rose-500/35">
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-rose-500 bg-rose-500/15 px-2.5 py-0.5 rounded-full border border-rose-500/30">
                       🏆 Official Pattern
                     </span>
-                    <span className="text-[10px] sm:text-xs font-black text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-500/30">
+                    <span className="text-[10px] sm:text-xs font-black text-amber-500 bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-500/30">
                       SCQ • MSQ • NAT
                     </span>
-                    <span className="text-[10px] sm:text-xs font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-md border border-emerald-500/30 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span className="text-[10px] sm:text-xs font-bold text-emerald-500 bg-emerald-500/15 px-2 py-0.5 rounded-md border border-emerald-500/30 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       14 Tests Live
                     </span>
                   </div>
-                  <h3 className="text-base sm:text-xl font-black text-white tracking-tight">
+                  <h3 className={`text-base sm:text-xl font-black ${theme === "light" ? "text-slate-900" : "text-white"} tracking-tight`}>
                     MADE EASY Online Test Series (OTS) — GATE CS 2027
                   </h3>
-                  <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+                  <p className={`text-xs ${theme === "light" ? "text-slate-600" : "text-slate-300"} max-w-xl leading-relaxed`}>
                     Topic-wise &amp; Full Mocks with authentic marking (+1/−0.33, +2/−0.66) · MSQ &amp; NAT with 0 negative penalty · Real CBT simulator.
                   </p>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center md:items-end justify-between w-full md:w-auto gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-white/[0.08]">
+              <div className="flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center md:items-end justify-between w-full md:w-auto gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-black/[0.06] dark:border-white/[0.08]">
                 <div className="flex justify-around sm:justify-start gap-4 text-center">
                   {[
                     { val: "10", lbl: "Subjects" },
@@ -1004,8 +1006,8 @@ export default function Home() {
                     { val: "286+", lbl: "Questions" },
                   ].map((s, i) => (
                     <div key={i} className="text-center">
-                      <div className="text-lg sm:text-xl font-black text-white">{s.val}</div>
-                      <div className="text-[10px] sm:text-xs text-slate-400 font-semibold">{s.lbl}</div>
+                      <div className={`text-lg sm:text-xl font-black ${theme === "light" ? "text-slate-900" : "text-white"}`}>{s.val}</div>
+                      <div className={`text-[10px] sm:text-xs ${theme === "light" ? "text-slate-500" : "text-slate-400"} font-semibold`}>{s.lbl}</div>
                     </div>
                   ))}
                 </div>
@@ -1139,34 +1141,36 @@ export default function Home() {
                 <div
                   className="p-5 sm:p-6 space-y-3.5 rounded-3xl cursor-pointer group transition hover:scale-[1.01] duration-200"
                   style={{
-                    background: "linear-gradient(135deg, #1c0012, #2e0a2f)",
-                    border: "1px solid rgba(225,29,72,0.4)",
-                    boxShadow: "0 0 22px rgba(225,29,72,0.12)",
+                    background: theme === "light"
+                      ? "linear-gradient(135deg, #fff1f2, #fdf2f8)"
+                      : "linear-gradient(135deg, #1c0012, #2e0a2f)",
+                    border: theme === "light" ? "1px solid rgba(244,63,94,0.3)" : "1px solid rgba(225,29,72,0.4)",
+                    boxShadow: theme === "light" ? "0 4px 18px rgba(225,29,72,0.06)" : "0 0 22px rgba(225,29,72,0.12)",
                   }}
                   onClick={() => setIsMadeEasyModalOpen(true)}
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-3 py-1 rounded-full border border-rose-500/35">
+                    <span className="text-xs font-black uppercase tracking-wider text-rose-500 bg-rose-500/15 px-3 py-1 rounded-full border border-rose-500/30">
                       🎯 MADE EASY OTS 2027
                     </span>
-                    <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse" />
+                    <span className="text-xs font-bold text-emerald-500 flex items-center gap-1.5 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
                       14 Tests Live
                     </span>
                   </div>
-                  <h4 className="font-extrabold text-white text-base leading-snug">
+                  <h4 className={`font-extrabold ${theme === "light" ? "text-slate-900" : "text-white"} text-base leading-snug`}>
                     GATE 2027 CS &amp; IT Online Test Series
                   </h4>
-                  <p className="text-xs text-rose-100/70 leading-relaxed">
+                  <p className={`text-xs ${theme === "light" ? "text-slate-600" : "text-rose-100/70"} leading-relaxed`}>
                     Topic Wise Tests &amp; Full Mocks ready with authentic SCQ / MSQ / NAT marking and CBT timer simulator.
                   </p>
                   <div className="flex items-center justify-between pt-1">
                     <div className="flex gap-2">
-                      <span className="text-xs bg-blue-500/15 border border-blue-500/30 text-blue-300 px-2 py-0.5 rounded-md font-bold">SCQ</span>
-                      <span className="text-xs bg-purple-500/15 border border-purple-500/30 text-purple-300 px-2 py-0.5 rounded-md font-bold">MSQ</span>
-                      <span className="text-xs bg-amber-500/15 border border-amber-500/30 text-amber-300 px-2 py-0.5 rounded-md font-bold">NAT</span>
+                      <span className="text-xs bg-blue-500/15 border border-blue-500/30 text-blue-500 dark:text-blue-300 px-2 py-0.5 rounded-md font-bold">SCQ</span>
+                      <span className="text-xs bg-purple-500/15 border border-purple-500/30 text-purple-500 dark:text-purple-300 px-2 py-0.5 rounded-md font-bold">MSQ</span>
+                      <span className="text-xs bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-300 px-2 py-0.5 rounded-md font-bold">NAT</span>
                     </div>
-                    <span className="text-sm font-black text-rose-300 group-hover:translate-x-1 transition flex items-center gap-1">
+                    <span className="text-sm font-black text-rose-500 dark:text-rose-300 group-hover:translate-x-1 transition flex items-center gap-1">
                       Dashboard →
                     </span>
                   </div>
