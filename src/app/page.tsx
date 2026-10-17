@@ -954,67 +954,67 @@ export default function Home() {
 
           {/* ── MADE EASY Featured Banner Card ── */}
           <div
-            className="relative overflow-hidden rounded-3xl p-6 sm:p-7 cursor-pointer group transition hover:scale-[1.01] duration-200"
+            className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-6 cursor-pointer group transition hover:scale-[1.01] duration-200"
             style={{
               background: "linear-gradient(135deg, #180010 0%, #2b082c 40%, #0d0c2c 100%)",
               border: "1px solid rgba(225,29,72,0.4)",
-              boxShadow: "0 0 32px rgba(225,29,72,0.15)",
+              boxShadow: "0 0 28px rgba(225,29,72,0.12)",
             }}
             onClick={() => setIsMadeEasyModalOpen(true)}
           >
             <div className="absolute -right-8 -top-8 w-44 h-44 bg-rose-600/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute -right-4 bottom-0 w-36 h-36 bg-violet-600/15 rounded-full blur-2xl pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
-              <div className="flex items-start sm:items-center gap-4.5">
+            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3.5">
                 <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shrink-0 font-black shadow-lg"
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shrink-0 font-black shadow-lg"
                   style={{
                     background: "linear-gradient(135deg, #be123c, #7c3aed)",
-                    boxShadow: "0 6px 20px rgba(190,18,60,0.45)",
+                    boxShadow: "0 4px 16px rgba(190,18,60,0.45)",
                   }}
                 >
                   🎯
                 </div>
-                <div className="space-y-1.5">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-3 py-1 rounded-full border border-rose-500/35">
-                      🏆 Official Test Series
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-rose-300 bg-rose-500/20 px-2.5 py-0.5 rounded-full border border-rose-500/35">
+                      🏆 Official Pattern
                     </span>
-                    <span className="text-xs font-black text-amber-300 bg-amber-500/15 px-2.5 py-1 rounded-md border border-amber-500/30">
+                    <span className="text-[10px] sm:text-xs font-black text-amber-300 bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-500/30">
                       SCQ • MSQ • NAT
                     </span>
-                    <span className="text-xs font-bold text-emerald-300 bg-emerald-500/15 px-2.5 py-1 rounded-md border border-emerald-500/30 flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                      14 Tests Live Now
+                    <span className="text-[10px] sm:text-xs font-bold text-emerald-300 bg-emerald-500/15 px-2 py-0.5 rounded-md border border-emerald-500/30 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      14 Tests Live
                     </span>
                   </div>
-                  <h3 className="text-lg sm:text-2xl font-black text-white tracking-tight">
-                    MADE EASY Online Test Series (OTS) — GATE CS & IT 2027
+                  <h3 className="text-base sm:text-xl font-black text-white tracking-tight">
+                    MADE EASY Online Test Series (OTS) — GATE CS 2027
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-                    Topic-wise tests & Full Mocks with authentic marking (+1/−0.33, +2/−0.66) · Multi-Select (MSQ) & Numerical (NAT) with zero negative penalty · Real CBT examination interface.
+                  <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
+                    Topic-wise &amp; Full Mocks with authentic marking (+1/−0.33, +2/−0.66) · MSQ &amp; NAT with 0 negative penalty · Real CBT simulator.
                   </p>
                 </div>
               </div>
-              <div className="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-4 shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/[0.08]">
-                <div className="flex gap-4 sm:gap-5 text-center">
+              <div className="flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center md:items-end justify-between w-full md:w-auto gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-white/[0.08]">
+                <div className="flex justify-around sm:justify-start gap-4 text-center">
                   {[
                     { val: "10", lbl: "Subjects" },
                     { val: "14", lbl: "Live Tests" },
                     { val: "286+", lbl: "Questions" },
                   ].map((s, i) => (
                     <div key={i} className="text-center">
-                      <div className="text-xl sm:text-2xl font-black text-white">{s.val}</div>
-                      <div className="text-xs text-slate-400 font-semibold">{s.lbl}</div>
+                      <div className="text-lg sm:text-xl font-black text-white">{s.val}</div>
+                      <div className="text-[10px] sm:text-xs text-slate-400 font-semibold">{s.lbl}</div>
                     </div>
                   ))}
                 </div>
                 <button
-                  className="px-6 py-3 rounded-xl text-sm font-black text-white cursor-pointer group-hover:shadow-xl transition flex items-center gap-2 shrink-0"
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black text-white cursor-pointer group-hover:shadow-xl transition flex items-center justify-center gap-1.5 shrink-0"
                   style={{
                     background: "linear-gradient(135deg, #e11d48, #be123c, #9f1239)",
                     border: "1px solid rgba(244,63,94,0.5)",
-                    boxShadow: "0 4px 16px rgba(225,29,72,0.35)",
+                    boxShadow: "0 4px 14px rgba(225,29,72,0.35)",
                   }}
                   onClick={(e) => { e.stopPropagation(); setIsMadeEasyModalOpen(true); }}
                 >
