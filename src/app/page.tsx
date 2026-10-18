@@ -1969,16 +1969,19 @@ export default function Home() {
             )}
 
             {/* Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {[
-                { label: "XP Earned", value: `+${Number.isInteger(earnedXP) ? earnedXP : earnedXP.toFixed(2)}`, color: "#00e676", bg: "bg-emerald-500/[0.07]", border: "border-emerald-500/20" },
-                { label: "Accuracy", value: `${activeQuestions.length > 0 ? Math.round((correctCount / activeQuestions.length) * 100) : 0}%`, color: "#00b0ff", bg: "bg-cyan-500/[0.07]", border: "border-cyan-500/20" },
-                { label: "Correct", value: `${correctCount}/${activeQuestions.length}`, color: "#00e676", bg: "bg-emerald-500/[0.07]", border: "border-emerald-500/20" },
-                { label: "Time", value: formatTime(timeTakenSeconds), color: "#ffab00", bg: "bg-amber-500/[0.07]", border: "border-amber-500/20" },
+                { label: "✅ Correct", value: `${correctCount}`, sub: `out of ${activeQuestions.length}`, color: "#00e676", bg: "bg-emerald-500/[0.07]", border: "border-emerald-500/20" },
+                { label: "❌ Incorrect", value: `${incorrectCount}`, sub: `out of ${activeQuestions.length}`, color: "#ff5252", bg: "bg-rose-500/[0.07]", border: "border-rose-500/20" },
+                { label: "⏭ Skipped", value: `${skippedCount}`, sub: `not attempted`, color: "#90a4ae", bg: "bg-slate-500/[0.07]", border: "border-slate-500/20" },
+                { label: "🎯 Accuracy", value: `${activeQuestions.length > 0 ? Math.round((correctCount / activeQuestions.length) * 100) : 0}%`, sub: `overall`, color: "#00b0ff", bg: "bg-cyan-500/[0.07]", border: "border-cyan-500/20" },
+                { label: "⚡ XP Earned", value: `+${Number.isInteger(earnedXP) ? earnedXP : earnedXP.toFixed(2)}`, sub: `experience points`, color: "#00e676", bg: "bg-emerald-500/[0.07]", border: "border-emerald-500/20" },
+                { label: "⏱ Time Taken", value: formatTime(timeTakenSeconds), sub: `total duration`, color: "#ffab00", bg: "bg-amber-500/[0.07]", border: "border-amber-500/20" },
               ].map((s, i) => (
                 <div key={i} className={`rounded-2xl p-4 border text-center ${s.bg} ${s.border}`}>
                   <div className="text-[10px] font-bold text-slate-400 mb-1">{s.label}</div>
                   <div className="text-xl font-black" style={{color: s.color}}>{s.value}</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">{s.sub}</div>
                 </div>
               ))}
             </div>
@@ -2089,7 +2092,7 @@ export default function Home() {
       <AIExplainModal isOpen={isAIExplainModalOpen} onClose={() => setIsAIExplainModalOpen(false)} question={activeQuestions[currentQuestionIndex] || null} userSelectedIndex={userAnswers[activeQuestions[currentQuestionIndex]?.id]?.selectedOptionIndex ?? null} examName={selectedExam?.name} subjectName={selectedSubject?.name} chapterName={selectedChapter?.name} />
       <AIQuizGeneratorModal isOpen={isAIQuizGenModalOpen} onClose={() => setIsAIQuizGenModalOpen(false)} onStartGeneratedQuiz={(questions, title) => launchCustomQuestionPool(questions, title)} />
       <GateRankEstimatorModal isOpen={isRankEstimatorOpen} onClose={() => setIsRankEstimatorOpen(false)} />
-      <QuestionSearchModal isOpen={isQuestionSearchOpen} onClose={() => setIsQuestionSearchOpen(false)} onSelectQuestion={(q, subjectName) => launchCustomQuestionPool([q], `Practice: ${subjectName}`)} />
+      <QuestionSearchModal isOpen={isQuestionSearchOpen} onClose={() => setIsQuestionSearchOpen(false)} onSelectQuestion={(questions, startIndex, subjectName) => launchCustomQuestionPool(questions, `Browse: ${subjectName}`, undefined, startIndex)} />
       <GatePyqMockModal isOpen={isGatePyqModalOpen} onClose={() => setIsGatePyqModalOpen(false)} onStartPaper={(questions, paperTitle, durationMinutes, initialIndex) => launchCustomQuestionPool(questions, paperTitle, durationMinutes, initialIndex)} />
       <ScientificCalculatorModal isOpen={isScientificCalcOpen} onClose={() => setIsScientificCalcOpen(false)} />
       <ScratchpadModal isOpen={isScratchpadOpen} onClose={() => setIsScratchpadOpen(false)} />
