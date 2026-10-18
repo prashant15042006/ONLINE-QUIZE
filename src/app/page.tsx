@@ -171,6 +171,44 @@ function renderFormattedSolution(exp: string) {
   const lines = exp.split("\n");
   const elements: React.ReactNode[] = [];
   let tableRows: string[] = [];
+  let listItems: { type: "ol" | "ul"; text: string }[] = [];
+  let listType: "ol" | "ul" | null = null;
+  let codeLines: string[] = [];
+  let inCode = false;
+
+  const flushList = (key: string) => {
+    if (listItems.length === 0) return;
+    if (listType === "ol") {
+      elements.push(
+        <ol key={key} className="list-decimal ml-5 space-y-1 my-2">
+          {listItems.map((li, i) => (
+            <li key={i} className="text-slate-200 leading-relaxed">{renderRichText(li.text)}</li>
+          ))}
+        </ol>
+      );
+    } else {
+      elements.push(
+        <ul key={key} className="list-disc ml-5 space-y-1 my-2">
+          {listItems.map((li, i) => (
+            <li key={i} className="text-slate-200 leading-relaxed">{renderRichText(li.text)}</li>
+          ))}
+        </ul>
+      );
+    }
+    listItems = [];
+    listType = null;
+  };
+
+  const flushCode = (key: string) => {
+    if (codeLines.length === 0) return;
+    elements.push(
+      <pre key={key} className="bg-slate-950 border border-slate-700 rounded-xl p-3 my-2 overflow-x-auto">
+        <code className="text-cyan-300 text-[11px] font-mono leading-relaxed">{codeLines.join("\n")}</code>
+      </pre>
+    );
+    codeLines = [];
+    inCode = false;
+  };
 
   const flushTable = (key: string) => {
     if (tableRows.length < 2) {
@@ -181,13 +219,23 @@ function renderFormattedSolution(exp: string) {
     const headers = tableRows[0].split("|").filter(Boolean).map(h => h.trim());
     const dataRows = tableRows.slice(2).filter(r => !r.match(/^[|\s-]+$/));
     elements.push(
-      <div key={key} className="overflow-x-auto my-2">
-        <table className="solution-table">
-          <thead><tr>{headers.map((h,i) => <th key={i}>{h}</th>)}</tr></thead>
-          <tbody>{dataRows.map((row, ri) => {
-            const cells = row.split("|").filter(Boolean).map(c => c.trim());
-            return <tr key={ri}>{cells.map((c, ci) => <td key={ci}>{renderTextWithMath(c)}</td>)}</tr>;
-          })}</tbody>
+      <div key={key} className="overflow-x-auto my-3 rounded-xl border border-slate-700">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="bg-slate-800">
+              {headers.map((h, i) => <th key={i} className="px-3 py-2 text-left font-bold text-cyan-300 border-b border-slate-700">{renderRichText(h)}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {dataRows.map((row, ri) => {
+              const cells = row.split("|").filter(Boolean).map(c => c.trim());
+              return (
+                <tr key={ri} className={ri % 2 === 0 ? "bg-slate-900" : "bg-slate-950"}>
+                  {cells.map((c, ci) => <td key={ci} className="px-3 py-2 text-slate-300 border-b border-slate-800">{renderRichText(c)}</td>)}
+                </tr>
+              );
+            })}
+          </tbody>
         </table>
       </div>
     );
@@ -195,27 +243,103 @@ function renderFormattedSolution(exp: string) {
   };
 
   lines.forEach((line, lIdx) => {
-    if (line.startsWith("|")) {
-      tableRows.push(line);
-    } else {
-      if (tableRows.length > 0) flushTable(`tbl-${lIdx}`);
-      if (line.startsWith("### ")) {
-        elements.push(<h5 key={lIdx} className="font-bold text-emerald-400 mt-3 mb-1 text-sm">{line.replace("### ", "")}</h5>);
-      } else if (line.startsWith("## ")) {
-        elements.push(<h4 key={lIdx} className="font-bold text-cyan-400 mt-3 mb-1">{line.replace("## ", "")}</h4>);
-      } else if (line.startsWith("\$\$") && line.endsWith("\$\$")) {
-        elements.push(<MathRenderer key={lIdx} math={line.slice(2, -2)} block={true} />);
-      } else if (line.startsWith("- ") || line.startsWith("* ")) {
-        elements.push(<li key={lIdx} className="ml-4 list-disc text-slate-300">{renderTextWithMath(line.slice(2))}</li>);
-      } else if (line.trim() === "") {
-        elements.push(<br key={lIdx} />);
-      } else {
-        elements.push(<p key={lIdx} className="text-slate-300 leading-relaxed">{renderTextWithMath(line)}</p>);
-      }
+    const key = `ln-${lIdx}`;
+
+    if (line.trim().startsWith("```")) {
+      if (inCode) { flushCode(key); } else { flushList(key); flushTable(key); inCode = true; }
+      return;
     }
+    if (inCode) { codeLines.push(line); return; }
+
+    if (line.startsWith("|")) {
+      flushList(key);
+      tableRows.push(line);
+      return;
+    } else if (tableRows.length > 0) {
+      flushTable(key);
+    }
+
+    if (line.match(/^[-*_]{3,}$/)) {
+      flushList(key);
+      elements.push(<hr key={key} className="border-slate-700 my-3" />);
+      return;
+    }
+
+    if (line.startsWith("### ")) {
+      flushList(key);
+      elements.push(<h5 key={key} className="font-bold text-emerald-400 mt-4 mb-1.5 text-sm border-b border-emerald-500/20 pb-1">{renderRichText(line.slice(4))}</h5>);
+      return;
+    }
+    if (line.startsWith("## ")) {
+      flushList(key);
+      elements.push(<h4 key={key} className="font-extrabold text-cyan-400 mt-4 mb-1.5 text-base">{renderRichText(line.slice(3))}</h4>);
+      return;
+    }
+    if (line.startsWith("# ")) {
+      flushList(key);
+      elements.push(<h3 key={key} className="font-extrabold text-white mt-4 mb-2 text-base">{renderRichText(line.slice(2))}</h3>);
+      return;
+    }
+
+    const olMatch = line.match(/^(\d+)\.\s+(.+)/);
+    if (olMatch) {
+      if (listType === "ul") flushList(key);
+      listType = "ol";
+      listItems.push({ type: "ol", text: olMatch[2] });
+      return;
+    }
+
+    if (line.match(/^[-*]\s+/)) {
+      if (listType === "ol") flushList(key);
+      listType = "ul";
+      listItems.push({ type: "ul", text: line.replace(/^[-*]\s+/, "") });
+      return;
+    }
+
+    if (listItems.length > 0) flushList(key);
+
+    if (line.startsWith("$$") && line.endsWith("$$")) {
+      elements.push(
+        <div key={key} className="my-3 overflow-x-auto bg-slate-950/60 border border-slate-700/60 rounded-xl px-4 py-3 text-center">
+          <MathRenderer math={line.slice(2, -2)} block={true} />
+        </div>
+      );
+      return;
+    }
+
+    if (line.trim() === "") {
+      elements.push(<div key={key} className="h-2" />);
+      return;
+    }
+
+    elements.push(
+      <p key={key} className="text-slate-200 leading-relaxed">{renderRichText(line)}</p>
+    );
   });
+
+  if (inCode) flushCode("code-end");
+  if (listItems.length > 0) flushList("list-end");
   if (tableRows.length > 0) flushTable("tbl-end");
-  return <div className="space-y-1 text-xs">{elements}</div>;
+
+  return <div className="space-y-1.5 text-xs">{elements}</div>;
+}
+
+function renderRichText(text: string): React.ReactNode {
+  if (!text) return null;
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\$\$[^$]+\$\$|\$[^$]+\$)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**"))
+      return <strong key={i} className="font-bold text-white">{part.slice(2, -2)}</strong>;
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 2)
+      return <em key={i} className="italic text-slate-300">{part.slice(1, -1)}</em>;
+    if (part.startsWith("`") && part.endsWith("`"))
+      return <code key={i} className="bg-slate-800 text-cyan-300 px-1 py-0.5 rounded text-[11px] font-mono">{part.slice(1, -1)}</code>;
+    if (part.startsWith("$$") && part.endsWith("$$"))
+      return <MathRenderer key={i} math={part.slice(2, -2)} block={true} />;
+    if (part.startsWith("$") && part.endsWith("$") && part.length > 2)
+      return <MathRenderer key={i} math={part.slice(1, -1)} block={false} />;
+    return <span key={i}>{part}</span>;
+  });
 }
 
 // Compute total question count across all exams
@@ -1818,12 +1942,51 @@ export default function Home() {
 
                 {/* Explanation panel (practice mode) */}
                 {quizMode === "practice" && isAnswerChecked && (
-                  <div className={`p-4 sm:p-5 rounded-2xl flex items-start gap-3 sm:gap-4 border animate-slide-up ${isCorrect ? "bg-emerald-950/60 border-emerald-500/30 text-emerald-200" : "bg-rose-950/60 border-rose-500/30 text-rose-200"}`}>
-                    <span className="text-xl sm:text-2xl shrink-0">{isCorrect ? "🎉" : "💡"}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-black text-sm mb-1.5">{isCorrect ? "Correct! Well done! (+10 XP)" : "Explanation:"}</div>
-                      <div className="text-xs leading-relaxed">{renderFormattedSolution(currentQ.explanation)}</div>
+                  <div className="rounded-2xl border border-slate-700/60 overflow-hidden animate-slide-up shadow-xl shadow-black/40">
+                    {/* Verdict header */}
+                    <div className={`flex items-center gap-3 px-4 py-3 ${isCorrect ? "bg-emerald-600/20 border-b border-emerald-500/30" : "bg-rose-600/20 border-b border-rose-500/30"}`}>
+                      <span className="text-2xl shrink-0">{isCorrect ? "🎉" : "❌"}</span>
+                      <div className="flex-1">
+                        <div className={`font-extrabold text-sm ${isCorrect ? "text-emerald-300" : "text-rose-300"}`}>
+                          {isCorrect ? "Correct! Well done! (+10 XP)" : "Wrong Answer — Study the explanation below"}
+                        </div>
+                        {!isCorrect && currentQ.options && (
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="text-[11px] text-slate-400">Correct Answer:</span>
+                            <span className="text-[11px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-lg">
+                              {(() => {
+                                const correctIdxList = (currentQ.correctAnswerIndices && currentQ.correctAnswerIndices.length > 0)
+                                  ? currentQ.correctAnswerIndices
+                                  : [currentQ.correctAnswerIndex];
+                                return correctIdxList.map(ci => {
+                                  const label = String.fromCharCode(65 + ci);
+                                  const text = currentQ.options?.[ci] ?? "";
+                                  return `${label}) ${text.length > 60 ? text.slice(0, 60) + "…" : text}`;
+                                }).join("  |  ");
+                              })()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Explanation body */}
+                    {currentQ.explanation && (
+                      <div className="bg-slate-900/80 px-4 py-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-base">💡</span>
+                          <span className="text-xs font-extrabold text-white tracking-wide uppercase">Detailed Explanation</span>
+                          {currentQ.concept && (
+                            <span className="ml-auto text-[10px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full">
+                              {currentQ.concept}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs leading-relaxed">
+                          {renderFormattedSolution(currentQ.explanation)}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
