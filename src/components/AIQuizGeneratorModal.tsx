@@ -150,10 +150,11 @@ export default function AIQuizGeneratorModal({ isOpen, onClose, onStartGenerated
         return;
       }
 
+      const modelLabel = data.model ? ` (${data.model})` : "";
       setSourceInfo(
         data.source === "ai"
-          ? "Generated directly with AI"
-          : "Matched with Curated Official Question Bank"
+          ? `✨ Dynamically generated with AI${modelLabel}`
+          : "📚 Matched & loaded from Official Exam Question Bank"
       );
 
       // Brief delay to show user confirmation then launch

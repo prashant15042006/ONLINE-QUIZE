@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { HIGHLIGHTED_TOPICS } from "@/data/highlightedTopics";
-import { EXAMS_DATA, Subject } from "@/data/quizData";
+import { EXAMS_DATA, Subject, Question as QuizQuestion } from "@/data/quizData";
+import { CURATED_QUESTIONS } from "@/data/curatedQuestions";
+import { GATE_PYQ_PAPERS } from "@/data/gatePyqData";
 
 const ENV_GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 const ENV_GROQ_KEY = process.env.GROQ_API_KEY || "";
@@ -11,6 +13,18 @@ const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
 const OR_URL = "https://openrouter.ai/api/v1/chat/completions";
 const GROQ_MODEL = "llama-3.3-70b-versatile";
 const OR_MODEL = "meta-llama/llama-3.1-8b-instruct:free";
+
+interface NormalizedQuestion {
+  id: string;
+  text: string;
+  imageUrl?: string;
+  imageAlt?: string;
+  options: string[];
+  correctAnswerIndex: number;
+  explanation: string;
+  difficulty: "easy" | "medium" | "hard";
+  concept: string;
+}
 
 async function callLLM(
   apiUrl: string,
@@ -44,14 +58,30 @@ async function callLLM(
   return data.choices?.[0]?.message?.content || "";
 }
 
-function extractJsonArray(raw: string): string {
-  const cleaned = raw.replace(/```(?:json)?\s*/gi, "").replace(/```/g, "").trim();
-  const start = cleaned.indexOf("[");
-  const end = cleaned.lastIndexOf("]");
-  if (start !== -1 && end !== -1 && end > start) {
-    return cleaned.slice(start, end + 1);
+/** Free Zero-Key Cloud AI via Pollinations */
+async function callPollinationsAI(systemPrompt: string, userPrompt: string): Promise<string> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+  try {
+    const res = await fetch("https://text.pollinations.ai/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        model: "openai",
+        jsonMode: true,
+      }),
+    });
+    if (!res.ok) throw new Error(`Pollinations HTTP ${res.status}`);
+    return await res.text();
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return cleaned;
 }
 
 // Fisher-Yates shuffle with answer index tracking
@@ -69,45 +99,231 @@ function shuffleQuestionOptions(options: string[], correctIdx: number): { shuffl
   };
 }
 
-// Search existing high quality questions matching the topic
-function searchCuratedQuestions(topic: string, count: number): Array<{
-  id: string;
-  text: string;
-  options: string[];
-  correctAnswerIndex: number;
-  explanation: string;
-  difficulty: "easy" | "medium" | "hard";
-  concept: string;
-}> {
-  const terms = topic.toLowerCase().split(/\s+/).filter(t => t.length > 2);
-  if (terms.length === 0) return [];
+/** Robust JSON parser that handles both raw array and object wrappers with options objects or arrays */
+function parseAndNormalizeAIQuestions(
+  rawContent: string,
+  targetDifficulty: string,
+  topic: string
+): NormalizedQuestion[] {
+  if (!rawContent || rawContent.trim().length < 20) return [];
 
-  const matched: Array<{
-    id: string;
-    text: string;
-    options: string[];
-    correctAnswerIndex: number;
-    explanation: string;
-    difficulty: "easy" | "medium" | "hard";
-    concept: string;
-    score: number;
-  }> = [];
+  const cleaned = rawContent.replace(/```(?:json)?\s*/gi, "").replace(/```/g, "").trim();
 
-  // Search Highlighted Topics
+  let parsed: unknown = null;
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    // Try to extract [ ... ]
+    const startArr = cleaned.indexOf("[");
+    const endArr = cleaned.lastIndexOf("]");
+    if (startArr !== -1 && endArr > startArr) {
+      try {
+        parsed = JSON.parse(cleaned.slice(startArr, endArr + 1));
+      } catch {
+        // Try to extract { ... }
+        const startObj = cleaned.indexOf("{");
+        const endObj = cleaned.lastIndexOf("}");
+        if (startObj !== -1 && endObj > startObj) {
+          try {
+            parsed = JSON.parse(cleaned.slice(startObj, endObj + 1));
+          } catch {
+            return [];
+          }
+        }
+      }
+    }
+  }
+
+  if (!parsed) return [];
+
+  // Extract array of raw question objects
+  let rawList: unknown[] = [];
+  if (Array.isArray(parsed)) {
+    rawList = parsed;
+  } else if (typeof parsed === "object" && parsed !== null) {
+    const record = parsed as Record<string, unknown>;
+    const arrayCandidate = Object.values(record).find(v => Array.isArray(v));
+    if (arrayCandidate && Array.isArray(arrayCandidate)) {
+      rawList = arrayCandidate;
+    }
+  }
+
+  const results: NormalizedQuestion[] = [];
+
+  for (let i = 0; i < rawList.length; i++) {
+    const item = rawList[i];
+    if (typeof item !== "object" || item === null) continue;
+    const q = item as Record<string, unknown>;
+
+    // Extract text
+    const text = String(q.text || q.question || q.prompt || "").trim();
+    if (text.length < 10) continue;
+
+    // Extract options
+    let options: string[] = [];
+    if (Array.isArray(q.options)) {
+      options = q.options.map(o => String(o).trim()).filter(Boolean);
+    } else if (typeof q.options === "object" && q.options !== null) {
+      const optObj = q.options as Record<string, unknown>;
+      if (optObj.A || optObj.a) {
+        options = [
+          String(optObj.A || optObj.a || "").trim(),
+          String(optObj.B || optObj.b || "").trim(),
+          String(optObj.C || optObj.c || "").trim(),
+          String(optObj.D || optObj.d || "").trim(),
+        ].filter(Boolean);
+      } else {
+        options = Object.values(optObj).map(v => String(v).trim()).filter(Boolean);
+      }
+    }
+
+    if (options.length < 2) continue;
+
+    // Pad to 4 options if needed
+    while (options.length < 4) {
+      options.push("None of the above");
+    }
+    if (options.length > 4) {
+      options = options.slice(0, 4);
+    }
+
+    // Determine correct answer index (0 to 3)
+    let correctIdx = 0;
+    if (typeof q.correctAnswerIndex === "number" && q.correctAnswerIndex >= 0 && q.correctAnswerIndex < options.length) {
+      correctIdx = q.correctAnswerIndex;
+    } else if (typeof q.answer === "string") {
+      const ansStr = (q.answer as string).trim();
+      const letter = ansStr.toUpperCase();
+      if (letter === "A" || letter === "0") correctIdx = 0;
+      else if (letter === "B" || letter === "1") correctIdx = 1;
+      else if (letter === "C" || letter === "2") correctIdx = 2;
+      else if (letter === "D" || letter === "3") correctIdx = 3;
+      else {
+        // Maybe the string is the option text itself
+        const found = options.findIndex(o => o.toLowerCase() === ansStr.toLowerCase());
+        if (found !== -1) correctIdx = found;
+      }
+    } else if (typeof q.correct === "string") {
+      const corStr = (q.correct as string).trim();
+      const found = options.findIndex(o => o.toLowerCase() === corStr.toLowerCase());
+      if (found !== -1) correctIdx = found;
+    }
+
+    // Shuffle options so correct answer is balanced
+    const { shuffledOptions, newCorrectIdx } = shuffleQuestionOptions(options, correctIdx);
+
+    // Extract explanation
+    const explanation = String(
+      q.explanation ||
+      q.solution ||
+      `### Detailed Solution\nReview the core principles and formulas governing **${topic || "this concept"}** to verify this answer.`
+    ).trim();
+
+    results.push({
+      id: `ai-gen-${Date.now()}-${i}`,
+      text,
+      options: shuffledOptions,
+      correctAnswerIndex: newCorrectIdx,
+      explanation,
+      difficulty: (q.difficulty as "easy" | "medium" | "hard") || (targetDifficulty as "easy" | "medium" | "hard"),
+      concept: String(q.concept || topic || "AI Quiz").trim(),
+    });
+  }
+
+  return results;
+}
+
+/** Comprehensive search across all genuine question banks in the app */
+function searchAuthenticQuestionBanks(topic: string, count: number): NormalizedQuestion[] {
+  const terms = topic
+    .toLowerCase()
+    .replace(/[^\w\s]/g, " ")
+    .split(/\s+/)
+    .filter(t => t.length > 2);
+
+  const matched: Array<NormalizedQuestion & { score: number }> = [];
+
+  // 1. Search GATE PYQ Papers (1040 official questions)
+  for (const paper of GATE_PYQ_PAPERS) {
+    for (const q of paper.questions) {
+      if (!q.options || q.options.length < 2) continue;
+      const qText = q.text.toLowerCase();
+      const qConcept = (q.concept || "").toLowerCase();
+      let score = 0;
+
+      if (terms.length > 0 && terms.every(t => qConcept.includes(t) || qText.includes(t))) {
+        score += 10;
+      }
+      for (const t of terms) {
+        if (qConcept.includes(t)) score += 4;
+        if (qText.includes(t)) score += 2;
+      }
+
+      if (score > 1) {
+        matched.push({
+          id: `gate-pyq-${q.id}`,
+          text: q.text,
+          imageUrl: q.imageUrl,
+          imageAlt: q.imageAlt,
+          options: q.options,
+          correctAnswerIndex: q.correctAnswerIndex ?? 0,
+          explanation: q.explanation || `### Solution\nOfficial GATE solution for ${paper.title}.`,
+          difficulty: q.difficulty || "medium",
+          concept: q.concept || paper.title,
+          score,
+        });
+      }
+    }
+  }
+
+  // 2. Search Curated Questions
+  for (const [chapKey, qList] of Object.entries(CURATED_QUESTIONS)) {
+    for (const q of qList) {
+      if (!q.options || q.options.length < 2) continue;
+      const qText = q.text.toLowerCase();
+      const qConcept = (q.concept || chapKey).toLowerCase();
+      let score = 0;
+
+      for (const t of terms) {
+        if (qConcept.includes(t)) score += 4;
+        if (qText.includes(t)) score += 2;
+      }
+
+      if (score > 1) {
+        matched.push({
+          id: `curated-${q.id}`,
+          text: q.text,
+          imageUrl: q.imageUrl,
+          imageAlt: q.imageAlt,
+          options: q.options,
+          correctAnswerIndex: q.correctAnswerIndex ?? 0,
+          explanation: q.explanation || "Detailed mathematical solution.",
+          difficulty: q.difficulty || "medium",
+          concept: q.concept || chapKey,
+          score,
+        });
+      }
+    }
+  }
+
+  // 3. Search Highlighted Topics
   for (const ht of HIGHLIGHTED_TOPICS) {
     const topicMatches = terms.some(t => ht.name.toLowerCase().includes(t) || ht.subject.toLowerCase().includes(t));
     for (const q of ht.questions) {
+      if (!q.options || q.options.length < 2) continue;
       const qText = q.text.toLowerCase();
-      let score = topicMatches ? 3 : 0;
+      let score = topicMatches ? 5 : 0;
       for (const t of terms) {
         if (qText.includes(t)) score += 2;
       }
-      if (score > 0) {
+      if (score > 1) {
         matched.push({
-          id: `ai-curated-${q.id}`,
+          id: `ht-${q.id}`,
           text: q.text,
+          imageUrl: q.imageUrl,
+          imageAlt: q.imageAlt,
           options: q.options,
-          correctAnswerIndex: q.correctAnswerIndex,
+          correctAnswerIndex: q.correctAnswerIndex ?? 0,
           explanation: q.explanation || `Relevant solution for ${ht.name}.`,
           difficulty: q.difficulty || "medium",
           concept: ht.name,
@@ -117,7 +333,7 @@ function searchCuratedQuestions(topic: string, count: number): Array<{
     }
   }
 
-  // Search EXAMS_DATA
+  // 4. Search EXAMS_DATA
   for (const exam of EXAMS_DATA) {
     const subjects: Subject[] = [];
     if (exam.branches) {
@@ -130,17 +346,20 @@ function searchCuratedQuestions(topic: string, count: number): Array<{
       for (const chap of subj.chapters) {
         const chapMatches = terms.some(t => chap.name.toLowerCase().includes(t) || subj.name.toLowerCase().includes(t));
         for (const q of chap.questions) {
+          if (!q.options || q.options.length < 2) continue;
           const qText = q.text.toLowerCase();
-          let score = chapMatches ? 2 : 0;
+          let score = chapMatches ? 4 : 0;
           for (const t of terms) {
             if (qText.includes(t)) score += 2;
           }
           if (score > 1) {
             matched.push({
-              id: `ai-curated-${q.id}`,
+              id: `exam-${q.id}`,
               text: q.text,
+              imageUrl: q.imageUrl,
+              imageAlt: q.imageAlt,
               options: q.options,
-              correctAnswerIndex: q.correctAnswerIndex,
+              correctAnswerIndex: q.correctAnswerIndex ?? 0,
               explanation: q.explanation || `Solution from ${chap.name} (${subj.name}).`,
               difficulty: q.difficulty || "medium",
               concept: chap.name,
@@ -152,164 +371,66 @@ function searchCuratedQuestions(topic: string, count: number): Array<{
     }
   }
 
-  // Sort by score descending and take unique questions
+  // Sort descending by relevance score
   matched.sort((a, b) => b.score - a.score);
-  const seen = new Set<string>();
-  const unique = matched.filter(item => {
-    if (seen.has(item.text)) return false;
-    seen.add(item.text);
-    return true;
-  });
 
-  return unique.slice(0, count).map(q => {
-    const { shuffledOptions, newCorrectIdx } = shuffleQuestionOptions(q.options, q.correctAnswerIndex);
-    return {
-      id: q.id,
-      text: q.text,
-      options: shuffledOptions,
-      correctAnswerIndex: newCorrectIdx,
-      explanation: q.explanation,
-      difficulty: q.difficulty,
-      concept: q.concept,
-    };
-  });
+  // Deduplicate
+  const seen = new Set<string>();
+  const unique: NormalizedQuestion[] = [];
+  for (const item of matched) {
+    const key = item.text.slice(0, 50);
+    if (!seen.has(key)) {
+      seen.add(key);
+      const { shuffledOptions, newCorrectIdx } = shuffleQuestionOptions(item.options, item.correctAnswerIndex);
+      unique.push({
+        ...item,
+        options: shuffledOptions,
+        correctAnswerIndex: newCorrectIdx,
+      });
+    }
+    if (unique.length >= count) break;
+  }
+
+  return unique;
 }
 
-// Smart Domain Fallback when no API keys are available or AI rate-limited
-function generateSmartFallback(topic: string, examName: string, difficulty: string, count: number) {
-  const t = topic.trim() || "Core Concepts";
+/** Fallback to high quality authentic exam questions from the nearest subject rather than fake templates */
+function getAuthenticBackupQuestions(examName: string, difficulty: string, count: number): NormalizedQuestion[] {
+  const pool: QuizQuestion[] = [];
 
-  // Check if we can pull authentic curated questions first
-  const curatedMatches = searchCuratedQuestions(t, count);
-  if (curatedMatches.length >= count) {
-    return curatedMatches;
+  // Pick questions from the relevant exam or GATE CS
+  for (const exam of EXAMS_DATA) {
+    if (examName.toLowerCase().includes(exam.id) || exam.name.toLowerCase().includes(examName.toLowerCase())) {
+      const subjects = exam.branches ? exam.branches.flatMap(b => b.subjects) : exam.subjects || [];
+      subjects.forEach(s => s.chapters.forEach(c => pool.push(...c.questions)));
+    }
   }
 
-  // Domain question generators
-  const baseTemplates = [
-    {
-      text: `In the context of ${t}, which statement is technically correct regarding primary execution and system behavior?`,
-      correct: `It enforces defined theoretical bounds and deterministic boundary constraints`,
-      wrong: [
-        `It operates with unconstrained random allocations without verifying preconditions`,
-        `It bypasses state invariants whenever asymptotic efficiency increases`,
-        `It assumes zero operational overhead across all memory and execution layers`
-      ],
-      explanation: `### Detailed Solution\nIn ${examName} analysis for **${t}**, operations must maintain formal invariants and adhere strictly to theoretical bounds.\n\n**Key Takeaway:** Correctness requires verifying state invariants before optimizing performance.`
-    },
-    {
-      text: `What is the primary constraint or performance bottleneck frequently encountered when optimizing "${t}"?`,
-      correct: `Resource contention and synchronization overhead across state transitions`,
-      wrong: [
-        `Arbitrary variable naming causing parsing latency`,
-        `Unconditional branching improving pipeline utilization`,
-        `Direct arithmetic simplicity without any memory interaction`
-      ],
-      explanation: `### Detailed Solution\nWhen scaling **${t}**, resource contention and memory latency dominate the critical path. Minimizing synchronization stalls directly optimizes throughput.`
-    },
-    {
-      text: `Consider a standard problem formulation involving ${t}. How are boundary edge-cases most effectively addressed?`,
-      correct: `By establishing clear base cases and validating invariant preconditions prior to iterative processing`,
-      wrong: [
-        `By ignoring boundary states and relying on default zero initializations`,
-        `By executing arbitrary retry loops without terminating conditions`,
-        `By strictly using brute-force search over infinite input domains`
-      ],
-      explanation: `### Detailed Solution\nBoundary verification ensures robustness in ${t}. Establishing inductive base conditions prevents edge-case regressions.`
-    },
-    {
-      text: `Which architectural or algorithmic property characterizes an optimal implementation of ${t}?`,
-      correct: `Minimal time-space complexity trade-off adhering to formal asymptotic limits`,
-      wrong: [
-        `Exponential auxiliary space regardless of input dimensions`,
-        `Redundant multi-pass recalculations without caching or memoization`,
-        `Indiscriminate synchronization locking across all concurrent blocks`
-      ],
-      explanation: `### Detailed Solution\nAn optimal implementation of ${t} achieves the theoretical lower bound without redundant auxiliary overhead.`
-    },
-    {
-      text: `During validation of ${t}, what criterion confirms that the system has reached a stable equilibrium?`,
-      correct: `All constraint verification assertions pass and no further state transitions are required`,
-      wrong: [
-        `The clock cycle counter wraps around zero`,
-        `Arbitrary exception suppression masks runtime anomalies`,
-        `Total operations exceed arbitrary arbitrary iteration thresholds`
-      ],
-      explanation: `### Detailed Solution\nEquilibrium is defined by satisfaction of all invariant constraints with stable state convergence.`
-    },
-    {
-      text: `In standard ${examName} evaluations of "${t}", which mistake is most commonly penalized?`,
-      correct: `Overlooking off-by-one boundary conditions and implicit domain restrictions`,
-      wrong: [
-        `Using standard mathematical notation instead of heuristic approximations`,
-        `Following formal algorithmic specifications step-by-step`,
-        `Verifying intermediate results before producing final output`
-      ],
-      explanation: `### Detailed Solution\nGATE and competitive exams frequently test subtle off-by-one boundaries and implicit domain assumptions in ${t}.`
-    },
-    {
-      text: `How does increasing input size N typically affect the computational resource demand in "${t}"?`,
-      correct: `It scales according to the fundamental asymptotic complexity of the governing algorithm`,
-      wrong: [
-        `It always remains strictly O(1) independent of data structure design`,
-        `It causes unpredictable non-deterministic shifts unrelated to algorithm complexity`,
-        `It reduces required execution time as problem size multiplies`
-      ],
-      explanation: `### Detailed Solution\nAsymptotic growth governs resource consumption in ${t}. Understanding Big-O bounds is essential for competitive exam questions.`
-    },
-    {
-      text: `Which design pattern or strategy is best suited for decomposing complex challenges in "${t}"?`,
-      correct: `Divide-and-conquer combined with modular verification of independent sub-problems`,
-      wrong: [
-        `Monolithic unrolled scripting without modular function boundaries`,
-        `Pure trial-and-error mutation without systematic hypothesis testing`,
-        `Ignoring existing subproblem dependencies to compute answers out-of-order`
-      ],
-      explanation: `### Detailed Solution\nModular decomposition breaks complex ${t} problems into solvable atomic steps with verifiable proofs of correctness.`
-    },
-    {
-      text: `When evaluating the worst-case scenario for "${t}", which factor has the greatest influence?`,
-      correct: `Adversarial input distributions that trigger maximum traversal paths or pipeline stalls`,
-      wrong: [
-        `Cosmetic formatting variations in source listings`,
-        `Constant factors that shrink asymptotically toward zero`,
-        `Presence of explanatory commentary within problem descriptions`
-      ],
-      explanation: `### Detailed Solution\nWorst-case analysis requires examining inputs that maximize resource usage or trigger worst-case branching paths.`
-    },
-    {
-      text: `What is the most effective approach to verify correctness of a derived solution for "${t}"?`,
-      correct: `Formal verification against test vectors, mathematical invariants, and boundary conditions`,
-      wrong: [
-        `Assuming the first generated candidate is automatically optimal`,
-        `Skipping validation whenever time elapsed is below average`,
-        `Relying solely on visual inspection without rigorous numerical verification`
-      ],
-      explanation: `### Detailed Solution\nRigorous testing against known edge cases and mathematical validation confirms solution soundness for ${t}.`
+  // If still low, add GATE PYQ questions
+  if (pool.length < count) {
+    for (const paper of GATE_PYQ_PAPERS.slice(0, 3)) {
+      pool.push(...paper.questions);
     }
-  ];
+  }
 
-  const combined = [...curatedMatches];
-  let templateIdx = 0;
+  const shuffled = [...pool].sort(() => 0.5 - Math.random());
+  const selected = shuffled.slice(0, count);
 
-  while (combined.length < count && templateIdx < baseTemplates.length) {
-    const tmpl = baseTemplates[templateIdx];
-    const allOptions = [tmpl.correct, ...tmpl.wrong];
-    const { shuffledOptions, newCorrectIdx } = shuffleQuestionOptions(allOptions, 0);
-
-    combined.push({
-      id: `ai-gen-${Date.now()}-${combined.length}`,
-      text: tmpl.text,
+  return selected.map((q, idx) => {
+    const opts = q.options && q.options.length >= 2 ? q.options : ["True", "False", "Cannot be determined", "None of these"];
+    const { shuffledOptions, newCorrectIdx } = shuffleQuestionOptions(opts, q.correctAnswerIndex ?? 0);
+    return {
+      id: `fallback-${Date.now()}-${idx}`,
+      text: q.text,
+      imageUrl: q.imageUrl,
+      imageAlt: q.imageAlt,
       options: shuffledOptions,
       correctAnswerIndex: newCorrectIdx,
-      explanation: tmpl.explanation,
-      difficulty: difficulty as "easy" | "medium" | "hard",
-      concept: t,
-    });
-    templateIdx++;
-  }
-
-  return combined.slice(0, count);
+      explanation: q.explanation || `### Detailed Solution\nReview key concepts and formulas related to ${q.concept || examName}.`,
+      difficulty: q.difficulty || (difficulty as "easy" | "medium" | "hard"),
+      concept: q.concept || examName,
+    };
+  });
 }
 
 export async function POST(req: NextRequest) {
@@ -327,22 +448,21 @@ export async function POST(req: NextRequest) {
     const activeGroqKey = customProvider === "groq" && customApiKey ? customApiKey : ENV_GROQ_KEY;
     const activeOrKey = customProvider === "openrouter" && customApiKey ? customApiKey : ENV_OR_KEY;
 
-    const systemPrompt = `You are a distinguished professor and expert question setter for competitive exams, specializing in ${examName}.
-Generate exactly ${count} rigorous, authentic multiple-choice questions (MCQs) matching the exact style, syllabus, and depth of ${examName}.
+    const systemPrompt = `You are a distinguished university professor and expert question setter for competitive examinations (${examName}).
+Your task is to generate exactly ${count} rigorous, authentic multiple-choice questions (MCQs) for ${examName} students.
 
-CRITICAL JSON OUTPUT RULES:
-- Output ONLY a valid raw JSON array of objects.
-- Absolutely NO conversational text, NO intro, NO markdown code fences.
-- "correctAnswerIndex" MUST be an integer between 0 and 3. Distribute correct answers across options 0, 1, 2, and 3 evenly.
-- "options" MUST be an array of exactly 4 strings. All 4 options must be distinct, plausible, and high quality.
-- "explanation" MUST include a clear step-by-step mathematical or conceptual breakdown.
-- "difficulty" should be "${difficulty}".
+CRITICAL RULES:
+- Return ONLY a raw JSON array of objects. No conversational text, no intro, no backticks.
+- "options" MUST be an array of exactly 4 plausible, distinct choices.
+- "correctAnswerIndex" MUST be an integer 0, 1, 2, or 3. Distribute correct choices across all indices.
+- "explanation" MUST be comprehensive and pedagogical: include formulas, step-by-step derivation, and why other options are incorrect.
+- "difficulty" MUST be "${difficulty}".
 
-Schema:
+Output schema:
 [
   {
-    "id": "gen-1",
-    "text": "Question text here",
+    "id": "q1",
+    "text": "Question text with LaTeX math like $O(n \\log n)$ if applicable",
     "options": ["Option A", "Option B", "Option C", "Option D"],
     "correctAnswerIndex": 1,
     "explanation": "### Solution\\nStep 1: ...\\nStep 2: ...",
@@ -353,16 +473,16 @@ Schema:
 
     const userPrompt =
       notes && notes.length > 20
-        ? `Generate ${count} ${examName} MCQs based on the following study notes (Difficulty: ${difficulty}):\n\nNotes:\n---\n${notes.substring(0, 4500)}\n---\n\nReturn ONLY the JSON array.`
-        : `Generate ${count} high-caliber ${examName} MCQs on the topic: "${topic || "Computer Science Fundamentals"}".\nDifficulty: ${difficulty}.\nInclude numericals, theoretical nuances, and tricky distractors.\n\nReturn ONLY the JSON array.`;
+        ? `Generate exactly ${count} high-standard ${examName} MCQs based on these study notes (Difficulty: ${difficulty}):\n\nNotes:\n---\n${notes.substring(0, 4000)}\n---\n\nReturn raw JSON array.`
+        : `Generate exactly ${count} authentic ${examName} MCQs on the topic: "${topic || "Core Fundamentals"}".\nDifficulty: ${difficulty}.\nInclude numerical problems and deep conceptual questions. Return raw JSON array.`;
 
     let content = "";
+    let aiModelUsed = "";
 
     // 1. Try Gemini
     if (activeGeminiKey) {
       try {
         const genAI = new GoogleGenerativeAI(activeGeminiKey);
-        // Try gemini-1.5-flash or gemini-2.0-flash
         const modelNames = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"];
         for (const mName of modelNames) {
           try {
@@ -375,7 +495,7 @@ Schema:
             const text = result.response.text();
             if (text && text.trim().length > 50) {
               content = text;
-              console.log(`Gemini (${mName}) succeeded, length:`, content.length);
+              aiModelUsed = `Gemini (${mName})`;
               break;
             }
           } catch (innerErr) {
@@ -391,7 +511,7 @@ Schema:
     if (!content && activeGroqKey) {
       try {
         content = await callLLM(GROQ_URL, activeGroqKey, GROQ_MODEL, systemPrompt, userPrompt, false);
-        console.log("Groq succeeded, length:", content.length);
+        aiModelUsed = "Groq (Llama 3.3)";
       } catch (err) {
         console.warn("Groq failed:", err);
       }
@@ -401,86 +521,65 @@ Schema:
     if (!content && activeOrKey) {
       try {
         content = await callLLM(OR_URL, activeOrKey, OR_MODEL, systemPrompt, userPrompt, true);
-        console.log("OpenRouter succeeded, length:", content.length);
+        aiModelUsed = "OpenRouter";
       } catch (err) {
         console.warn("OpenRouter failed:", err);
       }
     }
 
-    // 4. If AI succeeded, parse and validate
-    if (content) {
-      const jsonStr = extractJsonArray(content);
+    // 4. Free Zero-Key Cloud AI via Pollinations
+    if (!content) {
       try {
-        const raw = JSON.parse(jsonStr);
-        if (Array.isArray(raw) && raw.length > 0) {
-          const valid = raw
-            .filter(
-              (q) =>
-                q &&
-                typeof q.text === "string" &&
-                q.text.trim().length > 10 &&
-                Array.isArray(q.options) &&
-                q.options.length >= 2 &&
-                typeof q.correctAnswerIndex === "number" &&
-                q.correctAnswerIndex >= 0 &&
-                q.correctAnswerIndex < q.options.length
-            )
-            .map((q, i) => {
-              // Ensure 4 options
-              let opts: string[] = (q.options as unknown[]).map(o => String(o).trim());
-              let cIdx = q.correctAnswerIndex as number;
-              if (opts.length < 4) {
-                while (opts.length < 4) {
-                  opts.push(`None of the above`);
-                }
-              } else if (opts.length > 4) {
-                opts = opts.slice(0, 4);
-                if (cIdx >= 4) cIdx = 0;
-              }
-
-              // Randomize option order to prevent always-A bias
-              const { shuffledOptions, newCorrectIdx } = shuffleQuestionOptions(opts, cIdx);
-
-              return {
-                id: `gen-${Date.now()}-${i}`,
-                text: q.text,
-                imageUrl: typeof q.imageUrl === "string" && q.imageUrl.trim().length > 0 ? q.imageUrl.trim() : undefined,
-                imageAlt: typeof q.imageAlt === "string" ? q.imageAlt : undefined,
-                options: shuffledOptions,
-                correctAnswerIndex: newCorrectIdx,
-                explanation: q.explanation || "Review fundamental formulas and concepts related to this topic.",
-                difficulty: q.difficulty || difficulty,
-                concept: q.concept || topic || "AI Quiz",
-              };
-            });
-
-          if (valid.length > 0) {
-            return NextResponse.json({
-              questions: valid.slice(0, count),
-              source: "ai",
-            });
-          }
+        content = await callPollinationsAI(systemPrompt, userPrompt);
+        if (content && content.trim().length > 50) {
+          aiModelUsed = "Cloud AI Engine";
         }
-      } catch (parseErr) {
-        console.warn("JSON parse failed on AI response:", parseErr);
+      } catch (err) {
+        console.warn("Pollinations AI attempt timed out or failed:", err);
       }
     }
 
-    // 5. Intelligent Fallback: Real questions matched from curated bank or synthesized
-    console.log("Serving intelligent questions for:", topic || examName);
-    const fallbackQuestions = generateSmartFallback(topic || notes.slice(0, 40), examName, difficulty, count);
+    // Parse AI output if we got content
+    if (content) {
+      const parsedQuestions = parseAndNormalizeAIQuestions(content, difficulty, topic);
+      if (parsedQuestions.length >= Math.min(count, 3)) {
+        return NextResponse.json({
+          questions: parsedQuestions.slice(0, count),
+          source: "ai",
+          model: aiModelUsed,
+        });
+      }
+    }
+
+    // 5. Intelligent Fallback: Authentic question search from real question banks
+    console.log("Searching authentic question banks for topic:", topic || examName);
+    const bankMatches = searchAuthenticQuestionBanks(topic || notes.slice(0, 40), count);
+
+    if (bankMatches.length >= count) {
+      return NextResponse.json({
+        questions: bankMatches.slice(0, count),
+        source: "curated_bank",
+        fallback: true,
+      });
+    }
+
+    // If partial matches, fill remaining with authentic backup exam questions
+    const backupQuestions = getAuthenticBackupQuestions(examName, difficulty, count - bankMatches.length);
+    const combined = [...bankMatches, ...backupQuestions];
+
     return NextResponse.json({
-      questions: fallbackQuestions,
+      questions: combined.slice(0, count),
       source: "curated_bank",
       fallback: true,
     });
 
   } catch (error) {
     console.error("AI quiz endpoint error:", error);
+    const fallback = getAuthenticBackupQuestions("GATE CS", "medium", 5);
     return NextResponse.json({
-      questions: generateSmartFallback("Computer Science", "GATE", "medium", 5),
-      source: "fallback",
-      error: "Temporary issue encountered. Loaded standard questions for you.",
+      questions: fallback,
+      source: "curated_bank",
+      fallback: true,
     });
   }
 }
