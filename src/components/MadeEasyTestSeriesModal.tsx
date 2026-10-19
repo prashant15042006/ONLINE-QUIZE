@@ -22,6 +22,7 @@ import { MADE_EASY_ALGO_TWT3_QUESTIONS } from "../data/madeEasyAlgoTest3";
 import { MADE_EASY_COA_TWT6_QUESTIONS } from "../data/madeEasyCOATest6";
 import { MADE_EASY_EM_TWT9_QUESTIONS } from "../data/madeEasyEMTest9";
 import { MADE_EASY_ALGO_SWT_QUESTIONS } from "../data/madeEasyAlgoSWT";
+import { MADE_EASY_COA_SWT_QUESTIONS } from "../data/madeEasyCOASWT";
 
 interface Props {
   isOpen: boolean;
@@ -539,6 +540,32 @@ export default function MadeEasyTestSeriesModal({
       ],
       chapterId: "algo-gate-2027-swt",
       questions: MADE_EASY_ALGO_SWT_QUESTIONS,
+    },
+    {
+      id: "coa-swt-1",
+      testNumber: 1,
+      badge: "SWT COA",
+      title: "Computer Organization & Architecture: Subject Wise Test",
+      subjectKey: "coa",
+      subjectName: "Computer Organization",
+      subjectIcon: "💻",
+      type: "Topic Wise Test",
+      totalQuestions: MADE_EASY_COA_SWT_QUESTIONS.length,
+      totalMarks: 50,
+      durationMinutes: 90,
+      scqCount: 18,
+      msqCount: 7,
+      natCount: 8,
+      topics: [
+        "Machine Instructions, Addressing Modes & ISA",
+        "Microprogramming (Horizontal & Vertical) & Control Unit",
+        "Instruction Pipelining, Hazards (RAW, WAR, WAW) & Speedup",
+        "Memory Hierarchy: Cache Mapping, Policies & AMAT",
+        "I/O Organization, Interrupts & Cycle Stealing DMA",
+        "Computer Arithmetic, IEEE-754 & 2's Complement Overflow",
+      ],
+      chapterId: "coa-gate-2027-swt",
+      questions: MADE_EASY_COA_SWT_QUESTIONS,
     },
     {
       id: "cd-twt-23",
