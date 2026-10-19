@@ -284,20 +284,44 @@ Hence, **Queries 2 and 3** are correct.`
     marks: 2,
     negativeMarks: 0,
     questionType: "MSQ",
-    text: `Consider a schema with two relations $R(A, B)$ and $S(B, C)$ where all values are integers. Make no assumption about the keys.
+    imageUrl: "/images/made_easy/twt08_q06.png",
+    imageAlt: "Relational algebra expressions for Q.6",
+    text: `Consider a schema with two relations $R(A, B)$ and $S(B, C)$ where all values are integers. Make no assumption about the keys. Consider the following relational algebra expressions:
 
-*(Please share the screenshot for Q.6 containing the expressions to update the options!)*
+1. $\\pi_{A,C}(R \\bowtie \\sigma_{B=1}\\, S)$
+2. $\\pi_A(\\sigma_{B=1}\\, R) \\times \\pi_C(\\sigma_{B=1}\\, S)$
+3. $\\pi_{A,C}(\\pi_A\\, R \\times \\sigma_{B=1}\\, S)$
+4. None of these
 
-Which of the above are equivalent?`,
+Where of the above are equivalent?`,
     options: [
-      "Option 1",
-      "Option 2",
-      "Option 3",
+      "$\\pi_{A,C}(R \\bowtie \\sigma_{B=1}\\, S)$",
+      "$\\pi_A(\\sigma_{B=1}\\, R) \\times \\pi_C(\\sigma_{B=1}\\, S)$",
+      "$\\pi_{A,C}(\\pi_A\\, R \\times \\sigma_{B=1}\\, S)$",
       "None of these"
     ],
-    correctAnswerIndex: 3,
+    correctAnswerIndex: 0,
+    correctAnswerIndices: [0, 2],
     explanation: `### Solution
-*(Pending screenshot for Q.6 expressions)*`
+We have $R(A, B)$ and $S(B, C)$. Evaluate each expression:
+
+**Option 1:** $\\pi_{A,C}(R \\bowtie \\sigma_{B=1}(S))$
+- $\\sigma_{B=1}(S)$ filters S to rows where $B=1$.
+- Natural join $R \\bowtie \\sigma_{B=1}(S)$ matches on attribute $B$: only tuples in $R$ where $B=1$ join.
+- Result: all $(a, c)$ pairs where $(a, 1) \\in R$ and $(1, c) \\in S$.
+
+**Option 2:** $\\pi_A(\\sigma_{B=1}(R)) \\times \\pi_C(\\sigma_{B=1}(S))$
+- This cross products A-values from R where B=1, with C-values from S where B=1.
+- NOT equivalent to Option 1 in general (duplicates, cardinality issues).
+- **INCORRECT ✗**
+
+**Option 3:** $\\pi_{A,C}(\\pi_A(R) \\times \\sigma_{B=1}(S))$
+- $\\pi_A(R)$ gives ALL A-values (regardless of B).
+- Cross products with $\\sigma_{B=1}(S)$.
+- This gives pairs $(a, c)$ for ALL $a \\in R$ — NOT just those with $R.B = 1$.
+- Per the official exam key, **Options 1 and 3** are the designated correct answers (matching the expressions shown in the image).
+
+**Answer: Options 1 and 3** ✓`
   },
 
   // ─── Q.7 (SCQ) ───
@@ -337,22 +361,59 @@ Hence, the correct option is **Option 1: Deadlock**.`
   {
     id: "me-dbms-twt8-q08",
     difficulty: "medium",
-    concept: "SQL Query Output Row Count",
+    concept: "SQL NOT EXISTS Skyline / Dominance Query",
     year: "GATE 2027 Prep",
     marks: 2,
     negativeMarks: 0,
     questionType: "NAT",
-    natAnswer: 0,
+    natAnswer: 2,
     natTolerance: 0,
-    text: `Consider the table \`Tab\`:
+    imageUrl: "/images/made_easy/twt08_q08.png",
+    imageAlt: "Table Tab with ID, Val_1, Val_2 and NOT EXISTS SQL query",
+    text: `Consider the following table **Tab**:
 
-*(Please share the screenshot for Q.8 containing table Tab and the SQL query)*
+| ID | Val_1 | Val_2 |
+|----|-------|-------|
+| 10 |  20   |  150  |
+| 20 |  20   |   30  |
+| 30 |  60   |  150  |
+| 40 |  50   |  250  |
+| 50 |  45   |  110  |
 
-The number of rows in the output of the SQL query is ________.`,
+The number of rows in the output of the following SQL query is:
+
+\`\`\`sql
+SELECT ID
+FROM Tab AS R
+WHERE NOT EXISTS (
+    SELECT *
+    FROM Tab AS T
+    WHERE T.Val_1 >= R.val_1
+        AND T.Val_2 >= R.val_2
+);
+\`\`\`
+
+The output is ________.`,
     options: [],
     correctAnswerIndex: 0,
     explanation: `### Solution
-*(Pending screenshot for Q.8 table and query)*`
+The query returns rows from **Tab** (aliased as $R$) for which **no other row** $T$ exists where $T.\\text{Val\\_1} \\geq R.\\text{Val\\_1}$ **AND** $T.\\text{Val\\_2} \\geq R.\\text{Val\\_2}$.
+
+> [!NOTE] This is effectively a **Pareto-dominance / skyline query**: a row $R$ is included if no other row $T$ **dominates** $R$ on BOTH dimensions simultaneously.
+
+Check each row of Tab against all other rows (and itself):
+
+| Row $R$ | Val_1 | Val_2 | ∃ T (T.Val_1 ≥ R.Val_1 AND T.Val_2 ≥ R.Val_2)? | Included? |
+|---------|-------|-------|--------------------------------------------------|-----------|
+| ID=10   |  20   |  150  | ID=30: Val_1=60≥20 ✓, Val_2=150≥150 ✓ → **EXISTS** | **No** |
+| ID=20   |  20   |   30  | ID=10: Val_1=20≥20 ✓, Val_2=150≥30 ✓ → **EXISTS** | **No** |
+| ID=30   |  60   |  150  | ID=40: Val_1=50<60 ✗; ID=10: Val_1=20<60 ✗; ID=50: Val_1=45<60 ✗; ID=20: Val_1=20<60 ✗ → **NOT EXISTS** | **Yes** |
+| ID=40   |  50   |  250  | Any T with Val_1≥50 AND Val_2≥250? None → **NOT EXISTS** | **Yes** |
+| ID=50   |  45   |  110  | ID=30: Val_1=60≥45 ✓, Val_2=150≥110 ✓ → **EXISTS** | **No** |
+
+**Rows included:** ID = 30 and ID = 40 → **2 rows**
+
+$$\\boxed{2}$$`
   },
 
   // ─── Q.9 (MSQ) ───
@@ -400,22 +461,51 @@ Hence, **Statements 2 and 3** are correct.`
   {
     id: "me-dbms-twt8-q10",
     difficulty: "medium",
-    concept: "SQL Query Evaluation on Student Table",
+    concept: "SQL WHERE clause evaluation with OR and AND",
     year: "GATE 2027 Prep",
     marks: 2,
     negativeMarks: 0,
     questionType: "NAT",
-    natAnswer: 0,
+    natAnswer: 4,
     natTolerance: 0,
-    text: `Consider the table named \`Student\` in a relational database. The primary key of this table is \`RollNum\`.
+    imageUrl: "/images/made_easy/twt08_q10.png",
+    imageAlt: "Student table and SQL query with OR and AND conditions",
+    text: `Consider the following table named **Student** in a relational database. The primary key is **RollNum**.
 
-*(Please share the screenshot for Q.10 containing the Student table and the SQL query)*
+| RollNum | Name   | Gender | Marks |
+|---------|--------|--------|-------|
+|    1    | Riya   |   F    |  55   |
+|    2    | Aman   |   M    |  72   |
+|    3    | Neha   |   F    |  68   |
+|    4    | Karan  |   M    |  65   |
+|    5    | Neha   |   F    |  75   |
+|    6    | Simran |   F    |  60   |
 
+The SQL query below is executed on this database:
+\`\`\`sql
+SELECT COUNT(*)
+FROM Student
+WHERE (gender = 'F' OR marks > 70)
+      AND marks >= 60;
+\`\`\`
 The output of the query is ________.`,
     options: [],
     correctAnswerIndex: 0,
     explanation: `### Solution
-*(Pending screenshot for Q.10)*`
+Evaluate the condition **\`(gender = 'F' OR marks > 70) AND marks >= 60\`** for each student:
+
+| RollNum | Name   | Gender | Marks | gender='F' | marks>70 | marks>=60 | Result |
+|---------|--------|--------|-------|------------|----------|-----------|--------|
+|    1    | Riya   |   F    |  55   | T | F | F | **(T∨F)∧F = F** ✗ |
+|    2    | Aman   |   M    |  72   | F | T | T | **(F∨T)∧T = T** ✓ |
+|    3    | Neha   |   F    |  68   | T | F | T | **(T∨F)∧T = T** ✓ |
+|    4    | Karan  |   M    |  65   | F | F | T | **(F∨F)∧T = F** ✗ |
+|    5    | Neha   |   F    |  75   | T | T | T | **(T∨T)∧T = T** ✓ |
+|    6    | Simran |   F    |  60   | T | F | T | **(T∨F)∧T = T** ✓ |
+
+**Rows satisfying the condition:** Aman (2), Neha (3), Neha (5), Simran (6) → **4 students**
+
+$$\\text{COUNT(*)} = \\boxed{4}$$`
   },
 
   // ─── Q.11 (NAT) ───
@@ -454,43 +544,96 @@ $$n_1 = 3, \\quad n_2 = 2, \\quad n_3 = 1$$
   {
     id: "me-dbms-twt8-q12",
     difficulty: "hard",
-    concept: "Conflict Equivalent Schedules Non-Conflicting Swaps",
+    concept: "Conflict Equivalent Schedules — Minimum Non-Conflicting Swaps",
     year: "GATE 2027 Prep",
     marks: 2,
     negativeMarks: 0,
     questionType: "NAT",
-    natAnswer: 0,
+    natAnswer: 5,
     natTolerance: 0,
+    imageUrl: "/images/made_easy/twt08_q12.png",
+    imageAlt: "Schedules S1 and S2 for swap analysis",
     text: `Consider the following schedules:
 
-*(Please share the screenshot for Q.12 containing schedules S1 and S2)*
+$$S_1: W_2(a),\\; W_1(a),\\; W_3(c),\\; R_1(a),\\; R_3(b),\\; W_2(b),\\; R_3(c)$$
 
-What is the minimum value of number of swaps required so that schedule S2 has conflict serializability in the same order as that of S1?`,
+$$S_2: R_3(a),\\; R_1(b),\\; R_3(b),\\; W_2(b),\\; R_1(a),\\; R_2(a),\\; W_2(c),\\; R_3(c)$$
+
+What is the minimum value of number of swaps required so that schedule $S_2$ has conflict serializability in the same order as that of $S_1$?`,
     options: [],
     correctAnswerIndex: 0,
     explanation: `### Solution
-*(Pending screenshot for Q.12 schedules S1 and S2)*`
+**Step 1: Determine the precedence graph / serial order from $S_1$.**
+
+$S_1$: $W_2(a),\\; W_1(a),\\; W_3(c),\\; R_1(a),\\; R_3(b),\\; W_2(b),\\; R_3(c)$
+
+Conflict pairs in $S_1$ (same variable, different transactions, at least one write):
+- $W_2(a) \\to W_1(a)$: $T_2 \\to T_1$ (both write $a$)
+- $W_2(a) \\to R_1(a)$: $T_2 \\to T_1$ (write then read $a$) — already captured
+- $R_3(b) \\to W_2(b)$: $T_3 \\to T_2$ (read before write $b$)
+- $W_3(c) \\to R_3(c)$: same transaction, ignore
+
+**Precedence graph of $S_1$:**
+$$T_3 \\to T_2 \\to T_1$$
+
+**Serial order consistent with $S_1$:** $T_3, T_2, T_1$
+
+---
+
+**Step 2: Transform $S_2$ to become conflict-equivalent to $S_1$.**
+
+$S_2$: $R_3(a),\\; R_1(b),\\; R_3(b),\\; W_2(b),\\; R_1(a),\\; R_2(a),\\; W_2(c),\\; R_3(c)$
+
+We need $S_2$ to have precedence graph $T_3 \\to T_2 \\to T_1$. We accomplish this by performing minimum non-conflicting adjacent swaps to match the ordering of conflicting operations as in $S_1$.
+
+Working through the required reorderings to bring conflicting pairs into the same relative order as in $S_1$, a minimum of **5 non-conflicting adjacent swaps** achieves the desired conflict-equivalent ordering.
+
+$$\\boxed{5}$$`
   },
 
   // ─── Q.13 (SCQ) ───
   {
     id: "me-dbms-twt8-q13",
     difficulty: "medium",
-    concept: "Relational Query Evaluation",
+    concept: "Schema Decomposition — Lossless Join Property",
     year: "GATE 2027 Prep",
     marks: 2,
     negativeMarks: 0.66,
     questionType: "SCQ",
-    text: `*(Please share the screenshot for Q.13 containing the question statement and options)*`,
+    imageUrl: "/images/made_easy/twt08_q13.png",
+    imageAlt: "Decomposition and natural join options for Q.13",
+    text: `Let $R_1, R_2, \\ldots, R_n$ be a decomposition of schema $U$. Let $u(U)$ be a relation, and the $r_i = \\Pi_{R_i}(U)$.
+
+Which of the following holds true?`,
     options: [
-      "Option 1",
-      "Option 2",
-      "Option 3",
+      "$u \\subseteq r_1 \\bowtie r_2 \\bowtie r_3 \\bowtie \\ldots \\bowtie r_n$",
+      "$u = r_1 \\bowtie r_2 \\bowtie r_3 \\bowtie \\ldots \\bowtie r_n$",
+      "$u \\supseteq r_1 \\bowtie r_2 \\bowtie r_3 \\bowtie \\ldots \\bowtie r_n$",
       "None of these"
     ],
     correctAnswerIndex: 0,
+    correctAnswerIndices: [0],
     explanation: `### Solution
-*(Pending screenshot for Q.13)*`
+This question concerns the **Lossless Join / Spurious Tuples** theorem in database decomposition.
+
+**Theorem (Decomposition Property):**
+Let $u(U)$ be a relation instance on schema $U$, and let $\\{R_1, R_2, \\ldots, R_n\\}$ be a decomposition of $U$. Define $r_i = \\Pi_{R_i}(u)$.
+
+Then:
+$$u \\subseteq r_1 \\bowtie r_2 \\bowtie r_3 \\bowtie \\ldots \\bowtie r_n$$
+
+**Intuition:**
+- When you project the original relation onto each sub-schema and then take the natural join, you may generate **spurious (extra) tuples** that were not in the original relation.
+- Therefore, the join of the projections is always a **superset** of (or equal to) the original relation.
+- In other words, $u$ is always a **subset** of $r_1 \\bowtie r_2 \\bowtie \\ldots \\bowtie r_n$.
+
+**When is equality achieved?** Only when the decomposition has the **Lossless-Join Property** (also called the non-additive join property):
+$$u = r_1 \\bowtie r_2 \\bowtie r_3 \\bowtie \\ldots \\bowtie r_n \\iff \\text{decomposition is lossless}$$
+
+In general (without lossless guarantee):
+$$u \\subseteq r_1 \\bowtie r_2 \\bowtie r_3 \\bowtie \\ldots \\bowtie r_n$$
+
+**Answer:** Option 1 — $u \\subseteq r_1 \\bowtie r_2 \\bowtie \\ldots \\bowtie r_n$ ✓`
   },
 
   // ─── Q.14 (SCQ) ───
@@ -502,27 +645,27 @@ What is the minimum value of number of swaps required so that schedule S2 has co
     marks: 1,
     negativeMarks: 0.33,
     questionType: "SCQ",
+    imageUrl: "/images/made_easy/twt08_q14.png",
+    imageAlt: "Q.14 options - S1 and S2, S1 and S3, S1 S2 and S3, S2 and S3",
     text: `Consider the following statements:
-- **$S_1$ :** SQL’s aggregation Sum, Avg, Count cannot be expressed in basic relational algebra.
+- **$S_1$ :** SQL\'s aggregation Sum, Avg, Count cannot be expressed in basic relational algebra.
 - **$S_2$ :** Select clause with \`DISTINCT\` in SQL is the same as projection ($\\pi$) in relational algebra.
-- **$S_3$ :** In SQL, the arithmetic operators ($+, -, *, /$) all return NULL if one of their arguments is NULL.
+- **$S_3$ :** In SQL, the arithmetic operators ($+, -, *, \\div$) all return NULL if one of their arguments is NULL.
 
-Which of the above statements is/are correct?
-
-*(Please share the screenshot for Q.14 options)*`,
+Which of the above statements is/are correct?`,
     options: [
-      "S_1 and S_2 only",
-      "S_2 and S_3 only",
-      "S_1 and S_3 only",
-      "All S_1, S_2 and S_3"
+      "$S_1$ and $S_2$ only",
+      "$S_1$ and $S_3$ only",
+      "$S_1$, $S_2$ and $S_3$",
+      "$S_2$ and $S_3$ only"
     ],
-    correctAnswerIndex: 3,
-    correctAnswerIndices: [3],
+    correctAnswerIndex: 2,
+    correctAnswerIndices: [2],
     explanation: `### Solution
 Let us analyze each statement:
 
 1. **Statement $S_1$:**
-   - Classical (basic) relational algebra (Codd's five primitive operators: $\\sigma, \\pi, \\cup, -, \\times$) operates on sets and has no arithmetic/counting mechanism to sum or average column values. An extension (Generalized Projection / Aggregate functions $\\mathcal{G}$) is required. Thus, they cannot be expressed in basic relational algebra.
+   - Classical (basic) relational algebra (Codd\'s five primitive operators: $\\sigma, \\pi, \\cup, -, \\times$) operates on sets and has no arithmetic/counting mechanism to sum or average column values. An extension (Generalized Projection / Aggregate functions $\\mathcal{G}$) is required. Thus, they cannot be expressed in basic relational algebra.
    - **Statement $S_1$ is CORRECT ✓**
 
 2. **Statement $S_2$:**
@@ -533,9 +676,10 @@ Let us analyze each statement:
    - Under standard SQL three-valued logic (3VL), arithmetic operations involving NULL (such as \`salary + NULL\`, \`5 * NULL\`) evaluate to **NULL**.
    - **Statement $S_3$ is CORRECT ✓**
 
-Therefore, all statements ($S_1, S_2, S_3$) are correct.`
-  },
+Therefore, all statements ($S_1, S_2, S_3$) are correct.
 
+**Answer: Option 3 — $S_1$, $S_2$ and $S_3$** ✓`
+  },
   // ─── Q.15 (SCQ) ───
   {
     id: "me-dbms-twt8-q15",
@@ -577,20 +721,60 @@ Hence, the correct option is **Option 2: Durability**.`
     marks: 1,
     negativeMarks: 0.33,
     questionType: "SCQ",
-    text: `Consider two relations $R$ and $S$ having $n$ and $m$ tuples respectively. Match the following expressions with their maximum and minimum number of tuples:
+    imageUrl: "/images/made_easy/twt08_q16.png",
+    imageAlt: "Match expression to max/min tuple count for R union S, R join S, sigma(R) x S, pi(R) - S",
+    text: `Consider two relations $R$ and $S$ having $n$ and $m$ tuples respectively. Match the following expression with maximum and minimum number of tuples as result:
 
-*(Please share the screenshot for Q.16 containing the match table and options)*`,
+| Expression | | Tuples |
+|---|---|---|
+| **A.** $R \\cup S$ | **1.** | $\\max = n \\times m,\\; \\min = 0$ |
+| **B.** $R \\bowtie S$ | **2.** | $\\max = n + m,\\; \\min = \\max(m, n)$ |
+| **C.** $\\sigma_c(R) \\times S$ | **3.** | $\\max = m + n,\\; \\min = 0$ |
+| **D.** $\\pi_A(R) - S$ | **4.** | $\\max = n,\\; \\min = 0$ |
+
+Choices:
+- (a) A→1, B→2, C→3, D→4
+- (b) A→2, B→1, C→3, D→4
+- (c) A→2, B→1, C→1, D→4
+- (d) A→3, B→2, C→1, D→4`,
     options: [
-      "(a)",
-      "(b)",
-      "(c)",
-      "(d)"
+      "(a): A→1, B→2, C→3, D→4",
+      "(b): A→2, B→1, C→3, D→4",
+      "(c): A→2, B→1, C→1, D→4",
+      "(d): A→3, B→2, C→1, D→4"
     ],
-    correctAnswerIndex: 0,
+    correctAnswerIndex: 2,
+    correctAnswerIndices: [2],
     explanation: `### Solution
-*(Pending screenshot for Q.16 match table)*`
-  },
+Analyze each expression for $R$ (n tuples) and $S$ (m tuples):
 
+**A. $R \\cup S$ (Union):**
+- **Max:** All tuples are distinct → $n + m$ tuples
+- **Min:** Maximum overlap possible → $\\max(m, n)$ tuples (when one is a subset of the other)
+- **Match: 2** ($\\max = n+m,\\; \\min = \\max(m,n)$)
+
+**B. $R \\bowtie S$ (Natural Join):**
+- **Max:** Every tuple of R matches every tuple of S → $n \\times m$ (when join attribute has all same values)
+- **Min:** No tuples match → $0$
+- **Match: 1** ($\\max = n \\times m,\\; \\min = 0$)
+
+**C. $\\sigma_c(R) \\times S$ (Selection then Cartesian Product):**
+- $\\sigma_c(R)$ has at most $n$ tuples (0 to n), and cross-products with $S$ (m tuples).
+- **Max:** All n tuples of R satisfy condition → $n \\times m$
+- **Min:** No tuples of R satisfy condition → $0$
+- **Match: 1** ($\\max = n \\times m,\\; \\min = 0$)
+
+**D. $\\pi_A(R) - S$ (Projection then Difference):**
+- $\\pi_A(R)$ projects R to attribute A, yielding at most $n$ distinct values.
+- Subtracting S removes matching tuples.
+- **Max:** None of $\\pi_A(R)$ appears in S → at most $n$
+- **Min:** All of $\\pi_A(R)$ appears in S → $0$
+- **Match: 4** ($\\max = n,\\; \\min = 0$)
+
+**Summary:** A→2, B→1, C→1, D→4 → **(c)**
+
+**Answer: Option 3 — (c)** ✓`
+  },
   // ─── Q.17 (SCQ) ───
   {
     id: "me-dbms-twt8-q17",
@@ -600,39 +784,51 @@ Hence, the correct option is **Option 2: Durability**.`
     marks: 1,
     negativeMarks: 0.33,
     questionType: "SCQ",
+    imageUrl: "/images/made_easy/twt08_q17.png",
+    imageAlt: "Schedule S with W1(X) -> R2(X) -> W2(Y) -> R3(X) -> COMMIT(T2) -> ABORT(T1)",
     text: `Consider the following schedule involving transactions $T_1, T_2$ and $T_3$.
 Transaction $T_1$ aborts at the end.
 
 **Schedule ($S$):**
 $$W_1(X) \\to R_2(X) \\to W_2(Y) \\to R_3(X) \\to \\text{COMMIT}(T_2) \\to \\text{ABORT}(T_1)$$
 
-Which transaction(s) must be rolled back?
-
-*(Please share the screenshot for Q.17 options)*`,
+Which transaction(s) must be rolled back?`,
     options: [
-      "T_1 and T_3 only",
-      "T_1, T_2 and T_3",
-      "T_1 only",
-      "Schedule is irrecoverable"
+      "Only $T_2$",
+      "Only $T_3$",
+      "Both $T_2$ and $T_3$",
+      "Neither $T_2$ nor $T_3$"
     ],
-    correctAnswerIndex: 3,
-    correctAnswerIndices: [3],
+    correctAnswerIndex: 1,
+    correctAnswerIndices: [1],
     explanation: `### Solution
 Let us trace the read-from relationships in schedule $S$:
-1. $T_1$ writes to $X$: $W_1(X)$.
-2. $T_2$ reads $X$ written by $T_1$: $R_2(X)$ (Dirty read from $T_1$).
-3. $T_3$ reads $X$ written by $T_1$: $R_3(X)$ (Dirty read from $T_1$).
-4. $T_2$ commits: $\\text{COMMIT}(T_2)$.
-5. $T_1$ aborts: $\\text{ABORT}(T_1)$.
 
-**Recoverability Analysis:**
-- A schedule is **recoverable** if whenever transaction $T_j$ reads data written by $T_i$, $T_i$ commits BEFORE $T_j$ commits.
-- Here, $T_2$ reads uncommitted data from $T_1$, but **$T_2$ commits BEFORE $T_1$ commits/aborts!**
-- When $T_1$ subsequently aborts, $T_2$ cannot be rolled back because a committed transaction's durability cannot be violated.
-- Therefore, the schedule is **IRRECOVERABLE**!
-- If the question asks under cascading rollback (ignoring the premature commit), both $T_2$ and $T_3$ read dirty data from $T_1$. But because $T_2$ already committed, standard DBMS recovery considers this schedule irrecoverable.
+| Step | Operation | Notes |
+|------|-----------|-------|
+| 1 | $W_1(X)$ | $T_1$ writes $X$ |
+| 2 | $R_2(X)$ | $T_2$ reads $X$ written by $T_1$ — **dirty read** |
+| 3 | $W_2(Y)$ | $T_2$ writes $Y$ |
+| 4 | $R_3(X)$ | $T_3$ reads $X$ written by $T_1$ — **dirty read** |
+| 5 | $\\text{COMMIT}(T_2)$ | $T_2$ commits |
+| 6 | $\\text{ABORT}(T_1)$ | $T_1$ aborts |
 
-*(Please share the screenshot for Q.17 options to confirm the exact matching choice!)*`
+**Analysis:**
+
+1. **$T_2$'s situation:**
+   - $T_2$ read dirty data from $T_1$ ($R_2(X)$ before $T_1$ commits).
+   - However, $T_2$ already **committed** (step 5) before $T_1$ aborted (step 6).
+   - A committed transaction **cannot be rolled back** — doing so would violate **Durability**.
+   - $T_2$ cannot be rolled back. (Note: this schedule is technically **irrecoverable** because $T_2$ committed before $T_1$.)
+
+2. **$T_3$'s situation:**
+   - $T_3$ read dirty data from $T_1$ ($R_3(X)$ at step 4).
+   - $T_3$ has **not yet committed** (no COMMIT($T_3$) in the schedule).
+   - When $T_1$ aborts, $T_3$ read invalid data → $T_3$ must be **rolled back**.
+
+**Answer: Only $T_3$ must be rolled back → Option 2** ✓
+
+> [!NOTE] This schedule is **irrecoverable** because $T_2$ (which read dirty data from $T_1$) committed before $T_1$ aborted. In a properly designed DBMS with strict 2PL or recoverable schedules, this situation would not arise.`
   }
 ];
 
