@@ -21,6 +21,7 @@ import { MADE_EASY_DM_TWT21_QUESTIONS } from "../data/madeEasyDMTest21";
 import { MADE_EASY_ALGO_TWT3_QUESTIONS } from "../data/madeEasyAlgoTest3";
 import { MADE_EASY_COA_TWT6_QUESTIONS } from "../data/madeEasyCOATest6";
 import { MADE_EASY_EM_TWT9_QUESTIONS } from "../data/madeEasyEMTest9";
+import { MADE_EASY_ALGO_SWT_QUESTIONS } from "../data/madeEasyAlgoSWT";
 
 interface Props {
   isOpen: boolean;
@@ -512,6 +513,32 @@ export default function MadeEasyTestSeriesModal({
       ],
       chapterId: "toc-gate-2027-swt",
       questions: MADE_EASY_TOC_SWT_QUESTIONS,
+    },
+    {
+      id: "algo-swt-1",
+      testNumber: 1,
+      badge: "SWT Algo",
+      title: "Algorithms: Subject Wise Test (Complete Syllabus)",
+      subjectKey: "ds_algo",
+      subjectName: "Algorithms",
+      subjectIcon: "⚡",
+      type: "Topic Wise Test",
+      totalQuestions: MADE_EASY_ALGO_SWT_QUESTIONS.length,
+      totalMarks: 50,
+      durationMinutes: 90,
+      scqCount: 21,
+      msqCount: 4,
+      natCount: 8,
+      topics: [
+        "Asymptotic Analysis, Recurrence Relations & Master Theorem",
+        "Sorting Algorithms (Merge, Insertion, Bubble, Stooge)",
+        "Divide & Conquer, Dynamic Programming (LCS, Matrix Chain)",
+        "Greedy Algorithms (Fractional Knapsack, Huffman Coding)",
+        "Graph Algorithms (BFS, DFS, Dijkstra, Bellman-Ford, Kruskal MST)",
+        "Binary Heaps, Inversions & Topological Sort",
+      ],
+      chapterId: "algo-gate-2027-swt",
+      questions: MADE_EASY_ALGO_SWT_QUESTIONS,
     },
     {
       id: "cd-twt-23",

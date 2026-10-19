@@ -17,6 +17,7 @@ import { MADE_EASY_ALGO_TWT3_CHAPTER } from "./madeEasyAlgoTest3";
 import { MADE_EASY_COA_TWT6_CHAPTER } from "./madeEasyCOATest6";
 import { MADE_EASY_EM_TWT9_CHAPTER } from "./madeEasyEMTest9";
 import { MADE_EASY_TOC_SWT_CHAPTER } from "./madeEasyTOCTest2";
+import { MADE_EASY_ALGO_SWT_CHAPTER } from "./madeEasyAlgoSWT";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -1176,7 +1177,8 @@ const gateCS_Algo: Subject = {
         },
       ]
     },
-    MADE_EASY_ALGO_TWT3_CHAPTER
+    MADE_EASY_ALGO_TWT3_CHAPTER,
+    MADE_EASY_ALGO_SWT_CHAPTER
   ]
 };
 
