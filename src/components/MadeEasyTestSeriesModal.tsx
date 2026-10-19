@@ -18,6 +18,7 @@ import { MADE_EASY_DBMS_TWT8_QUESTIONS } from "../data/madeEasyDBMSTest8";
 import { MADE_EASY_DM_TWT21_QUESTIONS } from "../data/madeEasyDMTest21";
 import { MADE_EASY_ALGO_TWT3_QUESTIONS } from "../data/madeEasyAlgoTest3";
 import { MADE_EASY_COA_TWT6_QUESTIONS } from "../data/madeEasyCOATest6";
+import { MADE_EASY_EM_TWT9_QUESTIONS } from "../data/madeEasyEMTest9";
 
 interface Props {
   isOpen: boolean;
@@ -113,6 +114,12 @@ const getSubjectColorClasses = (subjectKey: string) => {
         badge: "bg-lime-500/15 text-lime-300 border-lime-500/30",
         pill: "bg-lime-500/20 text-lime-300",
         borderHover: "hover:border-lime-500/50",
+      };
+    case "em":
+      return {
+        badge: "bg-violet-500/15 text-violet-300 border-violet-500/30",
+        pill: "bg-violet-500/20 text-violet-300",
+        borderHover: "hover:border-violet-500/50",
       };
     default:
       return {
@@ -640,6 +647,38 @@ export default function MadeEasyTestSeriesModal({
       chapterId: "ga-gate-2027-twt-12",
       questions: MADE_EASY_APTITUDE_TWT12_QUESTIONS,
     },
+    {
+      id: "em-twt-9",
+      testNumber: 9,
+      badge: "TWT 09",
+      title: "Engineering Mathematics: Probability & Linear Algebra",
+      subjectKey: "em",
+      subjectName: "Engg. Mathematics",
+      subjectIcon: "📊",
+      type: "Topic Wise Test",
+      totalQuestions: MADE_EASY_EM_TWT9_QUESTIONS.length,
+      totalMarks: 25,
+      durationMinutes: 45,
+      scqCount: 9,
+      msqCount: 4,
+      natCount: 4,
+      topics: [
+        "PDF & CDF Properties",
+        "Poisson Distribution",
+        "Binomial Distribution",
+        "Probability Generating Function (PGF)",
+        "Order Statistics",
+        "Indicator Variables & Expected Value",
+        "Eigenvalues & Nilpotent Matrices",
+        "Rank, Null Space & Full Column Rank",
+        "Trace of Matrix Products & Inverses",
+        "Determinant & Adjugate Properties",
+        "Generalized Eigenvalue Problem",
+        "Special Matrices (Orthogonal, Involutary)",
+      ],
+      chapterId: "em-gate-2027-twt-9",
+      questions: MADE_EASY_EM_TWT9_QUESTIONS,
+    },
   ], [coaQuestions]);
 
   const subjectFilters = [
@@ -654,6 +693,7 @@ export default function MadeEasyTestSeriesModal({
     { key: "cd", label: "Compiler Design", icon: "⚡" },
     { key: "dm", label: "Discrete Math", icon: "📐" },
     { key: "ga", label: "Aptitude", icon: "📊" },
+    { key: "em", label: "Engg. Mathematics", icon: "🔢" },
   ];
 
   const filteredTests = useMemo(() => {
