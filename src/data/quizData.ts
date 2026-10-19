@@ -11,6 +11,7 @@ import { MADE_EASY_CN_TWT18_CHAPTER } from "./madeEasyCNTest18";
 import { MADE_EASY_CD_TWT23_CHAPTER } from "./madeEasyCDTest23";
 import { MADE_EASY_DBMS_TWT7_CHAPTER } from "./madeEasyDBMSTest7";
 import { MADE_EASY_DM_TWT21_CHAPTER } from "./madeEasyDMTest21";
+import { MADE_EASY_ALGO_TWT3_CHAPTER } from "./madeEasyAlgoTest3";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -1167,7 +1168,8 @@ const gateCS_Algo: Subject = {
           explanation: '### Solution\nUsing DP for Matrix Chain Multiplication:\nOptimal parenthesization is $((A_1 A_2) A_3) A_4$ or $(A_1 (A_2 A_3)) A_4$:\n1. $A_1 A_2 = 10 \\times 20 \\times 30 = 6,000$\n2. $(A_1 A_2) A_3 = 6,000 + 10 \\times 30 \\times 40 = 6,000 + 12,000 = 18,000$\n3. $((A_1 A_2) A_3) A_4 = 18,000 + 10 \\times 40 \\times 30 = 18,000 + 12,000 = \\mathbf{30,000}$.'
         },
       ]
-    }
+    },
+    MADE_EASY_ALGO_TWT3_CHAPTER
   ]
 };
 

@@ -15,6 +15,7 @@ import { MADE_EASY_CN_TWT18_QUESTIONS } from "../data/madeEasyCNTest18";
 import { MADE_EASY_CD_TWT23_QUESTIONS } from "../data/madeEasyCDTest23";
 import { MADE_EASY_DBMS_TWT7_QUESTIONS } from "../data/madeEasyDBMSTest7";
 import { MADE_EASY_DM_TWT21_QUESTIONS } from "../data/madeEasyDMTest21";
+import { MADE_EASY_ALGO_TWT3_QUESTIONS } from "../data/madeEasyAlgoTest3";
 
 interface Props {
   isOpen: boolean;
@@ -171,6 +172,39 @@ export default function MadeEasyTestSeriesModal({
       ],
       chapterId: "me-cs-demo-test",
       questions: MADE_EASY_DEMO_TEST_QUESTIONS,
+    },
+    {
+      id: "algo-twt-3",
+      testNumber: 3,
+      badge: "TWT 03",
+      title: "Algorithms: Asymptotic Analysis, Recurrences, Sorting & Selection",
+      subjectKey: "ds_algo",
+      subjectName: "Algorithms",
+      subjectIcon: "⚡",
+      type: "Topic Wise Test",
+      totalQuestions: MADE_EASY_ALGO_TWT3_QUESTIONS.length,
+      totalMarks: 25,
+      durationMinutes: 45,
+      scqCount: 13,
+      msqCount: 3,
+      natCount: 1,
+      topics: [
+        "Worst-case Selection Complexity across Disjoint Arrays",
+        "Simultaneous Min & Max Comparisons (Odd vs Even Size)",
+        "In-place vs Out-of-place Merge Sort & Radix Sort Invariance",
+        "Lomuto Partition Algorithm Tracing & Pivot Placement",
+        "Asymptotic Equivalence & Bounds (Max/Min of Positive Functions)",
+        "Insertion Sort Iterations & Inversion Count Swaps",
+        "Recurrence Relations & Divide-and-Conquer Analysis",
+        "Matrix Chain Multiplication Optimal Parenthesization",
+        "Sorting Algorithms Complexity Matching & Properties",
+        "Hybrid Search (Linear + Binary) Expected Comparisons",
+        "Bubble Sort vs Quick Sort Input Sensitivity",
+        "Merge Sort Bounds & Counting Sort Stability/Space",
+        "Logarithmic Function Asymptotic Growth Comparisons"
+      ],
+      chapterId: "algo-gate-2027-twt-3",
+      questions: MADE_EASY_ALGO_TWT3_QUESTIONS,
     },
     {
       id: "coa-twt-5",
