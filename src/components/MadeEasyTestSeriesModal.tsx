@@ -16,6 +16,7 @@ import { MADE_EASY_CD_TWT23_QUESTIONS } from "../data/madeEasyCDTest23";
 import { MADE_EASY_DBMS_TWT7_QUESTIONS } from "../data/madeEasyDBMSTest7";
 import { MADE_EASY_DM_TWT21_QUESTIONS } from "../data/madeEasyDMTest21";
 import { MADE_EASY_ALGO_TWT3_QUESTIONS } from "../data/madeEasyAlgoTest3";
+import { MADE_EASY_COA_TWT6_QUESTIONS } from "../data/madeEasyCOATest6";
 
 interface Props {
   isOpen: boolean;
@@ -232,6 +233,43 @@ export default function MadeEasyTestSeriesModal({
       ],
       chapterId: "coa-gate-2027-twt-5",
       questions: coaQuestions,
+    },
+    {
+      id: "coa-twt-6",
+      testNumber: 6,
+      badge: "TWT 06",
+      title: "COA: Cache Memory, Datapath Micro-operations, DMA & Register Windows",
+      subjectKey: "coa",
+      subjectName: "COA",
+      subjectIcon: "🖥️",
+      type: "Topic Wise Test",
+      totalQuestions: MADE_EASY_COA_TWT6_QUESTIONS.length,
+      totalMarks: 25,
+      durationMinutes: 45,
+      scqCount: 9,
+      msqCount: 4,
+      natCount: 4,
+      topics: [
+        "3C Model of Cache Misses (Compulsory, Capacity, Conflict)",
+        "2-Way Set-Associative Cache Address Decoding & Set Values",
+        "Direct-Mapped vs 2-Way Set-Associative Cache Miss Penalty",
+        "Average Memory Access Time with Write-Through Policy",
+        "Magnetic Disk Track Capacity, Transfer Rate & DMA Cycle Stealing",
+        "Single-Bus Datapath Control & Temporary Buffer Register Y",
+        "Micro-operation Sequences for Register Addition in Single-Bus",
+        "Cache Miss Rate Calculation from Memory Access Times",
+        "Write-Through Cache with LRU & No-Write-Allocate",
+        "Cache Controller Tag Directory Size (Tag, Valid & Dirty Bits)",
+        "I/O Transfer Techniques without CPU Intervention (DMA, Channels)",
+        "DMA Bus Request, Acknowledge & Transfer Protocol",
+        "Direct-Mapped Cache Address Breakdown & Tag Calculation",
+        "Write-Back Protocol Dirty Bit & Memory Write Traffic",
+        "Disk Average Service Time (Seek, Rotational Latency, Transfer)",
+        "Cache Size & Main Memory Size from Address Bits",
+        "RISC Overlapping Register Windows & Physical Register Count",
+      ],
+      chapterId: "coa-gate-2027-twt-6",
+      questions: MADE_EASY_COA_TWT6_QUESTIONS,
     },
     {
       id: "os-twt-13",

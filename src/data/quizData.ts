@@ -12,6 +12,7 @@ import { MADE_EASY_CD_TWT23_CHAPTER } from "./madeEasyCDTest23";
 import { MADE_EASY_DBMS_TWT7_CHAPTER } from "./madeEasyDBMSTest7";
 import { MADE_EASY_DM_TWT21_CHAPTER } from "./madeEasyDMTest21";
 import { MADE_EASY_ALGO_TWT3_CHAPTER } from "./madeEasyAlgoTest3";
+import { MADE_EASY_COA_TWT6_CHAPTER } from "./madeEasyCOATest6";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -929,7 +930,8 @@ const gateCS_COA: Subject = {
           explanation: '### Solution\n- In **Auto-increment addressing**, the effective address is in a register, and after the operand is accessed, the content of the register is automatically incremented by the step size (e.g., $(R)+$). This allows sequential stepping through an array in loops without executing any separate pointer-increment instruction.\n- In **Indexed** or **Base register** addressing, the index/base register must be explicitly modified by an arithmetic instruction (e.g. `INC R1` or `ADD R1, 4`) in each iteration.\n- In **Immediate** addressing, the operand itself is in the instruction.\n\nHence, **1 only** directly supports automatic address updates.'
         }
       ]
-    }
+    },
+    MADE_EASY_COA_TWT6_CHAPTER
   ]
 };
 
