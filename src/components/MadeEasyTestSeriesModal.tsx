@@ -4,6 +4,7 @@ import React, { useState, useMemo } from "react";
 import { Question, Subject, EXAMS_DATA } from "../data/quizData";
 import { MADE_EASY_DEMO_TEST_QUESTIONS } from "../data/madeEasyDemoTest";
 import { MADE_EASY_TOC_TWT1_QUESTIONS } from "../data/madeEasyTOCTest1";
+import { MADE_EASY_TOC_SWT_QUESTIONS } from "../data/madeEasyTOCTest2";
 import { MADE_EASY_APTITUDE_TWT11_QUESTIONS } from "../data/madeEasyAptitudeTest11";
 import { MADE_EASY_APTITUDE_TWT12_QUESTIONS } from "../data/madeEasyAptitudeTest12";
 import { MADE_EASY_OS_TWT13_QUESTIONS } from "../data/madeEasyOSTest13";
@@ -13,6 +14,7 @@ import { MADE_EASY_DS_TWT16_QUESTIONS } from "../data/madeEasyDSTest16";
 import { MADE_EASY_CN_TWT17_QUESTIONS } from "../data/madeEasyCNTest17";
 import { MADE_EASY_CN_TWT18_QUESTIONS } from "../data/madeEasyCNTest18";
 import { MADE_EASY_CD_TWT23_QUESTIONS } from "../data/madeEasyCDTest23";
+import { MADE_EASY_CD_TWT24_QUESTIONS } from "../data/madeEasyCDTest24";
 import { MADE_EASY_DBMS_TWT7_QUESTIONS } from "../data/madeEasyDBMSTest7";
 import { MADE_EASY_DBMS_TWT8_QUESTIONS } from "../data/madeEasyDBMSTest8";
 import { MADE_EASY_DM_TWT21_QUESTIONS } from "../data/madeEasyDMTest21";
@@ -486,6 +488,32 @@ export default function MadeEasyTestSeriesModal({
       questions: MADE_EASY_TOC_TWT1_QUESTIONS,
     },
     {
+      id: "toc-swt-1",
+      testNumber: 1,
+      badge: "SWT TOC",
+      title: "Theory of Computation: Subject Wise Test (Complete Syllabus)",
+      subjectKey: "toc",
+      subjectName: "Theory of Computation",
+      subjectIcon: "🔤",
+      type: "Topic Wise Test",
+      totalQuestions: MADE_EASY_TOC_SWT_QUESTIONS.length,
+      totalMarks: 50,
+      durationMinutes: 90,
+      scqCount: 17,
+      msqCount: 8,
+      natCount: 8,
+      topics: [
+        "Finite Automata (DFA, NFA), Minimization & State Complexity",
+        "Regular Expressions, Right Quotients & Equivalence",
+        "Context-Free Grammars, Derivations & Ambiguity",
+        "Pushdown Automata (PDA), DCFL vs Non-Deterministic CFL",
+        "Turing Machines, Tape Simulation & Decidability (Rice's Theorem)",
+        "Closure Properties Across Chomsky Hierarchy",
+      ],
+      chapterId: "toc-gate-2027-swt",
+      questions: MADE_EASY_TOC_SWT_QUESTIONS,
+    },
+    {
       id: "cd-twt-23",
       testNumber: 23,
       badge: "TWT 23",
@@ -512,6 +540,33 @@ export default function MadeEasyTestSeriesModal({
       ],
       chapterId: "cd-gate-2027-twt-23",
       questions: MADE_EASY_CD_TWT23_QUESTIONS,
+    },
+    {
+      id: "cd-twt-24",
+      testNumber: 24,
+      badge: "TWT 24",
+      title: "Compiler Design: Parsing (LL(1), LR, SLR), Liveness & Optimizations",
+      subjectKey: "cd",
+      subjectName: "Compiler Design",
+      subjectIcon: "⚡",
+      type: "Topic Wise Test",
+      totalQuestions: MADE_EASY_CD_TWT24_QUESTIONS.length,
+      totalMarks: 25,
+      durationMinutes: 45,
+      scqCount: 8,
+      msqCount: 6,
+      natCount: 3,
+      topics: [
+        "Live Variable Analysis & Data-Flow Equations",
+        "Ambiguity in Context-Free Grammars",
+        "Operator Precedence Parsing Conditions",
+        "LR(0), SLR(1), LALR(1) Parsing & Conflict Resolution",
+        "Computation of FIRST & FOLLOW Sets",
+        "LL(1) Parsing Table Construction",
+        "Loop Optimization (Invariant Code Motion, CSE)",
+      ],
+      chapterId: "cd-gate-2027-twt-24",
+      questions: MADE_EASY_CD_TWT24_QUESTIONS,
     },
     {
       id: "ds-twt-15",

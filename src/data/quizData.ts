@@ -9,12 +9,14 @@ import { MADE_EASY_DS_TWT16_CHAPTER } from "./madeEasyDSTest16";
 import { MADE_EASY_CN_TWT17_CHAPTER } from "./madeEasyCNTest17";
 import { MADE_EASY_CN_TWT18_CHAPTER } from "./madeEasyCNTest18";
 import { MADE_EASY_CD_TWT23_CHAPTER } from "./madeEasyCDTest23";
+import { MADE_EASY_CD_TWT24_CHAPTER } from "./madeEasyCDTest24";
 import { MADE_EASY_DBMS_TWT7_CHAPTER } from "./madeEasyDBMSTest7";
 import { MADE_EASY_DBMS_TWT8_CHAPTER } from "./madeEasyDBMSTest8";
 import { MADE_EASY_DM_TWT21_CHAPTER } from "./madeEasyDMTest21";
 import { MADE_EASY_ALGO_TWT3_CHAPTER } from "./madeEasyAlgoTest3";
 import { MADE_EASY_COA_TWT6_CHAPTER } from "./madeEasyCOATest6";
 import { MADE_EASY_EM_TWT9_CHAPTER } from "./madeEasyEMTest9";
+import { MADE_EASY_TOC_SWT_CHAPTER } from "./madeEasyTOCTest2";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -1501,7 +1503,8 @@ const gateCS_TOC: Subject = {
           explanation: '### Solution\n**Reduction-based undecidability proof:**\n\nTo show P is undecidable:\n1. Take known undecidable problem H (e.g., Halting Problem)\n2. Show: **if P were decidable, then H would also be decidable** (contradiction)\n3. Formally: reduce H ≤ₘ P (map instances of H to instances of P)\n\nThis is a **many-one reduction** (mapping reduction).\n\nPolynomial time and NP-Completeness are about **complexity** (decidable problems), not undecidability.\n\n**Answer: B ✓**'
         },
       ]
-    }
+    },
+    MADE_EASY_TOC_SWT_CHAPTER
   ]
 };
 
@@ -1910,7 +1913,8 @@ const gateCS_CD: Subject = {
         },
       ]
     },
-    MADE_EASY_CD_TWT23_CHAPTER
+    MADE_EASY_CD_TWT23_CHAPTER,
+    MADE_EASY_CD_TWT24_CHAPTER
   ]
 };
 
