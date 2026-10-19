@@ -10,6 +10,7 @@ import { MADE_EASY_CN_TWT17_CHAPTER } from "./madeEasyCNTest17";
 import { MADE_EASY_CN_TWT18_CHAPTER } from "./madeEasyCNTest18";
 import { MADE_EASY_CD_TWT23_CHAPTER } from "./madeEasyCDTest23";
 import { MADE_EASY_DBMS_TWT7_CHAPTER } from "./madeEasyDBMSTest7";
+import { MADE_EASY_DBMS_TWT8_CHAPTER } from "./madeEasyDBMSTest8";
 import { MADE_EASY_DM_TWT21_CHAPTER } from "./madeEasyDMTest21";
 import { MADE_EASY_ALGO_TWT3_CHAPTER } from "./madeEasyAlgoTest3";
 import { MADE_EASY_COA_TWT6_CHAPTER } from "./madeEasyCOATest6";
@@ -1738,7 +1739,8 @@ const gateCS_DBMS: Subject = {
         },
       ]
     },
-    MADE_EASY_DBMS_TWT7_CHAPTER
+    MADE_EASY_DBMS_TWT7_CHAPTER,
+    MADE_EASY_DBMS_TWT8_CHAPTER
   ]
 };
 

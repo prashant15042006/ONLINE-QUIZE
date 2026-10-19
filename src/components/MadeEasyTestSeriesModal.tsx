@@ -14,6 +14,7 @@ import { MADE_EASY_CN_TWT17_QUESTIONS } from "../data/madeEasyCNTest17";
 import { MADE_EASY_CN_TWT18_QUESTIONS } from "../data/madeEasyCNTest18";
 import { MADE_EASY_CD_TWT23_QUESTIONS } from "../data/madeEasyCDTest23";
 import { MADE_EASY_DBMS_TWT7_QUESTIONS } from "../data/madeEasyDBMSTest7";
+import { MADE_EASY_DBMS_TWT8_QUESTIONS } from "../data/madeEasyDBMSTest8";
 import { MADE_EASY_DM_TWT21_QUESTIONS } from "../data/madeEasyDMTest21";
 import { MADE_EASY_ALGO_TWT3_QUESTIONS } from "../data/madeEasyAlgoTest3";
 import { MADE_EASY_COA_TWT6_QUESTIONS } from "../data/madeEasyCOATest6";
@@ -361,6 +362,35 @@ export default function MadeEasyTestSeriesModal({
       ],
       chapterId: "dbms-gate-2027-twt-7",
       questions: MADE_EASY_DBMS_TWT7_QUESTIONS,
+    },
+    {
+      id: "dbms-twt-8",
+      testNumber: 8,
+      badge: "TWT 08",
+      title: "DBMS: SQL, Relational Calculus, Transactions, 2PL & Recovery",
+      subjectKey: "dbms",
+      subjectName: "DBMS",
+      subjectIcon: "🗄️",
+      type: "Topic Wise Test",
+      totalQuestions: MADE_EASY_DBMS_TWT8_QUESTIONS.length,
+      totalMarks: 25,
+      durationMinutes: 45,
+      scqCount: 9,
+      msqCount: 5,
+      natCount: 3,
+      topics: [
+        "Tuple Relational Calculus (TRC) Universal Quantification",
+        "Relational Algebra Expression Equivalence",
+        "Database Recovery, Log Entries & Checkpoint (Undo/Redo)",
+        "Complex SQL Queries (Aggregation & Group By)",
+        "Relational Division & Multi-table Joins",
+        "Two-Phase Locking (2PL), Deadlocks & Starvation",
+        "Strict 2PL Properties & Recoverability",
+        "Non-Serial Concurrent Schedules Calculation (NAT)",
+        "ACID Properties & Transaction Durability",
+      ],
+      chapterId: "dbms-gate-2027-twt-8",
+      questions: MADE_EASY_DBMS_TWT8_QUESTIONS,
     },
     {
       id: "cn-twt-17",
