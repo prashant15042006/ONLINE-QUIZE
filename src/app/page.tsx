@@ -1,0 +1,2344 @@
+"use client";
+
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { EXAMS_DATA, Exam, Branch, Subject, Chapter, Question, getChapterQuestions } from "../data/quizData";
+import { addQuizResultToBlockchain } from "../lib/blockchain";
+import {
+  recordQuizAttempt,
+  toggleBookmark,
+  isBookmarked,
+  getMistakes,
+  getBookmarks,
+  QuizAttemptRecord,
+} from "../lib/userStore";
+import MathRenderer from "../components/MathRenderer";
+import AIExplainModal from "../components/AIExplainModal";
+import MistakesNotebookModal from "../components/MistakesNotebookModal";
+import BookmarksModal from "../components/BookmarksModal";
+import AIQuizGeneratorModal from "../components/AIQuizGeneratorModal";
+import PerformanceAnalyticsView from "../components/PerformanceAnalyticsView";
+import QuestionNavigationGrid from "../components/QuestionNavigationGrid";
+import ResultReviewModal from "../components/ResultReviewModal";
+import GateRankEstimatorModal from "../components/GateRankEstimatorModal";
+import QuestionSearchModal from "../components/QuestionSearchModal";
+import GatePyqMockModal from "../components/GatePyqMockModal";
+import ScientificCalculatorModal from "../components/ScientificCalculatorModal";
+import ScratchpadModal from "../components/ScratchpadModal";
+import HighlightedTopicsModal from "../components/HighlightedTopicsModal";
+import MadeEasyTestSeriesModal from "../components/MadeEasyTestSeriesModal";
+
+function playAudioFeedback(type: "click" | "correct" | "wrong" | "next") {
+  if (typeof window === "undefined") return;
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    if (type === "click") {
+      osc.frequency.setValueAtTime(480, ctx.currentTime);
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.07);
+    } else if (type === "correct") {
+      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.22);
+    } else if (type === "wrong") {
+      osc.frequency.setValueAtTime(320, ctx.currentTime);
+      osc.frequency.setValueAtTime(220, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.07, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.2);
+    } else if (type === "next") {
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.06);
+    }
+  } catch {
+    // Audio context not allowed or failed silently
+  }
+}
+
+type Screen = "dashboard" | "branches" | "subjects" | "chapters" | "settings" | "quiz" | "result";
+type QuizMode = "practice" | "test" | "exam";
+
+interface UserAnswer {
+  questionId: string;
+  selectedOptionIndex: number | null;
+  selectedOptionIndices?: number[];
+  natValue?: string;
+  isMarkedForReview: boolean;
+}
+
+function getSelectedIndices(ans: UserAnswer | null | undefined): number[] {
+  if (!ans) return [];
+  if (Array.isArray(ans.selectedOptionIndices) && ans.selectedOptionIndices.length > 0)
+    return ans.selectedOptionIndices;
+  if (ans.selectedOptionIndex !== null && ans.selectedOptionIndex !== undefined)
+    return [ans.selectedOptionIndex];
+  return [];
+}
+
+function isMSQQuestion(q: Question | undefined): boolean {
+  if (!q) return false;
+  return Boolean(
+    q.questionType === "MSQ" ||
+    (q.correctAnswerIndices && q.correctAnswerIndices.length > 1)
+  );
+}
+
+function isQuestionAnswerCorrect(q: Question, ans: UserAnswer | null | undefined): boolean {
+  if (!ans) return false;
+
+  // NAT (Numerical Answer Type) check
+  if (q.questionType === "NAT") {
+    if (!ans.natValue || ans.natValue.trim() === "") return false;
+    const userNum = parseFloat(ans.natValue.trim());
+    if (isNaN(userNum)) return false;
+
+    // Check against q.natAnswer or q.options[q.correctAnswerIndex]
+    let targetNum: number | null = null;
+    if (q.natAnswer !== undefined && q.natAnswer !== null) {
+      targetNum = typeof q.natAnswer === "number" ? q.natAnswer : parseFloat(String(q.natAnswer).trim());
+    } else if (q.options && q.options.length > q.correctAnswerIndex) {
+      targetNum = parseFloat(q.options[q.correctAnswerIndex].trim());
+    }
+
+    if (targetNum !== null && !isNaN(targetNum)) {
+      const tol = q.natTolerance ?? 0.05;
+      return Math.abs(userNum - targetNum) <= tol;
+    }
+    return false;
+  }
+
+  // SCQ / MSQ check
+  const sel = getSelectedIndices(ans);
+  if (sel.length === 0) return false;
+
+  const correct = (q.correctAnswerIndices && q.correctAnswerIndices.length > 0)
+    ? q.correctAnswerIndices
+    : [q.correctAnswerIndex];
+
+  if (sel.length !== correct.length) return false;
+  const sortedSel = [...sel].sort((a, b) => a - b);
+  const sortedCor = [...correct].sort((a, b) => a - b);
+  return sortedSel.every((val, i) => val === sortedCor[i]);
+}
+
+function isQuestionSkipped(ans: UserAnswer | null | undefined, q?: Question): boolean {
+  if (!ans) return true;
+  if (q && q.questionType === "NAT") {
+    return !ans.natValue || ans.natValue.trim() === "";
+  }
+  return getSelectedIndices(ans).length === 0 && (!ans.natValue || ans.natValue.trim() === "");
+}
+
+function cleanQuestionText(text: string): string {
+  if (!text) return "";
+  return text.replace(/^\[(GATE|PYQ|\d{4}|CSE|IT|CS|Q\d+)[^\]]*\]\s*/gi, "").replace(/\s*\(Q\d+\)$/g, "").trim();
+}
+
+function renderTextWithMath(text: string): React.ReactNode {
+  if (!text) return null;
+  const blockParts = text.split(/(\$\$[^$]+\$\$)/g);
+  return blockParts.map((part, i) => {
+    if (part.startsWith("\$\$") && part.endsWith("\$\$")) {
+      return <MathRenderer key={i} math={part.slice(2, -2)} block={true} />;
+    }
+    const inlineParts = part.split(/(\$[^$]+\$)/g);
+    return inlineParts.map((ip, j) => {
+      if (ip.startsWith("\$") && ip.endsWith("\$") && ip.length > 2) {
+        return <MathRenderer key={`${i}-${j}`} math={ip.slice(1, -1)} block={false} />;
+      }
+      return <span key={`${i}-${j}`}>{ip}</span>;
+    });
+  });
+}
+
+function renderFormattedSolution(exp: string) {
+  if (!exp) return null;
+  const lines = exp.split("\n");
+  const elements: React.ReactNode[] = [];
+  let tableRows: string[] = [];
+  let listItems: { type: "ol" | "ul"; text: string }[] = [];
+  let listType: "ol" | "ul" | null = null;
+  let codeLines: string[] = [];
+  let inCode = false;
+
+  const flushList = (key: string) => {
+    if (listItems.length === 0) return;
+    if (listType === "ol") {
+      elements.push(
+        <ol key={key} className="list-decimal ml-5 space-y-1 my-2">
+          {listItems.map((li, i) => (
+            <li key={i} className="text-slate-200 leading-relaxed">{renderRichText(li.text)}</li>
+          ))}
+        </ol>
+      );
+    } else {
+      elements.push(
+        <ul key={key} className="list-disc ml-5 space-y-1 my-2">
+          {listItems.map((li, i) => (
+            <li key={i} className="text-slate-200 leading-relaxed">{renderRichText(li.text)}</li>
+          ))}
+        </ul>
+      );
+    }
+    listItems = [];
+    listType = null;
+  };
+
+  const flushCode = (key: string) => {
+    if (codeLines.length === 0) return;
+    elements.push(
+      <pre key={key} className="bg-slate-950 border border-slate-700 rounded-xl p-3 my-2 overflow-x-auto">
+        <code className="text-cyan-300 text-[11px] font-mono leading-relaxed">{codeLines.join("\n")}</code>
+      </pre>
+    );
+    codeLines = [];
+    inCode = false;
+  };
+
+  const flushTable = (key: string) => {
+    if (tableRows.length < 2) {
+      tableRows.forEach((r, ri) => elements.push(<div key={`${key}-tr-${ri}`} className="font-mono text-[11px] text-cyan-300">{r}</div>));
+      tableRows = [];
+      return;
+    }
+    const headers = tableRows[0].split("|").filter(Boolean).map(h => h.trim());
+    const dataRows = tableRows.slice(2).filter(r => !r.match(/^[|\s-]+$/));
+    elements.push(
+      <div key={key} className="overflow-x-auto my-3 rounded-xl border border-slate-700">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="bg-slate-800">
+              {headers.map((h, i) => <th key={i} className="px-3 py-2 text-left font-bold text-cyan-300 border-b border-slate-700">{renderRichText(h)}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {dataRows.map((row, ri) => {
+              const cells = row.split("|").filter(Boolean).map(c => c.trim());
+              return (
+                <tr key={ri} className={ri % 2 === 0 ? "bg-slate-900" : "bg-slate-950"}>
+                  {cells.map((c, ci) => <td key={ci} className="px-3 py-2 text-slate-300 border-b border-slate-800">{renderRichText(c)}</td>)}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    );
+    tableRows = [];
+  };
+
+  lines.forEach((line, lIdx) => {
+    const key = `ln-${lIdx}`;
+
+    if (line.trim().startsWith("```")) {
+      if (inCode) { flushCode(key); } else { flushList(key); flushTable(key); inCode = true; }
+      return;
+    }
+    if (inCode) { codeLines.push(line); return; }
+
+    if (line.startsWith("|")) {
+      flushList(key);
+      tableRows.push(line);
+      return;
+    } else if (tableRows.length > 0) {
+      flushTable(key);
+    }
+
+    if (line.match(/^[-*_]{3,}$/)) {
+      flushList(key);
+      elements.push(<hr key={key} className="border-slate-700 my-3" />);
+      return;
+    }
+
+    if (line.startsWith("### ")) {
+      flushList(key);
+      elements.push(<h5 key={key} className="font-bold text-emerald-400 mt-4 mb-1.5 text-sm border-b border-emerald-500/20 pb-1">{renderRichText(line.slice(4))}</h5>);
+      return;
+    }
+    if (line.startsWith("## ")) {
+      flushList(key);
+      elements.push(<h4 key={key} className="font-extrabold text-cyan-400 mt-4 mb-1.5 text-base">{renderRichText(line.slice(3))}</h4>);
+      return;
+    }
+    if (line.startsWith("# ")) {
+      flushList(key);
+      elements.push(<h3 key={key} className="font-extrabold text-white mt-4 mb-2 text-base">{renderRichText(line.slice(2))}</h3>);
+      return;
+    }
+
+    const olMatch = line.match(/^(\d+)\.\s+(.+)/);
+    if (olMatch) {
+      if (listType === "ul") flushList(key);
+      listType = "ol";
+      listItems.push({ type: "ol", text: olMatch[2] });
+      return;
+    }
+
+    if (line.match(/^[-*]\s+/)) {
+      if (listType === "ol") flushList(key);
+      listType = "ul";
+      listItems.push({ type: "ul", text: line.replace(/^[-*]\s+/, "") });
+      return;
+    }
+
+    if (listItems.length > 0) flushList(key);
+
+    if (line.startsWith("$$") && line.endsWith("$$")) {
+      elements.push(
+        <div key={key} className="my-3 overflow-x-auto bg-slate-950/60 border border-slate-700/60 rounded-xl px-4 py-3 text-center">
+          <MathRenderer math={line.slice(2, -2)} block={true} />
+        </div>
+      );
+      return;
+    }
+
+    if (line.trim() === "") {
+      elements.push(<div key={key} className="h-2" />);
+      return;
+    }
+
+    elements.push(
+      <p key={key} className="text-slate-200 leading-relaxed">{renderRichText(line)}</p>
+    );
+  });
+
+  if (inCode) flushCode("code-end");
+  if (listItems.length > 0) flushList("list-end");
+  if (tableRows.length > 0) flushTable("tbl-end");
+
+  return <div className="space-y-1.5 text-xs">{elements}</div>;
+}
+
+function renderRichText(text: string): React.ReactNode {
+  if (!text) return null;
+  const parts = text.split(/(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\$\$[^$]+\$\$|\$[^$]+\$)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**"))
+      return <strong key={i} className="font-bold text-white">{part.slice(2, -2)}</strong>;
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 2)
+      return <em key={i} className="italic text-slate-300">{part.slice(1, -1)}</em>;
+    if (part.startsWith("`") && part.endsWith("`"))
+      return <code key={i} className="bg-slate-800 text-cyan-300 px-1 py-0.5 rounded text-[11px] font-mono">{part.slice(1, -1)}</code>;
+    if (part.startsWith("$$") && part.endsWith("$$"))
+      return <MathRenderer key={i} math={part.slice(2, -2)} block={true} />;
+    if (part.startsWith("$") && part.endsWith("$") && part.length > 2)
+      return <MathRenderer key={i} math={part.slice(1, -1)} block={false} />;
+    return <span key={i}>{part}</span>;
+  });
+}
+
+// Compute total question count across all exams
+function getTotalQuestionCount(): number {
+  let total = 0;
+  EXAMS_DATA.forEach(e => {
+    const subs = e.branches ? e.branches.flatMap(b => b.subjects) : (e.subjects || []);
+    subs.forEach(s => s.chapters.forEach(c => { total += c.questions.length; }));
+  });
+  return total;
+}
+function getTotalChapterCount(): number {
+  let total = 0;
+  EXAMS_DATA.forEach(e => {
+    const subs = e.branches ? e.branches.flatMap(b => b.subjects) : (e.subjects || []);
+    subs.forEach(s => { total += s.chapters.length; });
+  });
+  return total;
+}
+
+export default function Home() {
+  const [userName, setUserName] = useState<string>("Master Learner");
+  const [streakCount, setStreakCount] = useState<number>(5);
+  const [userXP, setUserXP] = useState<number>(340);
+  const [dailyQuizzesDone, setDailyQuizzesDone] = useState<number>(1);
+  const [dailyGoal] = useState<number>(3);
+
+  const [currentScreen, setCurrentScreen] = useState<Screen>("dashboard");
+  const [selectedExam, setSelectedExam] = useState<Exam>(EXAMS_DATA[0]);
+  const [selectedBranch, setSelectedBranch] = useState<Branch | null>(
+    EXAMS_DATA[0].branches && EXAMS_DATA[0].branches.length > 0 ? EXAMS_DATA[0].branches[0] : null
+  );
+  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
+
+  const [quizMode, setQuizMode] = useState<QuizMode>("practice");
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("easy");
+  const [durationMinutes, setDurationMinutes] = useState<number>(10);
+  const [questionCount, setQuestionCount] = useState<number>(10);
+
+  const [activeQuestions, setActiveQuestions] = useState<Question[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0);
+  const [userAnswers, setUserAnswers] = useState<Record<string, UserAnswer>>({});
+  const [isAnswerChecked, setIsAnswerChecked] = useState<boolean>(false);
+  const [timeLeft, setTimeLeft] = useState<number>(0);
+  const [totalQuizTime, setTotalQuizTime] = useState<number>(0);
+  const [quizStartTime, setQuizStartTime] = useState<number>(0);
+  const [timeTakenSeconds, setTimeTakenSeconds] = useState<number>(0);
+  const [isPreparingQuiz, setIsPreparingQuiz] = useState<boolean>(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [activeQuizTitle, setActiveQuizTitle] = useState<string>("");
+
+  const [score, setScore] = useState<number>(0);
+  const [correctCount, setCorrectCount] = useState<number>(0);
+  const [incorrectCount, setIncorrectCount] = useState<number>(0);
+  const [skippedCount, setSkippedCount] = useState<number>(0);
+  const [earnedXP, setEarnedXP] = useState<number>(0);
+  const [certificateId, setCertificateId] = useState<string>("");
+  const [isRetrySession, setIsRetrySession] = useState<boolean>(false);
+  const [firstAttemptAccuracy, setFirstAttemptAccuracy] = useState<number | undefined>(undefined);
+
+  const [isMistakesModalOpen, setIsMistakesModalOpen] = useState(false);
+  const [isBookmarksModalOpen, setIsBookmarksModalOpen] = useState(false);
+  const [isAIExplainModalOpen, setIsAIExplainModalOpen] = useState(false);
+  const [isAIQuizGenModalOpen, setIsAIQuizGenModalOpen] = useState(false);
+  const [isRankEstimatorOpen, setIsRankEstimatorOpen] = useState(false);
+  const [isQuestionSearchOpen, setIsQuestionSearchOpen] = useState(false);
+  const [isResultReviewModalOpen, setIsResultReviewModalOpen] = useState(false);
+  const [isGatePyqModalOpen, setIsGatePyqModalOpen] = useState(false);
+  const [isHighlightedTopicsOpen, setIsHighlightedTopicsOpen] = useState(false);
+  const [isMadeEasyModalOpen, setIsMadeEasyModalOpen] = useState(false);
+  const [showAnalyticsView, setShowAnalyticsView] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [isCurrentQBookmarked, setIsCurrentQBookmarked] = useState(false);
+  const [mistakesCount, setMistakesCount] = useState(0);
+  const [bookmarksCount, setBookmarksCount] = useState(0);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+
+  // Advanced CBT Exam Tools States
+  const [isAutoNext, setIsAutoNext] = useState<boolean>(false);
+  const [isScientificCalcOpen, setIsScientificCalcOpen] = useState<boolean>(false);
+  const [isScratchpadOpen, setIsScratchpadOpen] = useState<boolean>(false);
+  const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(true);
+  const [questionFontSize, setQuestionFontSize] = useState<"normal" | "large" | "xlarge">("normal");
+  const [currentQSeconds, setCurrentQSeconds] = useState<number>(0);
+  const [showShortcutsModal, setShowShortcutsModal] = useState<boolean>(false);
+  const [isFullscreen, setIsFullscreen] = useState<boolean>(false);
+  const [zoomedImageUrl, setZoomedImageUrl] = useState<string | null>(null);
+  const [zoomedImageAlt, setZoomedImageAlt] = useState<string | null>(null);
+  const [isMobilePaletteOpen, setIsMobilePaletteOpen] = useState<boolean>(false);
+
+  const totalQs = useMemo(() => getTotalQuestionCount(), []);
+  const totalChapters = useMemo(() => getTotalChapterCount(), []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedXP = localStorage.getItem("examiq_xp");
+      if (savedXP) setUserXP(parseInt(savedXP, 10));
+      const savedStreak = localStorage.getItem("examiq_streak");
+      if (savedStreak) setStreakCount(parseInt(savedStreak, 10));
+      const savedName = localStorage.getItem("examiq_name");
+      if (savedName) setUserName(savedName);
+      const savedTheme = localStorage.getItem("examiq_theme") as "dark" | "light" | null;
+      if (savedTheme === "light") setTheme("light");
+      setMistakesCount(getMistakes().length);
+      setBookmarksCount(getBookmarks().length);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      if (theme === "light") {
+        document.documentElement.classList.add("light");
+      } else {
+        document.documentElement.classList.remove("light");
+      }
+      localStorage.setItem("examiq_theme", theme);
+    }
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(prev => prev === "dark" ? "light" : "dark");
+
+  const availableSubjects = useMemo(() => {
+    if (!selectedExam) return [];
+    if (selectedExam.id === "gate" && selectedBranch) return selectedBranch.subjects;
+    return selectedExam.subjects || [];
+  }, [selectedExam, selectedBranch]);
+
+  const availableChapters = useMemo(() => {
+    if (!selectedSubject) return [];
+    return selectedSubject.chapters || [];
+  }, [selectedSubject]);
+
+  const correctAnswersMap = useMemo(() => {
+    const map: Record<string, number | number[]> = {};
+    activeQuestions.forEach(q => {
+      map[q.id] = (q.correctAnswerIndices && q.correctAnswerIndices.length > 0)
+        ? q.correctAnswerIndices
+        : q.correctAnswerIndex;
+    });
+    return map;
+  }, [activeQuestions]);
+
+  const dailyChallengeQuestion = useMemo(() => {
+    const allQs: Question[] = [];
+    EXAMS_DATA.forEach(e => {
+      const subs = e.branches ? e.branches.flatMap(b => b.subjects) : e.subjects || [];
+      subs.forEach(s => s.chapters.forEach(c => allQs.push(...c.questions)));
+    });
+    if (allQs.length === 0) return null;
+    const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / (1000 * 60 * 60 * 24));
+    return allQs[dayOfYear % allQs.length];
+  }, []);
+
+  useEffect(() => {
+    if (currentScreen === "quiz" && timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) { clearInterval(timerRef.current!); handleQuizSubmit(true); return 0; }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [currentScreen, timeLeft]);
+
+  useEffect(() => {
+    if (activeQuestions[currentQuestionIndex]) {
+      setIsCurrentQBookmarked(isBookmarked(activeQuestions[currentQuestionIndex].id));
+    }
+  }, [currentQuestionIndex, activeQuestions]);
+
+  // Per-Question Timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (currentScreen === "quiz") {
+      interval = setInterval(() => {
+        setCurrentQSeconds(prev => prev + 1);
+      }, 1000);
+    }
+    return () => { if (interval) clearInterval(interval); };
+  }, [currentScreen, currentQuestionIndex]);
+
+  useEffect(() => {
+    setCurrentQSeconds(0);
+  }, [currentQuestionIndex]);
+
+  const toggleFullscreen = () => {
+    if (typeof document === "undefined") return;
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  };
+
+  const selectExam = (exam: Exam) => {
+    setSelectedExam(exam);
+    setSelectedBranch(null);
+    setSelectedSubject(null);
+    setSelectedChapter(null);
+    if (exam.branches && exam.branches.length > 0) setSelectedBranch(exam.branches[0]);
+  };
+
+  const quickLaunchChapterQuiz = (subject: Subject, chapter: Chapter) => {
+    setSelectedSubject(subject);
+    setSelectedChapter(chapter);
+    setCurrentScreen("settings");
+  };
+
+  const launchCustomQuestionPool = (
+    questions: Question[],
+    title: string,
+    customDurationMinutes?: number,
+    initialIndex: number = 0
+  ) => {
+    if (questions.length === 0) return;
+    const cleaned = questions.map(q => ({ ...q, text: cleanQuestionText(q.text) }));
+    setActiveQuestions(cleaned);
+    setCurrentQuestionIndex(initialIndex >= 0 && initialIndex < cleaned.length ? initialIndex : 0);
+    setIsAnswerChecked(false);
+    const initialAnswers: Record<string, UserAnswer> = {};
+    cleaned.forEach(q => { initialAnswers[q.id] = { questionId: q.id, selectedOptionIndex: null, selectedOptionIndices: [], isMarkedForReview: false }; });
+    setUserAnswers(initialAnswers);
+
+    // Dynamic duration calculation:
+    // If explicitly provided, respect it (e.g. 180m or 130m).
+    // For full 65-question GATE paper, default to official 180 minutes!
+    // For smaller pools, scale appropriately.
+    let finalDuration = customDurationMinutes;
+    if (!finalDuration) {
+      if (cleaned.length >= 60) {
+        finalDuration = 180; // Full 3-Hour GATE Official Mock
+      } else if (cleaned.length >= 30) {
+        finalDuration = Math.round(cleaned.length * 2);
+      } else if (cleaned.length === 1) {
+        finalDuration = 3;
+      } else {
+        finalDuration = durationMinutes || 10;
+      }
+    }
+
+    setDurationMinutes(finalDuration);
+    const seconds = finalDuration * 60;
+    setTimeLeft(seconds);
+    setTotalQuizTime(seconds);
+    setQuizStartTime(Date.now());
+    setActiveQuizTitle(title);
+    setCurrentScreen("quiz");
+  };
+
+  const startQuiz = async () => {
+    if (!selectedChapter) return;
+    setIsPreparingQuiz(true);
+    setIsRetrySession(false);
+    setFirstAttemptAccuracy(undefined);
+    const questions: Question[] = getChapterQuestions(selectedChapter, difficulty, questionCount);
+    setIsPreparingQuiz(false);
+    const cleaned = questions.map(q => ({ ...q, text: cleanQuestionText(q.text) }));
+    setActiveQuestions(cleaned);
+    setCurrentQuestionIndex(0);
+    setIsAnswerChecked(false);
+    const initialAnswers: Record<string, UserAnswer> = {};
+    cleaned.forEach(q => { initialAnswers[q.id] = { questionId: q.id, selectedOptionIndex: null, selectedOptionIndices: [], isMarkedForReview: false }; });
+    setUserAnswers(initialAnswers);
+    const seconds = durationMinutes * 60;
+    setTimeLeft(seconds);
+    setTotalQuizTime(seconds);
+    setQuizStartTime(Date.now());
+    setActiveQuizTitle(`${selectedSubject?.name || "Subject"} — ${selectedChapter?.name || "Chapter"}`);
+    setCurrentScreen("quiz");
+  };
+
+  const handleSelectOption = (optionIndex: number) => {
+    if (quizMode === "practice" && isAnswerChecked) return;
+    const activeQ = activeQuestions[currentQuestionIndex];
+    if (!activeQ) return;
+
+    const isMSQ = isMSQQuestion(activeQ);
+
+    if (isMSQ) {
+      setUserAnswers(prev => {
+        const currentAns = prev[activeQ.id];
+        const currentSelected = getSelectedIndices(currentAns);
+        let nextSelected: number[];
+        if (currentSelected.includes(optionIndex)) {
+          nextSelected = currentSelected.filter(i => i !== optionIndex);
+        } else {
+          nextSelected = [...currentSelected, optionIndex].sort((a, b) => a - b);
+        }
+
+        return {
+          ...prev,
+          [activeQ.id]: {
+            ...currentAns,
+            selectedOptionIndices: nextSelected,
+            selectedOptionIndex: nextSelected.length > 0 ? nextSelected[0] : null,
+          }
+        };
+      });
+
+      if (isSoundEnabled) {
+        playAudioFeedback("click");
+      }
+    } else {
+      setUserAnswers(prev => ({
+        ...prev,
+        [activeQ.id]: {
+          ...prev[activeQ.id],
+          selectedOptionIndex: optionIndex,
+          selectedOptionIndices: [optionIndex],
+        }
+      }));
+
+      if (isSoundEnabled) {
+        if (quizMode === "practice") {
+          if (optionIndex === activeQ.correctAnswerIndex) playAudioFeedback("correct");
+          else playAudioFeedback("wrong");
+        } else {
+          playAudioFeedback("click");
+        }
+      }
+
+      if (isAutoNext) {
+        if (quizMode === "practice") {
+          setIsAnswerChecked(true);
+          setTimeout(() => {
+            if (currentQuestionIndex < activeQuestions.length - 1) {
+              setCurrentQuestionIndex(prev => prev + 1);
+              setIsAnswerChecked(false);
+              if (isSoundEnabled) playAudioFeedback("next");
+            }
+          }, 900);
+        } else {
+          setTimeout(() => {
+            if (currentQuestionIndex < activeQuestions.length - 1) {
+              setCurrentQuestionIndex(prev => prev + 1);
+              if (isSoundEnabled) playAudioFeedback("next");
+            }
+          }, 350);
+        }
+      }
+    }
+  };
+
+  const handleToggleBookmarkCurrent = () => {
+    const q = activeQuestions[currentQuestionIndex];
+    if (!q) return;
+    const bookmarked = toggleBookmark(q, selectedExam?.name || "Exam", selectedSubject?.name || "Subject", selectedChapter?.name || "Chapter");
+    setIsCurrentQBookmarked(bookmarked);
+    setBookmarksCount(getBookmarks().length);
+  };
+
+  const toggleMarkForReview = () => {
+    const q = activeQuestions[currentQuestionIndex];
+    if (!q) return;
+    setUserAnswers(prev => ({ ...prev, [q.id]: { ...prev[q.id], isMarkedForReview: !prev[q.id].isMarkedForReview } }));
+  };
+
+  const handleNatChange = (value: string) => {
+    if (quizMode === "practice" && isAnswerChecked) return;
+    const activeQ = activeQuestions[currentQuestionIndex];
+    if (!activeQ) return;
+    setUserAnswers(prev => ({
+      ...prev,
+      [activeQ.id]: {
+        ...prev[activeQ.id],
+        natValue: value,
+      }
+    }));
+  };
+
+  const clearResponse = () => {
+    const q = activeQuestions[currentQuestionIndex];
+    if (!q) return;
+    setUserAnswers(prev => ({
+      ...prev,
+      [q.id]: {
+        ...prev[q.id],
+        selectedOptionIndex: null,
+        selectedOptionIndices: [],
+        natValue: "",
+      }
+    }));
+  };
+
+  const handleCheckOrNext = () => {
+    if (quizMode === "practice" && !isAnswerChecked) {
+      setIsAnswerChecked(true);
+      if (isSoundEnabled) {
+        const activeQ = activeQuestions[currentQuestionIndex];
+        const currentAns = userAnswers[activeQ.id];
+        if (isQuestionAnswerCorrect(activeQ, currentAns)) playAudioFeedback("correct");
+        else playAudioFeedback("wrong");
+      }
+    } else {
+      if (currentQuestionIndex < activeQuestions.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+        setIsAnswerChecked(false);
+        if (isSoundEnabled) playAudioFeedback("next");
+      } else {
+        handleQuizSubmit(false);
+      }
+    }
+  };
+
+  // Keyboard Shortcuts Listener for Fast Professional Navigation
+  useEffect(() => {
+    if (currentScreen !== "quiz") return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const activeQ = activeQuestions[currentQuestionIndex];
+      if (!activeQ) return;
+
+      if (e.key === "1" || e.key.toLowerCase() === "a") {
+        if (activeQ.options.length > 0) handleSelectOption(0);
+      } else if (e.key === "2" || e.key.toLowerCase() === "b") {
+        if (activeQ.options.length > 1) handleSelectOption(1);
+      } else if (e.key === "3" || (e.key.toLowerCase() === "c" && !e.ctrlKey && !e.metaKey)) {
+        if (activeQ.options.length > 2) handleSelectOption(2);
+      } else if (e.key === "4" || e.key.toLowerCase() === "d") {
+        if (activeQ.options.length > 3) handleSelectOption(3);
+      } else if (e.key === "Enter" || e.key === "ArrowRight") {
+        handleCheckOrNext();
+      } else if (e.key === "ArrowLeft") {
+        if (currentQuestionIndex > 0) {
+          setCurrentQuestionIndex(prev => prev - 1);
+          setIsAnswerChecked(false);
+        }
+      } else if (e.key.toLowerCase() === "m") {
+        toggleMarkForReview();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentScreen, currentQuestionIndex, activeQuestions, isAnswerChecked, quizMode, isAutoNext, isSoundEnabled]);
+
+  const handleQuizSubmit = async (isTimeout = false) => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    const elapsedSeconds = Math.round((Date.now() - quizStartTime) / 1000);
+    const actualTimeTaken = Math.min(elapsedSeconds, totalQuizTime);
+    setTimeTakenSeconds(actualTimeTaken);
+
+    let calculatedScore = 0, correct = 0, incorrect = 0, skipped = 0;
+    activeQuestions.forEach(q => {
+      const ans = userAnswers[q.id];
+      if (isQuestionSkipped(ans)) {
+        skipped++;
+      } else if (isQuestionAnswerCorrect(q, ans)) {
+        correct++;
+        const qMarks = q.marks ?? (quizMode === "exam" ? 4 : 10);
+        calculatedScore += qMarks;
+      } else {
+        incorrect++;
+        if (quizMode === "exam") {
+          const isMSQ = isMSQQuestion(q);
+          if (!isMSQ) {
+            calculatedScore -= (q.negativeMarks ?? 1);
+          }
+        }
+      }
+    });
+
+    setScore(calculatedScore);
+    setCorrectCount(correct);
+    setIncorrectCount(incorrect);
+    setSkippedCount(skipped);
+
+    const percentage = Math.max(0, Math.round((correct / activeQuestions.length) * 100));
+    const roundedScore = Math.round(calculatedScore * 100) / 100;
+    const newXP = Math.round((userXP + roundedScore) * 100) / 100;
+    setUserXP(newXP);
+    setEarnedXP(roundedScore);
+    setDailyQuizzesDone(prev => prev + 1);
+    if (typeof window !== "undefined") localStorage.setItem("examiq_xp", newXP.toString());
+
+    const certCode = `EXAM-CERT-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+    setCertificateId(certCode);
+
+    const attemptRecord: QuizAttemptRecord = {
+      id: `att-${Date.now()}`,
+      examName: selectedExam?.name || "Exam",
+      subjectName: selectedSubject?.name || "Subject",
+      chapterName: selectedChapter?.name || "Chapter",
+      mode: quizMode, difficulty, score: calculatedScore,
+      totalQuestions: activeQuestions.length,
+      correctCount: correct, incorrectCount: incorrect, skippedCount: skipped,
+      accuracy: percentage, timeTakenSeconds: actualTimeTaken,
+      avgTimePerQuestionSeconds: activeQuestions.length > 0 ? Math.round(actualTimeTaken / activeQuestions.length) : 0,
+      timestamp: new Date().toISOString(),
+      questions: activeQuestions, userAnswers,
+      isRetryAttempt: isRetrySession, firstAttemptAccuracy,
+    };
+    recordQuizAttempt(attemptRecord);
+    setMistakesCount(getMistakes().length);
+
+    try {
+      await addQuizResultToBlockchain({ certificateId: certCode, userName, examName: selectedExam?.name || "Quiz", subjectName: selectedSubject?.name || "Subject", chapterName: selectedChapter?.name || "Chapter", score: calculatedScore, totalQuestions: activeQuestions.length, percentage, difficulty, timeTakenSeconds: actualTimeTaken, timestamp: new Date().toISOString() });
+    } catch (err) {}
+    setCurrentScreen("result");
+  };
+
+  const retryIncorrectQuestions = () => {
+    const missedQuestions = activeQuestions.filter(q => {
+      const ans = userAnswers[q.id];
+      return !isQuestionSkipped(ans) && !isQuestionAnswerCorrect(q, ans);
+    });
+    if (missedQuestions.length === 0) return;
+    const currentAcc = Math.round((correctCount / activeQuestions.length) * 100);
+    setFirstAttemptAccuracy(currentAcc);
+    setIsRetrySession(true);
+    launchCustomQuestionPool(missedQuestions, `Retry Missed Questions (${missedQuestions.length})`);
+  };
+
+  const trySimilarQuestion = (currentQ: Question) => {
+    const similarQs = getChapterQuestions(selectedChapter || availableChapters[0], currentQ.difficulty, 5);
+    const filtered = similarQs.filter(q => q.id !== currentQ.id);
+    if (filtered.length > 0) launchCustomQuestionPool([filtered[0]], `Similar Question: ${currentQ.concept || "Concept Test"}`);
+  };
+
+  const formatTime = (secs: number) => {
+    const hrs = Math.floor(secs / 3600);
+    const mins = Math.floor((secs % 3600) / 60);
+    const s = secs % 60;
+    if (hrs > 0) {
+      return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    }
+    return `${mins.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const currentQ = activeQuestions[currentQuestionIndex];
+  const currentAns = currentQ ? userAnswers[currentQ.id] : null;
+  const isCorrect = currentAns && currentQ && isQuestionAnswerCorrect(currentQ, currentAns);
+
+  // Subject icon helper
+  const subjIcon = (name: string) => {
+    const n = name.toLowerCase();
+    if (n.includes("math") || n.includes("engineering math")) return "∑";
+    if (n.includes("digital")) return "⊕";
+    if (n.includes("os") || n.includes("operating")) return "⚙";
+    if (n.includes("network") || n.includes("cn")) return "🌐";
+    if (n.includes("database") || n.includes("dbms")) return "🗄";
+    if (n.includes("algorithm") || n.includes("algo")) return "⟳";
+    if (n.includes("toc") || n.includes("automata") || n.includes("compiler")) return "🔣";
+    if (n.includes("coa") || n.includes("computer org")) return "🖥";
+    if (n.includes("data struct")) return "🌲";
+    if (n.includes("physics")) return "⚛";
+    if (n.includes("chem")) return "🧪";
+    if (n.includes("bot")) return "🌿";
+    if (n.includes("zoo")) return "🦁";
+    if (n.includes("software")) return "💻";
+    if (n.includes("quant") || n.includes("aptitude")) return "🔢";
+    return "📖";
+  };
+
+  return (
+    <main className={`min-h-screen ${theme === "light" ? "bg-[#f8fafc] text-slate-900" : "bg-[#07090f] text-slate-100"} flex flex-col font-sans safe-bottom-padding transition-colors duration-200`}>
+
+      {/* ═══════════════ HEADER ═══════════════ */}
+      <header className={`sticky top-0 z-40 ${theme === "light" ? "bg-white/90 border-slate-200/90 shadow-sm" : "bg-[#07090f]/80 border-white/[0.06]"} backdrop-blur-xl border-b px-4 sm:px-8 py-3 flex items-center justify-between transition-colors duration-200`}>
+        <div onClick={() => setCurrentScreen("dashboard")} className="flex items-center gap-3 cursor-pointer group">
+          <div className="w-10 h-10 rounded-2xl overflow-hidden shadow-lg shadow-cyan-500/10 group-hover:shadow-cyan-500/25 group-hover:scale-105 transition border border-white/10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.jpg" alt="ExamiQ Logo" width={40} height={40} className="w-full h-full object-cover" />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-2">
+              <span className="gradient-text">ExamiQ</span>
+              <span className="text-[9px] font-black uppercase bg-cyan-500/15 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-500/30">PRO</span>
+            </h1>
+            <p className="text-[10px] text-slate-500 font-medium hidden sm:block">Smart Competitive Exam Prep · GATE · JEE · NEET · SSC</p>
+          </div>
+        </div>
+
+        {/* Desktop action bar */}
+        <div className="hidden md:flex items-center gap-2">
+          <button onClick={() => setIsGatePyqModalOpen(true)} className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 text-[11px] font-bold transition cursor-pointer">
+            📜 GATE PYQ Mocks
+          </button>
+          <button onClick={() => setIsQuestionSearchOpen(true)} className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/20 text-[11px] font-bold transition cursor-pointer">
+            🔍 Search Qs
+          </button>
+          <button onClick={() => setIsRankEstimatorOpen(true)} className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 text-[11px] font-bold transition cursor-pointer">
+            📊 Rank Predictor
+          </button>
+          <button onClick={() => setIsMistakesModalOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/20 text-[11px] font-bold transition cursor-pointer">
+            📕 Mistakes ({mistakesCount})
+          </button>
+          <button onClick={() => setIsBookmarksModalOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/20 text-[11px] font-bold transition cursor-pointer">
+            🔖 Saves ({bookmarksCount})
+          </button>
+          <button onClick={() => setIsAIQuizGenModalOpen(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/20 text-[11px] font-bold transition cursor-pointer">
+            ✨ AI Quiz
+          </button>
+          <button
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition cursor-pointer border"
+            style={theme === "dark"
+              ? { background: "rgba(255,235,59,0.08)", color: "#fdd835", borderColor: "rgba(253,216,53,0.25)" }
+              : { background: "rgba(30,58,138,0.10)", color: "#1e40af", borderColor: "rgba(30,64,175,0.25)" }
+            }
+          >
+            {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+          </button>
+          <div className="flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/20 px-3 py-1.5 rounded-full text-orange-400 font-bold text-[11px]">🔥 {streakCount}d</div>
+          <div className="flex items-center gap-1.5 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-full text-cyan-300 font-bold text-[11px]">⚡ {userXP} XP</div>
+        </div>
+
+        {/* Mobile */}
+        <div className="flex md:hidden items-center gap-2">
+          <div className="flex items-center gap-1 bg-orange-500/10 border border-orange-500/20 px-2.5 py-1 rounded-full text-orange-400 font-bold text-[11px]">🔥 {streakCount}d</div>
+          <div className="flex items-center gap-1 bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 rounded-full text-cyan-300 font-bold text-[11px]">⚡ {userXP}</div>
+          <button
+            onClick={toggleTheme}
+            className="w-9 h-9 rounded-xl border flex items-center justify-center text-base transition cursor-pointer"
+            style={theme === "dark"
+              ? { background: "rgba(255,235,59,0.08)", color: "#fdd835", borderColor: "rgba(253,216,53,0.2)" }
+              : { background: "rgba(30,58,138,0.10)", color: "#1e40af", borderColor: "rgba(30,64,175,0.2)" }
+            }
+            aria-label="Toggle theme"
+          >{theme === "dark" ? "☀️" : "🌙"}</button>
+          <button onClick={() => setIsMobileDrawerOpen(true)} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-200 text-lg hover:bg-white/10 transition cursor-pointer" aria-label="Open menu">☰</button>
+        </div>
+      </header>
+
+      {/* ═══════════════ MOBILE DRAWER ═══════════════ */}
+      {isMobileDrawerOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end bg-black/70 backdrop-blur-sm md:hidden animate-fadeIn">
+          <div className={`w-4/5 max-w-xs h-full border-l p-5 flex flex-col justify-between shadow-2xl ${theme === "light" ? "bg-white border-slate-200" : "bg-[#0d1117] border-white/[0.08]"}`}>
+            <div className="space-y-5">
+              <div className={`flex items-center justify-between border-b pb-4 ${theme === "light" ? "border-slate-200" : "border-white/[0.06]"}`}>
+                <span className={`font-extrabold text-base ${theme === "light" ? "text-slate-900" : "text-white"}`}>ExamiQ Menu</span>
+                <button onClick={() => setIsMobileDrawerOpen(false)} className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold cursor-pointer ${theme === "light" ? "bg-slate-100 text-slate-500 hover:text-slate-900" : "bg-white/5 text-slate-400 hover:text-white"}`}>✕</button>
+              </div>
+              <div className="space-y-2">
+                {[
+                  { label: "🗺️ Learning Pathway", action: () => { setCurrentScreen("dashboard"); setShowAnalyticsView(false); setIsMobileDrawerOpen(false); }, active: !showAnalyticsView },
+                  { label: "📊 Performance Analytics", action: () => { setCurrentScreen("dashboard"); setShowAnalyticsView(true); setIsMobileDrawerOpen(false); }, active: showAnalyticsView },
+                  { label: "🎯 MADE EASY Test Series (GATE)", action: () => { setIsMadeEasyModalOpen(true); setIsMobileDrawerOpen(false); } },
+                  { label: "📜 GATE PYQ Papers (2015-2024)", action: () => { setIsGatePyqModalOpen(true); setIsMobileDrawerOpen(false); } },
+                  { label: "📊 GATE Rank Estimator", action: () => { setIsRankEstimatorOpen(true); setIsMobileDrawerOpen(false); } },
+                  { label: `📕 Mistakes Notebook (${mistakesCount})`, action: () => { setIsMistakesModalOpen(true); setIsMobileDrawerOpen(false); } },
+                  { label: `🔖 Bookmarked Questions (${bookmarksCount})`, action: () => { setIsBookmarksModalOpen(true); setIsMobileDrawerOpen(false); } },
+                  { label: "✨ AI Quiz Generator", action: () => { setIsAIQuizGenModalOpen(true); setIsMobileDrawerOpen(false); } },
+                ].map((item, i) => (
+                  <button key={i} onClick={item.action} className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold cursor-pointer transition ${item.active ? "bg-cyan-500/15 text-cyan-600 border border-cyan-500/20" : theme === "light" ? "bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200" : "bg-white/[0.04] text-slate-300 border border-white/[0.06] hover:bg-white/[0.07]"}`}>
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+              {/* Theme Toggle in Drawer */}
+              <button
+                onClick={toggleTheme}
+                className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-xs font-bold cursor-pointer transition border ${theme === "dark" ? "bg-amber-500/10 text-amber-300 border-amber-500/20 hover:bg-amber-500/15" : "bg-slate-800/10 text-slate-700 border-slate-300 hover:bg-slate-100"}`}
+              >
+                {theme === "dark" ? "☀️ Switch to Light Mode" : "🌙 Switch to Dark Mode"}
+              </button>
+            </div>
+            <div className={`pt-4 border-t text-center text-[11px] font-medium ${theme === "light" ? "border-slate-200 text-slate-500" : "border-white/[0.06] text-slate-500"}`}>
+              Streak: <span className="text-orange-400 font-bold">{streakCount} Days</span> · XP: <span className="text-cyan-500 font-bold">{userXP}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════ DASHBOARD ═══════════════ */}
+      {currentScreen === "dashboard" && (
+        <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
+
+          {/* ── Question Bank Stats Hub ── */}
+          <div className="glass-card p-5 sm:p-6 border-white/[0.07]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-widest text-cyan-400 mb-1">📚 Question Bank Explorer</p>
+                <h2 className="text-xl sm:text-2xl font-black text-white">
+                  <span className="neon-text-green">{totalQs.toLocaleString()}</span> Curated Questions Ready
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">Covering GATE · JEE · NEET · SSC · All Subjects — deduplicated &amp; verified</p>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={() => setIsQuestionSearchOpen(true)} className="px-4 py-2 btn-3d-blue rounded-xl text-[11px] font-bold cursor-pointer flex items-center gap-1.5">
+                  🔍 Browse All Questions
+                </button>
+                <button onClick={() => setIsGatePyqModalOpen(true)} className="px-4 py-2 btn-3d-amber rounded-xl text-[11px] font-bold cursor-pointer flex items-center gap-1.5">
+                  📜 PYQ Papers
+                </button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {[
+                { value: totalQs.toLocaleString(), label: "Total Questions", cls: "stat-badge-green", icon: "🎯" },
+                { value: String(totalChapters), label: "Chapters Covered", cls: "stat-badge-blue", icon: "📖" },
+                { value: "16", label: "Official GATE Papers", cls: "stat-badge-amber", icon: "📜" },
+                { value: "5", label: "Exam Categories", cls: "stat-badge-purple", icon: "🏆" },
+              ].map((s, i) => (
+                <div key={i} className={`stat-badge ${s.cls}`}>
+                  <div className="text-xl mb-1">{s.icon}</div>
+                  <div className="text-xl sm:text-2xl font-black text-white">{s.value}</div>
+                  <div className="text-[10px] text-slate-400 mt-0.5 font-medium">{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Top Action Bar ── */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* 🎯 MADE EASY – Featured Hero Button */}
+            <button
+              onClick={() => setIsMadeEasyModalOpen(true)}
+              className="px-5 py-2.5 rounded-xl text-sm font-black cursor-pointer flex items-center gap-2 shadow-xl transition hover:scale-[1.03] active:scale-[0.98]"
+              style={{
+                background: "linear-gradient(135deg, #be123c, #9f1239, #7c3aed)",
+                border: "1px solid rgba(225,29,72,0.5)",
+                boxShadow: "0 0 20px rgba(225,29,72,0.3)",
+              }}
+            >
+              🎯 MADE EASY Test Series (GATE 2027)
+              <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-black">14 LIVE</span>
+            </button>
+            <button onClick={() => setIsGatePyqModalOpen(true)} className="px-4 py-2.5 btn-3d-amber rounded-xl text-xs font-black cursor-pointer flex items-center gap-1.5 shadow-lg">
+              📜 GATE Year-Wise PYQ (2015-2024)
+            </button>
+            <button onClick={() => setShowAnalyticsView(false)} className={`px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${!showAnalyticsView ? "btn-3d-blue" : "btn-3d-slate"}`}>
+              🗺️ Learning Pathway
+            </button>
+            <button onClick={() => setShowAnalyticsView(true)} className={`px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${showAnalyticsView ? "btn-3d-blue" : "btn-3d-slate"}`}>
+              📊 Analytics
+            </button>
+            <button onClick={() => setIsRankEstimatorOpen(true)} className="px-4 py-2.5 btn-3d-slate rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5">
+              📊 Rank Estimator
+            </button>
+            <button onClick={() => setIsHighlightedTopicsOpen(true)} className="px-4 py-2.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-lg" style={{background:"linear-gradient(135deg,#7c3aed,#db2777)",border:"1px solid rgba(219,39,119,0.4)"}}>
+              🔥 Must-Do Topics
+            </button>
+          </div>
+
+          {/* ── MADE EASY Featured Banner Card ── */}
+          <div
+            className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-6 cursor-pointer group transition hover:scale-[1.01] duration-200"
+            style={{
+              background: theme === "light"
+                ? "linear-gradient(135deg, #fff1f2 0%, #fdf2f8 50%, #f5f3ff 100%)"
+                : "linear-gradient(135deg, #180010 0%, #2b082c 40%, #0d0c2c 100%)",
+              border: theme === "light" ? "1px solid rgba(244,63,94,0.3)" : "1px solid rgba(225,29,72,0.4)",
+              boxShadow: theme === "light" ? "0 4px 20px rgba(225,29,72,0.08)" : "0 0 28px rgba(225,29,72,0.12)",
+            }}
+            onClick={() => setIsMadeEasyModalOpen(true)}
+          >
+            <div className="absolute -right-8 -top-8 w-44 h-44 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -right-4 bottom-0 w-36 h-36 bg-violet-600/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-start sm:items-center gap-3.5">
+                <div
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shrink-0 font-black shadow-lg"
+                  style={{
+                    background: "linear-gradient(135deg, #be123c, #7c3aed)",
+                    boxShadow: "0 4px 16px rgba(190,18,60,0.35)",
+                  }}
+                >
+                  🎯
+                </div>
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-rose-500 bg-rose-500/15 px-2.5 py-0.5 rounded-full border border-rose-500/30">
+                      🏆 Official Pattern
+                    </span>
+                    <span className="text-[10px] sm:text-xs font-black text-amber-500 bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-500/30">
+                      SCQ • MSQ • NAT
+                    </span>
+                    <span className="text-[10px] sm:text-xs font-bold text-emerald-500 bg-emerald-500/15 px-2 py-0.5 rounded-md border border-emerald-500/30 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      14 Tests Live
+                    </span>
+                  </div>
+                  <h3 className={`text-base sm:text-xl font-black ${theme === "light" ? "text-slate-900" : "text-white"} tracking-tight`}>
+                    MADE EASY Online Test Series (OTS) — GATE CS 2027
+                  </h3>
+                  <p className={`text-xs ${theme === "light" ? "text-slate-600" : "text-slate-300"} max-w-xl leading-relaxed`}>
+                    Topic-wise &amp; Full Mocks with authentic marking (+1/−0.33, +2/−0.66) · MSQ &amp; NAT with 0 negative penalty · Real CBT simulator.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center md:items-end justify-between w-full md:w-auto gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-black/[0.06] dark:border-white/[0.08]">
+                <div className="flex justify-around sm:justify-start gap-4 text-center">
+                  {[
+                    { val: "10", lbl: "Subjects" },
+                    { val: "14", lbl: "Live Tests" },
+                    { val: "286+", lbl: "Questions" },
+                  ].map((s, i) => (
+                    <div key={i} className="text-center">
+                      <div className={`text-lg sm:text-xl font-black ${theme === "light" ? "text-slate-900" : "text-white"}`}>{s.val}</div>
+                      <div className={`text-[10px] sm:text-xs ${theme === "light" ? "text-slate-500" : "text-slate-400"} font-semibold`}>{s.lbl}</div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black text-white cursor-pointer group-hover:shadow-xl transition flex items-center justify-center gap-1.5 shrink-0"
+                  style={{
+                    background: "linear-gradient(135deg, #e11d48, #be123c, #9f1239)",
+                    border: "1px solid rgba(244,63,94,0.5)",
+                    boxShadow: "0 4px 14px rgba(225,29,72,0.35)",
+                  }}
+                  onClick={(e) => { e.stopPropagation(); setIsMadeEasyModalOpen(true); }}
+                >
+                  <span>Open OTS Dashboard</span>
+                  <span>→</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {showAnalyticsView ? (
+            <PerformanceAnalyticsView
+              onStartTargetedPractice={(topic, subject) => {
+                const foundSubj = availableSubjects.find(s => s.name.includes(subject)) || availableSubjects[0];
+                const foundChap = foundSubj?.chapters.find(c => c.name.includes(topic)) || foundSubj?.chapters[0];
+                if (foundSubj && foundChap) quickLaunchChapterQuiz(foundSubj, foundChap);
+              }}
+            />
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              <div className="lg:col-span-8 space-y-6">
+
+                {/* Exam Selector */}
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-400">Select Exam Target</h2>
+                    <span className="text-[11px] text-cyan-400 font-semibold">{EXAMS_DATA.length} Exams Available</span>
+                  </div>
+                  <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                    {EXAMS_DATA.map(exam => (
+                      <button key={exam.id} onClick={() => selectExam(exam)} className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${selectedExam.id === exam.id ? "btn-3d-blue" : "btn-3d-slate"}`}>
+                        <span className="text-base">{exam.icon}</span>
+                        <span>{exam.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Branch Selector (GATE) */}
+                {selectedExam.id === "gate" && selectedExam.branches && (
+                  <div className="glass-card p-4 border-white/[0.06]">
+                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-3">Select Branch ({selectedExam.branches.length} Available)</h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {selectedExam.branches.map(branch => (
+                        <button key={branch.id} onClick={() => setSelectedBranch(branch)} className={`p-2.5 rounded-xl text-xs font-bold text-center transition cursor-pointer ${selectedBranch?.id === branch.id ? "bg-cyan-500/15 border-2 border-cyan-400/60 text-cyan-300" : "bg-white/[0.03] border border-white/[0.07] text-slate-400 hover:bg-white/[0.06]"}`}>
+                          <div>{branch.icon} {branch.name}</div>
+                          <div className="text-[10px] font-normal text-slate-500 mt-0.5">{branch.subjects.length} Subjects</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Hero Banner */}
+                <div className="relative overflow-hidden rounded-3xl p-6 text-white" style={{background: "linear-gradient(135deg, #003d2e 0%, #004d4d 50%, #001a3d 100%)", border: "1px solid rgba(0,230,118,0.15)"}}>
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-400/5 rounded-full blur-3xl pointer-events-none" />
+                  <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <span className="text-[10px] font-black uppercase tracking-wider bg-white/10 px-3 py-1 rounded-full border border-white/10">
+                        📌 Current Target: {selectedExam.name} {selectedBranch ? `(${selectedBranch.name})` : ""}
+                      </span>
+                      <h2 className="text-xl sm:text-2xl font-black mt-2 mb-1">{selectedExam.fullName}</h2>
+                      <p className="text-xs text-white/60 max-w-lg leading-relaxed">{selectedExam.description}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-4xl font-black neon-text-green">{availableSubjects.length}</span>
+                      <div className="text-xs font-medium text-white/50 mt-0.5">Active Subjects</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Subjects & Chapters */}
+                <div className="space-y-5">
+                  {availableSubjects.map((subj, subjIdx) => (
+                    <div key={subj.id} className="glass-card p-5">
+                      <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/[0.06]">
+                        <div className="flex items-center gap-3">
+                          <div className="w-11 h-11 rounded-2xl flex items-center justify-center text-xl font-black" style={{background: "rgba(0,176,255,0.1)", border: "1px solid rgba(0,176,255,0.2)", color: "#00b0ff"}}>
+                            {subjIcon(subj.name)}
+                          </div>
+                          <div>
+                            <h3 className="text-base font-bold text-white">{subj.name}</h3>
+                            <p className="text-[11px] text-slate-500">{subj.description}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-black bg-white/[0.05] text-slate-300 px-3 py-1 rounded-full border border-white/[0.08]">
+                            {subj.chapters.reduce((acc, c) => acc + c.questions.length, 0)} Qs
+                          </span>
+                          <span className="text-[10px] font-bold bg-white/[0.04] text-slate-400 px-2.5 py-1 rounded-full">
+                            {subj.chapters.length} Chapters
+                          </span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                        {subj.chapters.map(chap => (
+                          <div key={chap.id} onClick={() => quickLaunchChapterQuiz(subj, chap)} className="chapter-card p-4 flex flex-col justify-between group">
+                            <div>
+                              <div className="flex justify-between items-start mb-2">
+                                <span className="text-[10px] font-black text-cyan-400 group-hover:text-cyan-300 uppercase tracking-wide">Chapter</span>
+                                <span className="text-[10px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-md font-bold">{chap.questions.length} Qs</span>
+                              </div>
+                              <h4 className="text-sm font-bold text-slate-200 group-hover:text-white mb-1 leading-snug">{chap.name}</h4>
+                              <p className="text-[11px] text-slate-500 line-clamp-2 leading-relaxed">{chap.description}</p>
+                            </div>
+                            <div className="mt-3 pt-3 border-t border-white/[0.05] flex items-center justify-between text-xs font-bold text-cyan-400 group-hover:text-cyan-300 group-hover:translate-x-1 transition">
+                              <span>Start Practice</span><span>→</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+
+              {/* ── Sidebar ── */}
+              <div className="lg:col-span-4 space-y-4">
+
+                {/* 🎯 MADE EASY Test Series Sidebar Card */}
+                <div
+                  className="p-5 sm:p-6 space-y-3.5 rounded-3xl cursor-pointer group transition hover:scale-[1.01] duration-200"
+                  style={{
+                    background: theme === "light"
+                      ? "linear-gradient(135deg, #fff1f2, #fdf2f8)"
+                      : "linear-gradient(135deg, #1c0012, #2e0a2f)",
+                    border: theme === "light" ? "1px solid rgba(244,63,94,0.3)" : "1px solid rgba(225,29,72,0.4)",
+                    boxShadow: theme === "light" ? "0 4px 18px rgba(225,29,72,0.06)" : "0 0 22px rgba(225,29,72,0.12)",
+                  }}
+                  onClick={() => setIsMadeEasyModalOpen(true)}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-black uppercase tracking-wider text-rose-500 bg-rose-500/15 px-3 py-1 rounded-full border border-rose-500/30">
+                      🎯 MADE EASY OTS 2027
+                    </span>
+                    <span className="text-xs font-bold text-emerald-500 flex items-center gap-1.5 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                      14 Tests Live
+                    </span>
+                  </div>
+                  <h4 className={`font-extrabold ${theme === "light" ? "text-slate-900" : "text-white"} text-base leading-snug`}>
+                    GATE 2027 CS &amp; IT Online Test Series
+                  </h4>
+                  <p className={`text-xs ${theme === "light" ? "text-slate-600" : "text-rose-100/70"} leading-relaxed`}>
+                    Topic Wise Tests &amp; Full Mocks ready with authentic SCQ / MSQ / NAT marking and CBT timer simulator.
+                  </p>
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex gap-2">
+                      <span className="text-xs bg-blue-500/15 border border-blue-500/30 text-blue-500 dark:text-blue-300 px-2 py-0.5 rounded-md font-bold">SCQ</span>
+                      <span className="text-xs bg-purple-500/15 border border-purple-500/30 text-purple-500 dark:text-purple-300 px-2 py-0.5 rounded-md font-bold">MSQ</span>
+                      <span className="text-xs bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-300 px-2 py-0.5 rounded-md font-bold">NAT</span>
+                    </div>
+                    <span className="text-sm font-black text-rose-500 dark:text-rose-300 group-hover:translate-x-1 transition flex items-center gap-1">
+                      Dashboard →
+                    </span>
+                  </div>
+                </div>
+
+                {/* GATE PYQ Banner */}
+                <div className="glass-card glass-card-amber p-5 space-y-3" style={{background: "rgba(30,15,0,0.6)", borderColor: "rgba(255,171,0,0.15)"}}>
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 bg-amber-500/15 px-2.5 py-1 rounded-full border border-amber-400/20">📜 Official GATE PYQs</span>
+                    <span className="text-xs font-bold text-amber-400">2015 – 2024</span>
+                  </div>
+                  <h4 className="font-extrabold text-white text-sm leading-snug">GATE CSE Official Year-Wise Papers</h4>
+                  <p className="text-[11px] text-amber-100/60 leading-relaxed">16 complete original GATE papers with step-by-step solutions. 1040+ authentic questions.</p>
+                  <button onClick={() => setIsGatePyqModalOpen(true)} className="w-full py-3 btn-3d-amber font-black text-xs rounded-xl cursor-pointer">
+                    Explore All Year Papers 🚀
+                  </button>
+                </div>
+
+                {/* Daily Challenge */}
+                {dailyChallengeQuestion && (
+                  <div className="glass-card glass-card-purple p-5 space-y-3" style={{background: "rgba(20,0,30,0.6)", borderColor: "rgba(213,0,249,0.15)"}}>
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-black uppercase tracking-wider text-purple-300 bg-purple-500/15 px-2.5 py-1 rounded-full border border-purple-400/20">⚡ Daily Challenge</span>
+                      <span className="text-xs font-bold text-amber-400">+20 XP</span>
+                    </div>
+                    <div className="text-xs font-semibold text-white leading-relaxed line-clamp-3">
+                      {renderTextWithMath(cleanQuestionText(dailyChallengeQuestion.text))}
+                    </div>
+                    <button onClick={() => launchCustomQuestionPool([dailyChallengeQuestion], "Daily Challenge Question")} className="w-full py-2.5 btn-3d-purple font-bold text-xs rounded-xl cursor-pointer">
+                      Solve Daily Question 🚀
+                    </button>
+                  </div>
+                )}
+
+                {/* Rank Estimator */}
+                <div className="glass-card p-5 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 text-xl flex items-center justify-center border border-amber-500/20">📊</div>
+                    <div>
+                      <h4 className="font-extrabold text-white text-sm">GATE Rank Predictor</h4>
+                      <p className="text-[11px] text-slate-500">Estimate your AIR from expected marks</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setIsRankEstimatorOpen(true)} className="w-full py-2.5 btn-3d-blue font-bold text-xs rounded-xl cursor-pointer">Open Rank Estimator →</button>
+                </div>
+
+                {/* AI Quiz */}
+                <div className="glass-card p-5 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-400 text-xl flex items-center justify-center border border-cyan-500/20">✨</div>
+                    <div>
+                      <h4 className="font-extrabold text-white text-sm">AI Quiz Generator</h4>
+                      <p className="text-[11px] text-slate-500">Generate custom quiz from any topic</p>
+                    </div>
+                  </div>
+                  <button onClick={() => setIsAIQuizGenModalOpen(true)} className="w-full py-2.5 btn-3d-purple font-bold text-xs rounded-xl cursor-pointer">Generate AI Quiz →</button>
+                </div>
+
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══════════════ SETTINGS SCREEN ═══════════════ */}
+      {currentScreen === "settings" && selectedSubject && selectedChapter && (
+        <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-8 flex flex-col justify-center">
+          <div className="glass-card p-6 sm:p-8 space-y-6">
+            {/* Header */}
+            <div className="pb-4 border-b border-white/[0.07]">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-cyan-400">{selectedExam.name}</span>
+                <span className="text-slate-600">•</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{selectedSubject.name}</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight">{selectedChapter.name}</h2>
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">{selectedChapter.description}</p>
+              <div className="mt-3 flex items-center gap-3">
+                <span className="text-xs bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-3 py-1 rounded-full font-bold">
+                  📚 {selectedChapter.questions.length} Questions Available
+                </span>
+              </div>
+            </div>
+
+            {/* Quiz Mode */}
+            <div>
+              <label className="block text-xs font-black text-slate-300 mb-2 uppercase tracking-wider">Quiz Mode</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(["practice", "test", "exam"] as const).map(m => (
+                  <button key={m} type="button" onClick={() => setQuizMode(m)} className={`py-3 rounded-xl text-xs font-bold capitalize transition cursor-pointer ${quizMode === m ? "btn-3d-blue" : "btn-3d-slate"}`}>
+                    {m === "practice" ? "🎯 Practice" : m === "test" ? "📝 Test" : "🏆 Exam"}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[10px] text-slate-500 mt-1.5">{quizMode === "practice" ? "Instant feedback after each answer" : quizMode === "test" ? "No feedback, review at end" : "Negative marking, timed, like real GATE"}</p>
+            </div>
+
+            {/* Difficulty */}
+            <div>
+              <label className="block text-xs font-black text-slate-300 mb-2 uppercase tracking-wider">Difficulty Level</label>
+              <div className="grid grid-cols-3 gap-2">
+                {(["easy", "medium", "hard"] as const).map(d => (
+                  <button key={d} type="button" onClick={() => setDifficulty(d)} className={`py-3 rounded-xl text-xs font-bold capitalize transition cursor-pointer ${difficulty === d ? d === "easy" ? "btn-3d-green" : d === "medium" ? "btn-3d-amber" : "btn-3d-purple" : "btn-3d-slate"}`}>
+                    {d === "easy" ? "🟢 Easy" : d === "medium" ? "🟡 Medium" : "🔴 Hard"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Question Count */}
+            <div>
+              <label className="block text-xs font-black text-slate-300 mb-2 uppercase tracking-wider">Number of Questions</label>
+              <div className="grid grid-cols-5 gap-2">
+                {[5, 10, 15, 20, 25].map(num => (
+                  <button key={num} type="button" onClick={() => setQuestionCount(num)} className={`py-3 rounded-xl text-xs font-bold transition cursor-pointer ${questionCount === num ? "btn-3d-blue" : "btn-3d-slate"}`}>
+                    {num}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Timer */}
+            <div>
+              <label className="block text-xs font-black text-slate-300 mb-2 uppercase tracking-wider">Timer Duration</label>
+              <select value={durationMinutes} onChange={e => setDurationMinutes(Number(e.target.value))} className="w-full bg-white/[0.04] border border-white/[0.09] rounded-xl px-4 py-3 text-sm text-slate-200 focus:outline-none focus:border-cyan-500/50">
+                <option value={5}>5 Minutes (Quick Sprint)</option>
+                <option value={10}>10 Minutes (Standard)</option>
+                <option value={15}>15 Minutes (Comprehensive)</option>
+                <option value={30}>30 Minutes (Exam Mode)</option>
+                <option value={60}>60 Minutes (Full Chapter Test)</option>
+                <option value={130}>130 Minutes (Fast Track Practice)</option>
+                <option value={180}>180 Minutes (GATE Official 3-Hour Exam)</option>
+              </select>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 pt-2">
+              <button type="button" onClick={() => setCurrentScreen("dashboard")} className="flex-1 py-3 btn-3d-slate font-bold text-xs rounded-xl cursor-pointer">← Back</button>
+              <button type="button" onClick={startQuiz} disabled={isPreparingQuiz} className="flex-1 py-3 btn-3d-green font-black text-sm rounded-xl flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50">
+                {isPreparingQuiz ? (<><div className="w-4 h-4 border-2 border-[#07090f] border-t-transparent rounded-full animate-spin"></div><span>Preparing...</span></>) : (<span>Start Quiz 🚀</span>)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════ QUIZ INTERFACE ═══════════════ */}
+      {currentScreen === "quiz" && currentQ && (
+        <div className="flex-1 max-w-6xl mx-auto w-full px-4 py-5">
+          {timeLeft > 0 && timeLeft < 60 && (
+            <div className="bg-rose-600/90 text-white font-bold text-xs text-center py-2 rounded-xl mb-3 animate-pulse">
+              ⚠️ Less than {timeLeft}s remaining — quiz will auto-submit!
+            </div>
+          )}
+
+          {/* Quiz Top Bar */}
+          <div className="flex items-center justify-between gap-3 mb-5">
+            <button onClick={() => { if (confirm("Quit session? Progress will be lost.")) setCurrentScreen("dashboard"); }} className="text-slate-500 hover:text-white font-bold text-xl cursor-pointer transition">✕</button>
+
+            {/* Paper / Exam Title Badge */}
+            {activeQuizTitle && (
+              <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-amber-500/10 border border-amber-500/25 rounded-xl text-xs font-black text-amber-300 shrink-0 shadow-sm">
+                <span>📜</span>
+                <span className="truncate max-w-[220px]">{activeQuizTitle}</span>
+              </div>
+            )}
+
+            {/* Progress Bar */}
+            <div className="flex-1 flex flex-col gap-1">
+              <div className="flex justify-between text-[10px] text-slate-500 font-bold">
+                <span>Question {currentQuestionIndex + 1} of {activeQuestions.length}</span>
+                <span>{Math.round(((currentQuestionIndex + 1) / activeQuestions.length) * 100)}%</span>
+              </div>
+              <div className="bg-white/[0.06] h-2.5 rounded-full overflow-hidden">
+                <div className="quiz-progress-fill h-full rounded-full" style={{ width: `${Math.round(((currentQuestionIndex + 1) / activeQuestions.length) * 100)}%` }} />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button onClick={handleToggleBookmarkCurrent} className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition cursor-pointer ${isCurrentQBookmarked ? "bg-amber-500 text-white border-amber-400" : "bg-white/[0.04] border-white/[0.09] text-slate-400 hover:text-white"}`}>
+                {isCurrentQBookmarked ? "★" : "☆"}
+              </button>
+              <button onClick={() => setIsAIExplainModalOpen(true)} className="px-3 py-1.5 rounded-full text-[11px] font-bold btn-3d-purple cursor-pointer">🤖 AI</button>
+              <div className={`px-3 py-1.5 rounded-full text-[11px] font-mono font-black border ${timeLeft > 0 && timeLeft <= 30 ? "bg-rose-950/80 border-rose-500/60 timer-danger" : timeLeft > 0 && timeLeft <= 120 ? "bg-amber-950/80 border-amber-500/60 timer-warning" : "bg-white/[0.04] border-white/[0.08] timer-normal"}`}>
+                ⏱ {formatTime(timeLeft)}
+              </div>
+            </div>
+          </div>
+
+          {/* CBT Advanced Controls Bar */}
+          <div className="flex items-center justify-between gap-2 p-2 px-3 mb-5 rounded-2xl bg-slate-900/90 border border-slate-800 text-xs overflow-x-auto scrollbar-none shadow-xl">
+            {/* Left Tools: Calculator, Rough Sheet, Mode Toggle */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsScientificCalcOpen(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold flex items-center gap-1 transition cursor-pointer border border-cyan-500/20"
+                title="Open GATE Virtual Scientific Calculator"
+              >
+                <span>🧮</span>
+                <span className="hidden sm:inline">Calculator</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsScratchpadOpen(true)}
+                className="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold flex items-center gap-1 transition cursor-pointer border border-amber-500/20"
+                title="Open Rough Sheet / Notes"
+              >
+                <span>📝</span>
+                <span className="hidden sm:inline">Rough Sheet</span>
+              </button>
+
+              {/* Mode Switcher */}
+              <button
+                type="button"
+                onClick={() => setQuizMode(prev => prev === "practice" ? "exam" : "practice")}
+                className={`px-2.5 py-1.5 rounded-xl font-bold flex items-center gap-1 transition cursor-pointer border ${
+                  quizMode === "practice"
+                    ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                    : "bg-blue-500/10 border-blue-500/30 text-blue-300"
+                }`}
+                title="Switch between Instant Practice Mode and Official Exam Mode"
+              >
+                <span>{quizMode === "practice" ? "💡 Practice Mode" : "🎯 Official Exam Mode"}</span>
+              </button>
+            </div>
+
+            {/* Middle: Per-Question Timer & Auto-Next Toggle */}
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Auto-Next Switch */}
+              <button
+                type="button"
+                onClick={() => setIsAutoNext(prev => !prev)}
+                className={`px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition cursor-pointer border ${
+                  isAutoNext
+                    ? "bg-amber-500 text-slate-950 border-amber-400 font-black shadow-md shadow-amber-500/20"
+                    : "bg-slate-800 border-slate-700 text-slate-400 hover:text-white"
+                }`}
+                title="Automatically advance to next question when option is chosen"
+              >
+                <span>⚡ Auto-Next:</span>
+                <span className={isAutoNext ? "font-black" : ""}>{isAutoNext ? "ON" : "OFF"}</span>
+              </button>
+
+              {/* Per-Question Live Stopwatch */}
+              <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 font-mono text-[11px] text-cyan-400 font-bold">
+                <span className="text-slate-500">⏳ This Q:</span>
+                <span>{Math.floor(currentQSeconds / 60).toString().padStart(2, "0")}:{(currentQSeconds % 60).toString().padStart(2, "0")}</span>
+              </div>
+            </div>
+
+            {/* Right Tools: Font Size, Sound, Shortcuts, Fullscreen */}
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Font Size Adjuster */}
+              <div className="flex items-center bg-slate-950 rounded-xl border border-slate-800 p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setQuestionFontSize(prev => prev === "xlarge" ? "large" : "normal")}
+                  className={`px-2 py-0.5 rounded-lg text-xs font-bold cursor-pointer ${questionFontSize === "normal" ? "text-cyan-400 font-black" : "text-slate-400 hover:text-white"}`}
+                  title="Standard text size"
+                >
+                  A
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQuestionFontSize(prev => prev === "normal" ? "large" : "xlarge")}
+                  className={`px-2 py-0.5 rounded-lg text-xs font-bold cursor-pointer ${questionFontSize !== "normal" ? "text-cyan-400 font-black" : "text-slate-400 hover:text-white"}`}
+                  title="Enlarge text size"
+                >
+                  A+
+                </button>
+              </div>
+
+              {/* Sound Toggle */}
+              <button
+                type="button"
+                onClick={() => setIsSoundEnabled(!isSoundEnabled)}
+                className={`p-1.5 rounded-xl border transition cursor-pointer text-xs ${
+                  isSoundEnabled ? "bg-slate-800 border-slate-700 text-emerald-400" : "bg-slate-950 border-slate-800 text-slate-500"
+                }`}
+                title={isSoundEnabled ? "Audio Chimes ON" : "Audio Chimes Muted"}
+              >
+                {isSoundEnabled ? "🔊" : "🔇"}
+              </button>
+
+              {/* Keyboard Shortcuts Dialog */}
+              <button
+                type="button"
+                onClick={() => setShowShortcutsModal(true)}
+                className="p-1.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-bold cursor-pointer transition hidden md:flex items-center gap-1"
+                title="Keyboard Shortcuts Guide"
+              >
+                <span>⌨️</span>
+              </button>
+
+              {/* Fullscreen */}
+              <button
+                type="button"
+                onClick={toggleFullscreen}
+                className="p-1.5 px-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white text-xs font-bold cursor-pointer transition"
+                title="Toggle CBT Fullscreen Mode"
+              >
+                {isFullscreen ? "🗗" : "⛶"}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Question Column */}
+            <div className="lg:col-span-8 flex flex-col">
+              <div className="glass-card p-3.5 sm:p-6 md:p-7 flex flex-col gap-3.5 sm:gap-5">
+                {/* Q meta */}
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    <span className="text-xs font-black text-white bg-white/[0.08] px-2.5 py-1 rounded-full">Q {currentQuestionIndex + 1}</span>
+                    {currentQ.marks && (
+                      <span className="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold">
+                        +{currentQ.marks} Marks {currentQ.negativeMarks ? `• -${currentQ.negativeMarks}` : "• 0 Neg"}
+                      </span>
+                    )}
+                    {currentQ.concept && (
+                      <span className="text-[10px] bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-0.5 rounded-full font-bold max-w-[200px] truncate">{currentQ.concept}</span>
+                    )}
+                    {currentQ.year && (
+                      <span className="text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full font-bold">GATE {currentQ.year}</span>
+                    )}
+                  </div>
+                  <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full border ${currentQ.difficulty === "easy" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" : currentQ.difficulty === "medium" ? "bg-amber-500/10 text-amber-400 border-amber-500/20" : "bg-rose-500/10 text-rose-400 border-rose-500/20"}`}>
+                    {currentQ.difficulty}
+                  </span>
+                </div>
+
+                {/* Question text — large, readable with dynamic zoom */}
+                <div className={`font-semibold text-white leading-[1.8] tracking-[0.01em] whitespace-pre-line break-words ${
+                  questionFontSize === "xlarge" ? "text-[18px] sm:text-[22px]" : questionFontSize === "large" ? "text-[17px] sm:text-[20px]" : "text-[15px] sm:text-[18px]"
+                }`}>
+                  {renderTextWithMath(cleanQuestionText(currentQ.text))}
+                </div>
+
+                {/* Diagram/image */}
+                {currentQ.imageUrl && (
+                  <div className="flex flex-col items-center justify-center my-1 sm:my-2 max-w-full">
+                    <div 
+                      onClick={() => {
+                        setZoomedImageUrl(currentQ.imageUrl!);
+                        setZoomedImageAlt(currentQ.imageAlt ?? "Question diagram");
+                      }}
+                      className="bg-white rounded-xl sm:rounded-2xl p-2 sm:p-3 border-2 border-cyan-500/30 shadow-lg shadow-cyan-950/20 max-w-full overflow-hidden flex flex-col items-center cursor-zoom-in group hover:border-cyan-400 transition"
+                      title="Tap / Click to view full image"
+                    >
+                      {currentQ.imageUrl.trim().startsWith("<svg") ? (
+                        <div className="w-full overflow-x-auto" dangerouslySetInnerHTML={{ __html: currentQ.imageUrl }} aria-label={currentQ.imageAlt ?? "Question diagram"} />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={currentQ.imageUrl} alt={currentQ.imageAlt ?? "Question diagram"} className="max-w-full max-h-48 sm:max-h-64 md:max-h-80 w-auto object-contain mx-auto rounded transition duration-200 group-hover:scale-[1.01]" />
+                      )}
+                      <span className="text-[10px] text-slate-500 font-medium mt-1.5 flex items-center gap-1 group-hover:text-cyan-600 transition">
+                        <span>🔍</span> Tap to enlarge diagram
+                      </span>
+                    </div>
+                    {currentQ.imageAlt && <p className="text-[10px] text-slate-400 text-center mt-1">{currentQ.imageAlt}</p>}
+                  </div>
+                )}
+
+                {/* Question Type Indicator */}
+                <div className="flex flex-wrap items-center justify-between gap-2 pb-1 border-b border-white/[0.04]">
+                  <div className="flex items-center gap-2">
+                    {isMSQQuestion(currentQ) ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        <span className="text-sm">☑</span> Multiple Select Question (MSQ) — Choose all correct options
+                      </span>
+                    ) : currentQ.questionType === "NAT" ? (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                        Numerical Answer Type (NAT)
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-white/[0.06] text-slate-300 border border-white/10">
+                        <span>◉</span> Single Choice Question (SCQ)
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Options OR NAT Input */}
+                {currentQ.questionType === "NAT" || currentQ.options.length === 0 ? (
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="p-4 sm:p-5 rounded-2xl bg-[#0e1628] border border-cyan-500/30 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black uppercase tracking-wider text-cyan-300 flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                          Enter your numerical answer:
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-semibold">
+                          {currentQ.marks ? `+${currentQ.marks} Marks` : "+2 Marks"} • 0 Negative
+                        </span>
+                      </div>
+
+                      {/* Display / Input Field */}
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            inputMode="decimal"
+                            value={currentAns?.natValue ?? ""}
+                            onChange={(e) => handleNatChange(e.target.value)}
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            placeholder="e.g. 10.75, 7, 34"
+                            className="w-full bg-[#070b14] border-2 border-cyan-500/50 focus:border-cyan-400 rounded-xl px-4 py-2.5 sm:py-3 text-base sm:text-lg font-mono font-bold text-white placeholder-slate-600 outline-none transition shadow-inner"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handleNatChange("")}
+                          disabled={quizMode === "practice" && isAnswerChecked}
+                          className="px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white border border-white/10 text-xs font-bold transition cursor-pointer"
+                        >
+                          Clear
+                        </button>
+                      </div>
+
+                      {/* GATE CBT On-screen Virtual Keypad */}
+                      <div>
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
+                          <span>Virtual Keypad (CBT Calculator Style):</span>
+                          <span className="text-[10px] text-slate-500 font-normal">GATE On-Screen Layout</span>
+                        </div>
+                        <div className="grid grid-cols-4 gap-1.5 sm:gap-2 max-w-xs sm:max-w-sm">
+                          {/* Row 1 */}
+                          {["7", "8", "9"].map((keyChar) => (
+                            <button
+                              key={keyChar}
+                              type="button"
+                              disabled={quizMode === "practice" && isAnswerChecked}
+                              onClick={() => {
+                                const prev = currentAns?.natValue ?? "";
+                                handleNatChange(prev + keyChar);
+                              }}
+                              className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            >
+                              {keyChar}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              handleNatChange(prev.slice(0, -1));
+                            }}
+                            className="py-2.5 rounded-xl bg-rose-950/60 hover:bg-rose-600 border border-rose-800/80 hover:border-rose-400 text-rose-300 hover:text-white font-mono font-black text-xs active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            title="Backspace"
+                          >
+                            ⌫ Back
+                          </button>
+
+                          {/* Row 2 */}
+                          {["4", "5", "6"].map((keyChar) => (
+                            <button
+                              key={keyChar}
+                              type="button"
+                              disabled={quizMode === "practice" && isAnswerChecked}
+                              onClick={() => {
+                                const prev = currentAns?.natValue ?? "";
+                                handleNatChange(prev + keyChar);
+                              }}
+                              className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            >
+                              {keyChar}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => handleNatChange("")}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-amber-600 border border-slate-700/80 hover:border-amber-400 text-amber-300 hover:text-white font-mono font-black text-xs active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            title="Clear"
+                          >
+                            Clear
+                          </button>
+
+                          {/* Row 3 */}
+                          {["1", "2", "3"].map((keyChar) => (
+                            <button
+                              key={keyChar}
+                              type="button"
+                              disabled={quizMode === "practice" && isAnswerChecked}
+                              onClick={() => {
+                                const prev = currentAns?.natValue ?? "";
+                                handleNatChange(prev + keyChar);
+                              }}
+                              className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            >
+                              {keyChar}
+                            </button>
+                          ))}
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              if (prev.startsWith("-")) {
+                                handleNatChange(prev.slice(1));
+                              } else {
+                                handleNatChange("-" + prev);
+                              }
+                            }}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                            title="Toggle sign"
+                          >
+                            ±
+                          </button>
+
+                          {/* Row 4 */}
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              handleNatChange(prev + "0");
+                            }}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                          >
+                            0
+                          </button>
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              if (prev.includes(".")) return;
+                              handleNatChange(prev + ".");
+                            }}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                          >
+                            .
+                          </button>
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              if (prev === "" || prev === "-") return;
+                              handleNatChange(prev + "00");
+                            }}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                          >
+                            00
+                          </button>
+                          <button
+                            type="button"
+                            disabled={quizMode === "practice" && isAnswerChecked}
+                            onClick={() => {
+                              const prev = currentAns?.natValue ?? "";
+                              if (prev.includes("-")) return;
+                              handleNatChange("-" + prev);
+                            }}
+                            className="py-2.5 rounded-xl bg-slate-800/90 hover:bg-cyan-600 border border-slate-700/80 hover:border-cyan-400 text-white font-mono font-black text-sm active:scale-95 transition cursor-pointer disabled:opacity-40"
+                          >
+                            -
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Revealed answer in practice mode */}
+                      {quizMode === "practice" && isAnswerChecked && (
+                        <div className="pt-3 border-t border-white/10 text-xs flex items-center justify-between">
+                          <span className="text-slate-400">
+                            Your Answer: <strong className={isCorrect ? "text-emerald-400" : "text-rose-400"}>{currentAns?.natValue || "None"}</strong>
+                          </span>
+                          <span className="text-emerald-300 font-bold">
+                            Correct Answer: {currentQ.natAnswer !== undefined ? String(currentQ.natAnswer) : (currentQ.options && currentQ.options[currentQ.correctAnswerIndex] ? currentQ.options[currentQ.correctAnswerIndex] : "Refer Explanation")}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {currentQ.options.map((opt, idx) => {
+                      const userSelectedList = getSelectedIndices(currentAns);
+                      const isSelected = userSelectedList.includes(idx);
+                      const isRevealed = quizMode === "practice" && isAnswerChecked;
+                      const correctList = (currentQ.correctAnswerIndices && currentQ.correctAnswerIndices.length > 0)
+                        ? currentQ.correctAnswerIndices
+                        : [currentQ.correctAnswerIndex];
+                      const isOptCorrect = correctList.includes(idx);
+                      const isOptWrong = isSelected && !isOptCorrect && isRevealed;
+                      const isOptMissed = !isSelected && isOptCorrect && isRevealed;
+
+                      const isMSQ = isMSQQuestion(currentQ);
+
+                      let optClass = "option-default";
+                      let badgeBg = isMSQ ? "rounded-lg" : "rounded-xl";
+                      let badgeContent: React.ReactNode = String.fromCharCode(65 + idx);
+
+                      if (isRevealed) {
+                        if (isOptCorrect && isSelected) {
+                          optClass = "option-correct";
+                          badgeBg += " bg-emerald-500 text-white border-emerald-400 font-bold";
+                          badgeContent = "✓";
+                        } else if (isOptWrong) {
+                          optClass = "option-wrong";
+                          badgeBg += " bg-rose-500 text-white border-rose-400 font-bold";
+                          badgeContent = "✗";
+                        } else if (isOptMissed) {
+                          optClass = "border-2 border-emerald-500/60 bg-emerald-950/40 text-emerald-300";
+                          badgeBg += " bg-emerald-700/60 text-white border-emerald-500 font-bold";
+                          badgeContent = "✓";
+                        } else {
+                          optClass = "option-default opacity-40";
+                          badgeBg += " bg-white/[0.05] text-slate-400 border-white/[0.08]";
+                        }
+                      } else if (isSelected) {
+                        optClass = "option-selected";
+                        badgeBg += " bg-white text-blue-700 border-white font-bold";
+                        badgeContent = isMSQ ? "✓" : String.fromCharCode(65 + idx);
+                      } else {
+                        badgeBg += " bg-white/[0.07] text-slate-300 border-white/[0.1]";
+                        badgeContent = String.fromCharCode(65 + idx);
+                      }
+
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => handleSelectOption(idx)}
+                          disabled={isRevealed}
+                          className={`w-full p-3 sm:p-4 rounded-xl sm:rounded-2xl text-left flex items-start gap-3 sm:gap-4 cursor-pointer disabled:cursor-default group ${optClass}`}
+                        >
+                          <div className={`w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-xs font-black border shrink-0 transition ${badgeBg}`}>
+                            {badgeContent}
+                          </div>
+                          <span className="flex-1 text-sm sm:text-base leading-relaxed font-medium break-words">
+                            {renderTextWithMath(opt)}
+                          </span>
+                          <span className="hidden group-hover:inline text-[10px] text-slate-500 font-mono mt-1 font-bold">
+                            [{idx + 1}]
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Explanation panel (practice mode) */}
+                {quizMode === "practice" && isAnswerChecked && (
+                  <div className="rounded-2xl border border-slate-700/60 overflow-hidden animate-slide-up shadow-xl shadow-black/40">
+                    {/* Verdict header */}
+                    <div className={`flex items-center gap-3 px-4 py-3 ${isCorrect ? "bg-emerald-600/20 border-b border-emerald-500/30" : "bg-rose-600/20 border-b border-rose-500/30"}`}>
+                      <span className="text-2xl shrink-0">{isCorrect ? "🎉" : "❌"}</span>
+                      <div className="flex-1">
+                        <div className={`font-extrabold text-sm ${isCorrect ? "text-emerald-300" : "text-rose-300"}`}>
+                          {isCorrect ? "Correct! Well done! (+10 XP)" : "Wrong Answer — Study the explanation below"}
+                        </div>
+                        {!isCorrect && currentQ.options && (
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="text-[11px] text-slate-400">Correct Answer:</span>
+                            <span className="text-[11px] font-bold text-emerald-300 bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 rounded-lg">
+                              {(() => {
+                                const correctIdxList = (currentQ.correctAnswerIndices && currentQ.correctAnswerIndices.length > 0)
+                                  ? currentQ.correctAnswerIndices
+                                  : [currentQ.correctAnswerIndex];
+                                return correctIdxList.map(ci => {
+                                  const label = String.fromCharCode(65 + ci);
+                                  const text = currentQ.options?.[ci] ?? "";
+                                  return `${label}) ${text.length > 60 ? text.slice(0, 60) + "…" : text}`;
+                                }).join("  |  ");
+                              })()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Explanation body */}
+                    {currentQ.explanation && (
+                      <div className="bg-slate-900/80 px-4 py-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-base">💡</span>
+                          <span className="text-xs font-extrabold text-white tracking-wide uppercase">Detailed Explanation</span>
+                          {currentQ.concept && (
+                            <span className="ml-auto text-[10px] font-bold text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full">
+                              {currentQ.concept}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs leading-relaxed">
+                          {renderFormattedSolution(currentQ.explanation)}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Bottom controls */}
+                <div className="pt-3 sm:pt-4 border-t border-white/[0.06] flex flex-wrap justify-between items-center gap-2.5">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button onClick={toggleMarkForReview} className={`px-3 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ${currentAns?.isMarkedForReview ? "bg-amber-600 text-white border-amber-500" : "bg-white/[0.04] text-slate-400 border-white/[0.08] hover:bg-white/[0.08]"}`}>
+                      {currentAns?.isMarkedForReview ? "★ Marked" : "☆ Mark"}
+                    </button>
+                    <button onClick={clearResponse} className="px-3 py-2 rounded-xl text-xs font-bold bg-white/[0.04] hover:bg-white/[0.08] text-slate-400 border border-white/[0.08] cursor-pointer">Clear</button>
+                    {/* Mobile palette quick jump button */}
+                    <button
+                      type="button"
+                      onClick={() => setIsMobilePaletteOpen(true)}
+                      className="lg:hidden px-3 py-2 rounded-xl text-xs font-bold bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/30 transition cursor-pointer flex items-center gap-1.5"
+                    >
+                      <span>📋</span>
+                      <span>Palette</span>
+                    </button>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => { if (currentQuestionIndex > 0) { setCurrentQuestionIndex(prev => prev - 1); setIsAnswerChecked(false); } }} disabled={currentQuestionIndex === 0} className="px-3.5 sm:px-4 py-2 sm:py-2.5 btn-3d-slate text-xs font-bold rounded-xl disabled:opacity-30 cursor-pointer">← Prev</button>
+                    <button
+                      onClick={handleCheckOrNext}
+                      disabled={isQuestionSkipped(currentAns, currentQ)}
+                      className={`px-5 sm:px-6 py-2 sm:py-2.5 text-xs font-black rounded-xl cursor-pointer disabled:opacity-40 ${quizMode === "practice" && !isAnswerChecked ? "btn-3d-green" : "btn-3d-blue"}`}
+                    >
+                      {quizMode === "practice" && !isAnswerChecked ? "CHECK ✓" : currentQuestionIndex < activeQuestions.length - 1 ? "NEXT →" : "FINISH 🎉"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation Sidebar */}
+            <div className="lg:col-span-4 space-y-3">
+              <QuestionNavigationGrid questions={activeQuestions} userAnswers={userAnswers} correctAnswers={correctAnswersMap} currentIndex={currentQuestionIndex} isSubmitted={false} quizMode={quizMode} onJumpTo={idx => { setCurrentQuestionIndex(idx); setIsAnswerChecked(false); }} />
+              <button onClick={() => handleQuizSubmit(false)} className="w-full py-3 btn-3d-green font-black text-xs rounded-xl cursor-pointer">Submit Quiz ✓</button>
+            </div>
+          </div>
+
+          {/* Mobile Question Navigation Palette Modal */}
+          {isMobilePaletteOpen && (
+            <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-3 animate-fade-in lg:hidden">
+              <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-lg p-4 space-y-4 shadow-2xl max-h-[85vh] flex flex-col overflow-hidden">
+                <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">📋</span>
+                    <h3 className="text-xs font-black text-white uppercase tracking-wider">Question Navigation Palette</h3>
+                  </div>
+                  <button 
+                    onClick={() => setIsMobilePaletteOpen(false)}
+                    className="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  <QuestionNavigationGrid 
+                    questions={activeQuestions} 
+                    userAnswers={userAnswers} 
+                    correctAnswers={correctAnswersMap} 
+                    currentIndex={currentQuestionIndex} 
+                    isSubmitted={false} 
+                    quizMode={quizMode} 
+                    onJumpTo={idx => { 
+                      setCurrentQuestionIndex(idx); 
+                      setIsAnswerChecked(false); 
+                      setIsMobilePaletteOpen(false); 
+                    }} 
+                  />
+                </div>
+                <button 
+                  onClick={() => { setIsMobilePaletteOpen(false); handleQuizSubmit(false); }} 
+                  className="w-full py-2.5 btn-3d-green font-black text-xs rounded-xl cursor-pointer"
+                >
+                  Submit Quiz ✓
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══════════════ RESULT SCREEN ═══════════════ */}
+      {currentScreen === "result" && (
+        <div className="flex-1 max-w-3xl mx-auto w-full px-4 py-8">
+          {/* Quick Return to Dashboard Top Bar */}
+          <div className="flex items-center justify-between mb-4 bg-slate-900/90 border border-slate-800 rounded-2xl px-5 py-3.5 backdrop-blur-md shadow-xl sticky top-3 z-30">
+            <div className="flex items-center gap-2.5">
+              <span className="text-xl">🏆</span>
+              <div>
+                <h3 className="text-xs font-black text-white uppercase tracking-wider">Exam Results Overview</h3>
+                <p className="text-[10px] text-slate-400">{activeQuestions.length} Questions Attempted · Score: {Number.isInteger(score) ? score : score.toFixed(2)} pts</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setCurrentScreen("dashboard")}
+              className="px-5 py-2.5 btn-3d-green text-xs font-black rounded-xl cursor-pointer flex items-center gap-2 shadow-lg hover:scale-105 transition"
+            >
+              <span>🏠</span>
+              <span>Back to Dashboard</span>
+            </button>
+          </div>
+
+          <div className="glass-card p-6 sm:p-10 space-y-8 text-center">
+            {/* Score Circle */}
+            <div className="flex flex-col items-center gap-3">
+              {(() => {
+                const pct = activeQuestions.length > 0 ? Math.round((correctCount / activeQuestions.length) * 100) : 0;
+                const r = 54, circ = 2 * Math.PI * r;
+                const offset = circ - (pct / 100) * circ;
+                const emoji = pct >= 80 ? "🏆" : pct >= 60 ? "🎯" : pct >= 40 ? "📚" : "💪";
+                const color = pct >= 80 ? "#00e676" : pct >= 60 ? "#ffab00" : pct >= 40 ? "#00b0ff" : "#ff5252";
+                return (
+                  <div className="relative w-40 h-40">
+                    <svg width="160" height="160" viewBox="0 0 160 160">
+                      <circle cx="80" cy="80" r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="12" />
+                      <circle cx="80" cy="80" r={r} fill="none" stroke={color} strokeWidth="12" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset} transform="rotate(-90 80 80)" className="score-ring" />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <span className="text-3xl">{emoji}</span>
+                      <span className="text-2xl font-black" style={{color}}>{pct}%</span>
+                    </div>
+                  </div>
+                );
+              })()}
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400 bg-cyan-500/10 px-3.5 py-1 rounded-full border border-cyan-500/20">Session Complete</span>
+                <h2 className="text-2xl font-black text-white mt-2">
+                  {activeQuestions.length > 0 && Math.round((correctCount / activeQuestions.length) * 100) >= 80 ? "Outstanding! 🚀" : Math.round((correctCount / activeQuestions.length) * 100) >= 60 ? "Good Work! 🎯" : "Keep Practicing! 💪"}
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">{selectedExam?.name} • {selectedSubject?.name}{selectedChapter ? ` • ${selectedChapter.name}` : ""}</p>
+              </div>
+            </div>
+
+            {/* Retry banner */}
+            {isRetrySession && firstAttemptAccuracy !== undefined && (
+              <div className="glass-card p-4 text-xs font-bold flex justify-between items-center" style={{borderColor: "rgba(0,176,255,0.2)"}}>
+                <span className="text-slate-400">First Attempt: <span className="text-white">{firstAttemptAccuracy}%</span></span>
+                <span className="text-cyan-400 text-sm">Retry: {Math.round((correctCount / activeQuestions.length) * 100)}% 🚀</span>
+              </div>
+            )}
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {[
+                { label: "✅ Correct", value: `${correctCount}`, sub: `out of ${activeQuestions.length}`, color: "#00e676", bg: "bg-emerald-500/[0.07]", border: "border-emerald-500/20" },
+                { label: "❌ Incorrect", value: `${incorrectCount}`, sub: `out of ${activeQuestions.length}`, color: "#ff5252", bg: "bg-rose-500/[0.07]", border: "border-rose-500/20" },
+                { label: "⏭ Skipped", value: `${skippedCount}`, sub: `not attempted`, color: "#90a4ae", bg: "bg-slate-500/[0.07]", border: "border-slate-500/20" },
+                { label: "🎯 Accuracy", value: `${activeQuestions.length > 0 ? Math.round((correctCount / activeQuestions.length) * 100) : 0}%`, sub: `overall`, color: "#00b0ff", bg: "bg-cyan-500/[0.07]", border: "border-cyan-500/20" },
+                { label: "⚡ XP Earned", value: `+${Number.isInteger(earnedXP) ? earnedXP : earnedXP.toFixed(2)}`, sub: `experience points`, color: "#00e676", bg: "bg-emerald-500/[0.07]", border: "border-emerald-500/20" },
+                { label: "⏱ Time Taken", value: formatTime(timeTakenSeconds), sub: `total duration`, color: "#ffab00", bg: "bg-amber-500/[0.07]", border: "border-amber-500/20" },
+              ].map((s, i) => (
+                <div key={i} className={`rounded-2xl p-4 border text-center ${s.bg} ${s.border}`}>
+                  <div className="text-[10px] font-bold text-slate-400 mb-1">{s.label}</div>
+                  <div className="text-xl font-black" style={{color: s.color}}>{s.value}</div>
+                  <div className="text-[10px] text-slate-500 mt-0.5">{s.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-wrap gap-3 justify-center">
+              <button onClick={() => setCurrentScreen("dashboard")} className="px-6 py-3 btn-3d-green font-black text-xs rounded-xl cursor-pointer flex items-center gap-2 shadow-md">
+                🏠 Back to Dashboard
+              </button>
+              <button onClick={() => setIsResultReviewModalOpen(true)} className="px-6 py-3 btn-3d-blue font-bold text-xs rounded-xl cursor-pointer flex items-center gap-2">📋 Full Question Review</button>
+              {incorrectCount > 0 && (
+                <button onClick={retryIncorrectQuestions} className="px-6 py-3 btn-3d-purple font-bold text-xs rounded-xl cursor-pointer">🔁 Retry {incorrectCount} Incorrect</button>
+              )}
+              {activeQuestions.length > 0 && (
+                <button onClick={() => trySimilarQuestion(activeQuestions[0])} className="px-6 py-3 btn-3d-slate font-bold text-xs rounded-xl cursor-pointer">🔄 Try Similar</button>
+              )}
+            </div>
+
+            {/* Certificate */}
+            {certificateId && (
+              <div className="glass-card p-6 text-left" style={{borderColor: "rgba(0,230,118,0.2)"}}>
+                <div className="flex justify-between items-start mb-4 border-b border-white/[0.06] pb-3">
+                  <div>
+                    <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest">ExamiQ Verified Certificate</span>
+                    <h3 className="text-lg font-bold text-white mt-1">Certificate of Completion</h3>
+                  </div>
+                  <div className="text-xs font-mono font-bold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 px-3 py-1 rounded-full">ID: {certificateId}</div>
+                </div>
+                <div className="text-xs text-slate-300 space-y-1">
+                  <div><span className="text-slate-500">Candidate:</span> <strong className="text-white">{userName}</strong></div>
+                  <div><span className="text-slate-500">Test:</span> {selectedExam.name} - {selectedSubject?.name}</div>
+                  <div><span className="text-slate-500">Status:</span> <span className="text-cyan-400 font-bold">✓ Digitally Authenticated</span></div>
+                </div>
+              </div>
+            )}
+
+            {/* Detailed Solution Review */}
+            <div className="text-left space-y-3">
+              <h3 className="text-sm font-bold text-slate-300 flex items-center gap-2">
+                <span className="w-1 h-4 rounded-full bg-cyan-400 inline-block" />
+                Detailed Solutions &amp; Step-by-Step Breakdown
+              </h3>
+              {activeQuestions.map((q, idx) => {
+                const ans = userAnswers[q.id];
+                const isQCorrect = isQuestionAnswerCorrect(q, ans);
+                const isSkipped = isQuestionSkipped(ans, q);
+                const userSelected = getSelectedIndices(ans);
+                const correctList = (q.correctAnswerIndices && q.correctAnswerIndices.length > 0)
+                  ? q.correctAnswerIndices
+                  : [q.correctAnswerIndex];
+
+                const userText = q.questionType === "NAT"
+                  ? (ans?.natValue ? ans.natValue : "Not Answered")
+                  : userSelected.map(i => `${String.fromCharCode(65 + i)}: ${q.options[i]}`).join(" | ");
+                const correctText = q.questionType === "NAT"
+                  ? (q.natAnswer !== undefined ? String(q.natAnswer) : (q.options && q.options[q.correctAnswerIndex] ? q.options[q.correctAnswerIndex] : "Refer solution"))
+                  : correctList.map(i => `${String.fromCharCode(65 + i)}: ${q.options[i]}`).join(" | ");
+
+                return (
+                  <div key={q.id} className={`p-5 rounded-2xl border text-xs ${isSkipped ? "bg-white/[0.02] border-white/[0.07]" : isQCorrect ? "bg-emerald-950/20 border-emerald-500/20" : "bg-rose-950/20 border-rose-500/20"}`}>
+                    <div className="flex justify-between items-start mb-3 gap-2">
+                      <div className="flex items-start gap-2">
+                        <span className={`w-6 h-6 rounded-full text-[10px] font-black flex items-center justify-center shrink-0 mt-0.5 ${isSkipped ? "bg-white/10 text-slate-400" : isQCorrect ? "bg-emerald-500/20 text-emerald-400" : "bg-rose-500/20 text-rose-400"}`}>{isSkipped ? "–" : isQCorrect ? "✓" : "✗"}</span>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            {isMSQQuestion(q) && (
+                              <span className="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded font-black border border-amber-500/30">MSQ</span>
+                            )}
+                            {q.concept && <span className="text-[10px] text-slate-400 font-medium">{q.concept}</span>}
+                          </div>
+                          <div className="font-semibold text-slate-200 text-sm leading-relaxed">{cleanQuestionText(q.text)}</div>
+                        </div>
+                      </div>
+                      <button onClick={() => trySimilarQuestion(q)} className="text-[11px] text-cyan-400 hover:underline font-bold whitespace-nowrap shrink-0">Try Similar →</button>
+                    </div>
+                    <div className="ml-8">
+                      <div className="text-[11px] text-slate-400 mb-2 flex flex-col sm:flex-row gap-2">
+                        {!isSkipped && !isQCorrect && (
+                          <span>Your answer: <strong className="text-rose-400">{userText || "None"}</strong></span>
+                        )}
+                        {!isSkipped && isQCorrect && (
+                          <span>Your answer: <strong className="text-emerald-400">{userText}</strong></span>
+                        )}
+                        <span>Correct: <strong className="text-emerald-400">{correctText}</strong></span>
+                      </div>
+                      <div className="p-3 bg-white/[0.03] rounded-xl border border-white/[0.06]">
+                        {renderFormattedSolution(q.explanation)}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <button onClick={() => setCurrentScreen("dashboard")} className="w-full py-4 btn-3d-green font-black text-sm rounded-2xl cursor-pointer">Back to Dashboard 🚀</button>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════ FOOTER ═══════════════ */}
+      <footer className="py-4 border-t border-white/[0.04] text-center text-[11px] text-slate-600">
+        ExamiQ Interactive Quiz Platform © 2026 · <span className="gradient-text font-bold">Empowering Students Everywhere</span>
+      </footer>
+
+      {/* ═══════════════ MODALS ═══════════════ */}
+      <MistakesNotebookModal isOpen={isMistakesModalOpen} onClose={() => setIsMistakesModalOpen(false)} onStartMistakesQuiz={questions => launchCustomQuestionPool(questions, "Mistakes Notebook Practice")} />
+      <BookmarksModal isOpen={isBookmarksModalOpen} onClose={() => setIsBookmarksModalOpen(false)} onStartBookmarkQuiz={questions => launchCustomQuestionPool(questions, "Bookmarked Questions Practice")} />
+      <AIExplainModal isOpen={isAIExplainModalOpen} onClose={() => setIsAIExplainModalOpen(false)} question={activeQuestions[currentQuestionIndex] || null} userSelectedIndex={userAnswers[activeQuestions[currentQuestionIndex]?.id]?.selectedOptionIndex ?? null} examName={selectedExam?.name} subjectName={selectedSubject?.name} chapterName={selectedChapter?.name} />
+      <AIQuizGeneratorModal isOpen={isAIQuizGenModalOpen} onClose={() => setIsAIQuizGenModalOpen(false)} onStartGeneratedQuiz={(questions, title) => launchCustomQuestionPool(questions, title)} />
+      <GateRankEstimatorModal isOpen={isRankEstimatorOpen} onClose={() => setIsRankEstimatorOpen(false)} />
+      <QuestionSearchModal isOpen={isQuestionSearchOpen} onClose={() => setIsQuestionSearchOpen(false)} onSelectQuestion={(questions, startIndex, subjectName) => launchCustomQuestionPool(questions, `Browse: ${subjectName}`, undefined, startIndex)} />
+      <GatePyqMockModal isOpen={isGatePyqModalOpen} onClose={() => setIsGatePyqModalOpen(false)} onStartPaper={(questions, paperTitle, durationMinutes, initialIndex) => launchCustomQuestionPool(questions, paperTitle, durationMinutes, initialIndex)} />
+      <ScientificCalculatorModal isOpen={isScientificCalcOpen} onClose={() => setIsScientificCalcOpen(false)} />
+      <ScratchpadModal isOpen={isScratchpadOpen} onClose={() => setIsScratchpadOpen(false)} />
+      <HighlightedTopicsModal isOpen={isHighlightedTopicsOpen && currentScreen === "dashboard"} onClose={() => setIsHighlightedTopicsOpen(false)} onStartTopic={(questions, title) => { setIsHighlightedTopicsOpen(false); launchCustomQuestionPool(questions, title); }} />
+      <MadeEasyTestSeriesModal
+        isOpen={isMadeEasyModalOpen}
+        onClose={() => setIsMadeEasyModalOpen(false)}
+        gateSubjects={
+          (EXAMS_DATA.find(e => e.id === "gate")?.branches?.find(b => b.id === "cs")?.subjects) || []
+        }
+        onStartTest={(questions, title, mode, durationMinutes) => {
+          setQuizMode(mode);
+          launchCustomQuestionPool(questions, title, durationMinutes);
+        }}
+      />
+
+      {/* Keyboard Shortcuts Guide Modal */}
+      {showShortcutsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-[#0f172a] border border-slate-700 rounded-3xl max-w-sm w-full p-5 text-slate-100 shadow-2xl relative">
+            <div className="flex justify-between items-center border-b border-slate-800 pb-3 mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">⌨️</span>
+                <h3 className="font-extrabold text-white text-sm">CBT Keyboard Shortcuts</h3>
+              </div>
+              <button onClick={() => setShowShortcutsModal(false)} className="w-7 h-7 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition cursor-pointer text-xs">✕</button>
+            </div>
+            <div className="space-y-2 text-xs">
+              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-300">Select Options A, B, C, D</span>
+                <span className="font-mono bg-slate-800 px-2 py-0.5 rounded text-cyan-300 font-bold">1, 2, 3, 4</span>
+              </div>
+              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-300">Check / Next Question</span>
+                <span className="font-mono bg-slate-800 px-2 py-0.5 rounded text-cyan-300 font-bold">Enter / →</span>
+              </div>
+              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-300">Previous Question</span>
+                <span className="font-mono bg-slate-800 px-2 py-0.5 rounded text-cyan-300 font-bold">←</span>
+              </div>
+              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-900 border border-slate-800">
+                <span className="text-slate-300">Mark for Review</span>
+                <span className="font-mono bg-slate-800 px-2 py-0.5 rounded text-cyan-300 font-bold">M</span>
+              </div>
+            </div>
+            <div className="mt-4 pt-3 border-t border-slate-800 text-center">
+              <button onClick={() => setShowShortcutsModal(false)} className="w-full py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl cursor-pointer">Got It 👍</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isResultReviewModalOpen && (
+        <ResultReviewModal questions={activeQuestions} userAnswers={userAnswers} onClose={() => setIsResultReviewModalOpen(false)} />
+      )}
+
+      {/* ═══════════════ IMAGE LIGHTBOX ZOOM MODAL ═══════════════ */}
+      {zoomedImageUrl && (
+        <div 
+          onClick={() => setZoomedImageUrl(null)}
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-6 animate-fade-in cursor-zoom-out"
+        >
+          <div className="max-w-4xl w-full flex flex-col items-center gap-3" onClick={e => e.stopPropagation()}>
+            <div className="w-full flex items-center justify-between text-white text-xs px-2">
+              <span className="font-bold text-slate-300 truncate">{zoomedImageAlt || "Question Diagram / Image"}</span>
+              <button
+                onClick={() => setZoomedImageUrl(null)}
+                className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold transition flex items-center gap-1 cursor-pointer"
+              >
+                <span>✕</span> Close
+              </button>
+            </div>
+            <div className="bg-white rounded-2xl p-3 sm:p-4 border-2 border-cyan-400/60 shadow-2xl max-w-full max-h-[82vh] overflow-auto flex items-center justify-center">
+              {zoomedImageUrl.trim().startsWith("<svg") ? (
+                <div className="w-full" dangerouslySetInnerHTML={{ __html: zoomedImageUrl }} />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={zoomedImageUrl} alt={zoomedImageAlt || "Enlarged diagram"} className="max-w-full max-h-[75vh] w-auto h-auto object-contain select-none" />
+              )}
+            </div>
+            <span className="text-[11px] text-slate-400">Click anywhere outside or ✕ button to close</span>
+          </div>
+        </div>
+      )}
+    </main>
+  );
+}

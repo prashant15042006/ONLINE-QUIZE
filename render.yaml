@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: examiq-quiz-app
+    env: node
+    buildCommand: npm install && npx next build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.0.0
