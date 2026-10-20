@@ -23,6 +23,7 @@ import { MADE_EASY_COA_TWT6_QUESTIONS } from "../data/madeEasyCOATest6";
 import { MADE_EASY_EM_TWT9_QUESTIONS } from "../data/madeEasyEMTest9";
 import { MADE_EASY_ALGO_SWT_QUESTIONS } from "../data/madeEasyAlgoSWT";
 import { MADE_EASY_COA_SWT_QUESTIONS } from "../data/madeEasyCOASWT";
+import { MADE_EASY_FULL_SYLLABUS_TEST_1_BASIC_QUESTIONS } from "../data/madeEasyFullSyllabusTest1";
 
 interface Props {
   isOpen: boolean;
@@ -185,6 +186,37 @@ export default function MadeEasyTestSeriesModal({
       ],
       chapterId: "me-cs-demo-test",
       questions: MADE_EASY_DEMO_TEST_QUESTIONS,
+    },
+    {
+      id: "me-cs-fst-1-basic",
+      testNumber: 2,
+      badge: "Basic Mock",
+      title: "Full Syllabus Test - 1 (Basic Level)",
+      subjectKey: "mock",
+      subjectName: "Full Mock",
+      subjectIcon: "📝",
+      type: "Full Syllabus Mock",
+      totalQuestions: MADE_EASY_FULL_SYLLABUS_TEST_1_BASIC_QUESTIONS.length,
+      totalMarks: 100,
+      durationMinutes: 180,
+      scqCount: 33,
+      msqCount: 13,
+      natCount: 19,
+      topics: [
+        "General Aptitude (Verbal & Numerical Ability)",
+        "Digital Logic (Boolean Algebra, POS/SOP, Combinational Circuits)",
+        "Computer Organization (Cache, Instructions, DMA, Pipelining)",
+        "Operating Systems (CPU Scheduling, Paging, Memory Management, Semaphores)",
+        "Computer Networks (Routing, Addressing, Fragmentation, Data Link)",
+        "Database Management Systems (Relational Algebra, Normalization, Concurrency)",
+        "Theory of Computation (DFA, Regular Languages, CFLs, Decidability)",
+        "Compiler Design (Parsers, LR(1), Activation Records)",
+        "Data Structures & Algorithms (Trees, Graphs, MST, Dynamic Programming)",
+        "Discrete Mathematics (Graph Theory, Logic, Probability, Functions)",
+        "Engineering Mathematics (Eigenvalues, Limits, Calculus)"
+      ],
+      chapterId: "me-cs-fst-1-basic",
+      questions: MADE_EASY_FULL_SYLLABUS_TEST_1_BASIC_QUESTIONS,
     },
     {
       id: "algo-twt-3",
