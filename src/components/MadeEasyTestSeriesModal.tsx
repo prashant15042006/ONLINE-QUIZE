@@ -253,10 +253,10 @@ export default function MadeEasyTestSeriesModal({
       questions: MADE_EASY_FULL_MOCK_2_QUESTIONS,
     },
     {
-      id: "me-cs-fst-3-basic",
-      testNumber: 3,
-      badge: "Full Mock 3",
-      title: "Full Syllabus Test - 3 (Basic Level)",
+      id: "me-cs-fst-1-adv",
+      testNumber: 1,
+      badge: "Adv Mock 1",
+      title: "Full Syllabus Test - 1 (Advance Level)",
       subjectKey: "mock",
       subjectName: "Full Mock",
       subjectIcon: "🏆",
@@ -280,14 +280,14 @@ export default function MadeEasyTestSeriesModal({
         "Discrete Mathematics (Permutation Groups, Injective Functions, Predicate Logic, Logic Simplification)",
         "Engineering Mathematics (Continuous PDF, Taylor Series, Homogeneous Linear Systems)"
       ],
-      chapterId: "me-cs-fst-3-basic",
+      chapterId: "me-cs-fst-1-adv",
       questions: MADE_EASY_FULL_MOCK_3_QUESTIONS,
     },
     {
-      id: "me-cs-fst-4-basic",
-      testNumber: 4,
-      badge: "Full Mock 4",
-      title: "Full Syllabus Test - 4 (Basic Level)",
+      id: "me-cs-fst-2-adv",
+      testNumber: 2,
+      badge: "Adv Mock 2",
+      title: "Full Syllabus Test - 2 (Advance Level)",
       subjectKey: "mock",
       subjectName: "Full Mock",
       subjectIcon: "🏆",
@@ -311,7 +311,7 @@ export default function MadeEasyTestSeriesModal({
         "Discrete Mathematics (Inference Dilemmas, Modular Diamond Lattice M3, Chromatic Numbers, Predicate Induction)",
         "Engineering Mathematics (Nilpotent Matrix Determinant, Definite Integrals, Bayes' Theorem, System of Linear Equations)"
       ],
-      chapterId: "me-cs-fst-4-basic",
+      chapterId: "me-cs-fst-2-adv",
       questions: MADE_EASY_FULL_MOCK_4_QUESTIONS,
     },
     {
