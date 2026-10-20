@@ -26,6 +26,7 @@ import { MADE_EASY_COA_SWT_QUESTIONS } from "../data/madeEasyCOASWT";
 import { MADE_EASY_FULL_SYLLABUS_TEST_1_BASIC_QUESTIONS } from "../data/madeEasyFullSyllabusTest1";
 import { MADE_EASY_FULL_MOCK_2_QUESTIONS } from "../data/madeEasyFullMock2";
 import { MADE_EASY_FULL_MOCK_3_QUESTIONS } from "../data/madeEasyFullMock3";
+import { MADE_EASY_FULL_MOCK_4_QUESTIONS } from "../data/madeEasyFullMock4";
 
 interface Props {
   isOpen: boolean;
@@ -281,6 +282,37 @@ export default function MadeEasyTestSeriesModal({
       ],
       chapterId: "me-cs-fst-3-basic",
       questions: MADE_EASY_FULL_MOCK_3_QUESTIONS,
+    },
+    {
+      id: "me-cs-fst-4-basic",
+      testNumber: 4,
+      badge: "Full Mock 4",
+      title: "Full Syllabus Test - 4 (Basic Level)",
+      subjectKey: "mock",
+      subjectName: "Full Mock",
+      subjectIcon: "🏆",
+      type: "Full Syllabus Mock",
+      totalQuestions: MADE_EASY_FULL_MOCK_4_QUESTIONS.length,
+      totalMarks: 100,
+      durationMinutes: 180,
+      scqCount: 43,
+      msqCount: 10,
+      natCount: 12,
+      topics: [
+        "General Aptitude (Verbal Analogies, Permutations, Surds, Quadrant Geometry, Data Interpretation)",
+        "Digital Logic (Multiplexers, 2's Complement, Ripple Carry Adder, Setup Time Constraints)",
+        "Computer Organization (Interrupt Controllers, Multi-Level Cache AMAT, Pipelining Speedup, Stack CPU, IEEE-754)",
+        "Operating Systems (Multi-Level Paging with TLB, Process Synchronization, SRTF Scheduling, Deadlocks)",
+        "Computer Networks (IP Fragmentation & MTU, TCP TIME_WAIT State, Circuit Switching, NAT/NAPT)",
+        "Database Management Systems (OLAP vs OLTP, ACID Durability, BCNF Normalization, Relational Algebra & TRC)",
+        "Theory of Computation (Decidability & Rice's Theorem, PDA Palindromes, 3D Hypercube DFA, Halting Problem)",
+        "Compiler Design (Dead Code Elimination, Grammar Ambiguity, LR(0) Items, SDTS Bottom-Up Evaluation, Register Allocation)",
+        "Data Structures & Algorithms (B/B+ Trees, Linked List Traversal, Hash Tables, Queue via Stacks, Matrix Chain, Quicksort, MST)",
+        "Discrete Mathematics (Inference Dilemmas, Modular Diamond Lattice M3, Chromatic Numbers, Predicate Induction)",
+        "Engineering Mathematics (Nilpotent Matrix Determinant, Definite Integrals, Bayes' Theorem, System of Linear Equations)"
+      ],
+      chapterId: "me-cs-fst-4-basic",
+      questions: MADE_EASY_FULL_MOCK_4_QUESTIONS,
     },
     {
       id: "algo-twt-3",
