@@ -817,11 +817,11 @@ C was in FIN_WAIT_1 state just after sending the FIN packet. The state of C just
     explanation: `### Solution
 In TCP connection termination state transition diagram:
 1. **Way 1 (Server sends ACK only):**
-   - Client is in `FIN_WAIT_1`.
-   - On receiving ACK for its FIN, Client transitions to **`FIN_WAIT_2`**.
+   - Client is in \`FIN_WAIT_1\`.
+   - On receiving ACK for its FIN, Client transitions to **\`FIN_WAIT_2\`**.
 2. **Way 2 (Server sends simultaneous FIN + ACK in the same segment):**
-   - Client is in `FIN_WAIT_1`.
-   - On receiving both ACK for its FIN and FIN from the server, Client sends an ACK and immediately transitions to **`TIME_WAIT`**.
+   - Client is in \`FIN_WAIT_1\`.
+   - On receiving both ACK for its FIN and FIN from the server, Client sends an ACK and immediately transitions to **\`TIME_WAIT\`**.
 
 Therefore, the states of C are **FIN_WAIT_2 and TIME_WAIT**.
 
@@ -1081,16 +1081,16 @@ Let us trace the stack height after reading each token:
 1. Push 16 $\\to$ Stack size = 1
 2. Push 2 $\\to$ Stack size = 2
 3. Push 4 $\\to$ Stack size = 3
-4. Operator `^`: pops 4 and 2, pushes $2^4 = 16$ $\\to$ Stack size = 2
-5. Operator `/`: pops 16 and 16, pushes $16/16 = 1$ $\\to$ Stack size = 1
+4. Operator \`^\`: pops 4 and 2, pushes $2^4 = 16$ $\\to$ Stack size = 2
+5. Operator \`/\`: pops 16 and 16, pushes $16/16 = 1$ $\\to$ Stack size = 1
 6. Push 4 $\\to$ Stack size = 2
 7. Push 3 $\\to$ Stack size = 3
-8. Operator `*`: pops 3 and 4, pushes 12 $\\to$ Stack size = 2
-9. Operator `+`: pops 12 and 1, pushes 13 $\\to$ Stack size = 1
+8. Operator \`*\`: pops 3 and 4, pushes 12 $\\to$ Stack size = 2
+9. Operator \`+\`: pops 12 and 1, pushes 13 $\\to$ Stack size = 1
 10. Push 6 $\\to$ Stack size = 2
 11. Push 2 $\\to$ Stack size = 3
-12. Operator `*`: pops 2 and 6, pushes 12 $\\to$ Stack size = 2
-13. Operator `-`: pops 12 and 13, pushes 1 $\\to$ Stack size = 1
+12. Operator \`*\`: pops 2 and 6, pushes 12 $\\to$ Stack size = 2
+13. Operator \`-\`: pops 12 and 13, pushes 1 $\\to$ Stack size = 1
 
 Peak stack height observed during evaluation $= 3$ (or 4 if multi-digit tokens are treated as separate entries).
 For single-operand tokens, maximum stack height $= \\mathbf{3}$.
@@ -1182,25 +1182,25 @@ $$\\text{Rate} = 5 \\times 10^4 \\times 4\\text{ bytes/sec} = 2 \\times 10^5\\te
     correctAnswerIndex: 0,
     explanation: `### Solution
 Tracing step-by-step:
-1. Inside `main()`: `static int x = 5;`
-2. Expression: `x += f1() + f2() + f1();`
-   - **First call to `f1()`**:
-     - `static int x = 10;` (initialized once)
-     - `x += 2;` $\\implies x = 12$
+1. Inside \`main()\`: \`static int x = 5;\`
+2. Expression: \`x += f1() + f2() + f1();\`
+   - **First call to \`f1()\`**:
+     - \`static int x = 10;\` (initialized once)
+     - \`x += 2;\` $\\implies x = 12$
      - Returns **12**.
-   - **Call to `f2()`**:
-     - Local variable `int x = 20;`
-     - `x += 3;` $\\implies x = 23$
+   - **Call to \`f2()\`**:
+     - Local variable \`int x = 20;\`
+     - \`x += 3;\` $\\implies x = 23$
      - Returns **23**.
-   - **Second call to `f1()`**:
+   - **Second call to \`f1()\`**:
      - Retains previous static value $x = 12$.
-     - `x += 2;` $\\implies x = 14$
+     - \`x += 2;\` $\\implies x = 14$
      - Returns **14**.
 3. Sum of returned values:
 $$12 + 23 + 14 = 49$$
-4. Update `x` in `main`:
+4. Update \`x\` in \`main\`:
 $$x = 5 + 49 = 54$$
-5. `printf(\"%d\", x);` outputs **54**.
+5. \`printf(\"%d\", x);\` outputs **54**.
 
 **Answer: 54**`
   },
@@ -1437,7 +1437,7 @@ Which of the following query is the correct representation to "Retrieve female e
     explanation: `### Solution
 We need female employees whose salary $> \\text{salary of EVERY male employee}$.
 - **Query 1 (Relational Algebra)**:
-  - Takes all female employees and subtracts those females whose salary $\\leq$ some male employee's salary (via cross join condition `salary <= S AND sex='female' AND sx='male'`).
+  - Takes all female employees and subtracts those females whose salary $\\leq$ some male employee's salary (via cross join condition \`salary <= S AND sex='female' AND sx='male'\`).
   - Females who remain have salary greater than all males. $\\implies$ **Correct**.
 - **Query 2 (SQL with NOT EXISTS)**:
   - Selects female employees where there does NOT exist any male employee with equal or greater salary.

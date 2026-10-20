@@ -25,6 +25,7 @@ import { MADE_EASY_ALGO_SWT_QUESTIONS } from "../data/madeEasyAlgoSWT";
 import { MADE_EASY_COA_SWT_QUESTIONS } from "../data/madeEasyCOASWT";
 import { MADE_EASY_FULL_SYLLABUS_TEST_1_BASIC_QUESTIONS } from "../data/madeEasyFullSyllabusTest1";
 import { MADE_EASY_FULL_MOCK_2_QUESTIONS } from "../data/madeEasyFullMock2";
+import { MADE_EASY_FULL_MOCK_3_QUESTIONS } from "../data/madeEasyFullMock3";
 
 interface Props {
   isOpen: boolean;
@@ -249,6 +250,37 @@ export default function MadeEasyTestSeriesModal({
       ],
       chapterId: "me-cs-fst-2-basic",
       questions: MADE_EASY_FULL_MOCK_2_QUESTIONS,
+    },
+    {
+      id: "me-cs-fst-3-basic",
+      testNumber: 3,
+      badge: "Full Mock 3",
+      title: "Full Syllabus Test - 3 (Basic Level)",
+      subjectKey: "mock",
+      subjectName: "Full Mock",
+      subjectIcon: "🏆",
+      type: "Full Syllabus Mock",
+      totalQuestions: MADE_EASY_FULL_MOCK_3_QUESTIONS.length,
+      totalMarks: 100,
+      durationMinutes: 180,
+      scqCount: 33,
+      msqCount: 15,
+      natCount: 17,
+      topics: [
+        "General Aptitude (Verbal Analogies, Seating Arrangement, Logs, Relative Speed, Venn Diagrams)",
+        "Digital Logic (Self-Dual Functions, K-Maps, Universal Gates, Propagation Delay)",
+        "Computer Organization (Memory-Mapped I/O, Cache Tag Directory, Booth's Algorithm, AMAT, CPI)",
+        "Operating Systems (Segmentation, Synchronization, Bounded Waiting, Free Space Management, Scheduling)",
+        "Computer Networks (Web Protocols, IP Fragmentation, TCP Slow Start, Subnetting, Store-and-Forward)",
+        "Database Management Systems (BCNF, ER to Relational, B+ Trees, Conflict Serializability)",
+        "Theory of Computation (Turing Machines, Chomsky Hierarchy, Reducibility, Pumping Lemma, NFA)",
+        "Compiler Design (Activation Records, LL(1) Parsing Table, Register Allocation)",
+        "Data Structures & Algorithms (Augmented BST, Linked Lists, Circular Queue, Tree Comparisons, MST, Heapify)",
+        "Discrete Mathematics (Permutation Groups, Injective Functions, Predicate Logic, Logic Simplification)",
+        "Engineering Mathematics (Continuous PDF, Taylor Series, Homogeneous Linear Systems)"
+      ],
+      chapterId: "me-cs-fst-3-basic",
+      questions: MADE_EASY_FULL_MOCK_3_QUESTIONS,
     },
     {
       id: "algo-twt-3",
