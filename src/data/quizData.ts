@@ -19,6 +19,7 @@ import { MADE_EASY_COA_SWT_CHAPTER } from "./madeEasyCOASWT";
 import { MADE_EASY_EM_TWT9_CHAPTER } from "./madeEasyEMTest9";
 import { MADE_EASY_TOC_SWT_CHAPTER } from "./madeEasyTOCTest2";
 import { MADE_EASY_ALGO_SWT_CHAPTER } from "./madeEasyAlgoSWT";
+import { MADE_EASY_FULL_SYLLABUS_TEST_1_BASIC_CHAPTER } from "./madeEasyFullSyllabusTest1";
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
@@ -1987,7 +1988,8 @@ const gateCS_GA: Subject = {
       ]
     },
     MADE_EASY_APTITUDE_TWT11_CHAPTER,
-    MADE_EASY_APTITUDE_TWT12_CHAPTER
+    MADE_EASY_APTITUDE_TWT12_CHAPTER,
+    MADE_EASY_FULL_SYLLABUS_TEST_1_BASIC_CHAPTER
   ]
 };
 
