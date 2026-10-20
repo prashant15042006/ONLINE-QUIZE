@@ -24,6 +24,7 @@ import { MADE_EASY_EM_TWT9_QUESTIONS } from "../data/madeEasyEMTest9";
 import { MADE_EASY_ALGO_SWT_QUESTIONS } from "../data/madeEasyAlgoSWT";
 import { MADE_EASY_COA_SWT_QUESTIONS } from "../data/madeEasyCOASWT";
 import { MADE_EASY_FULL_SYLLABUS_TEST_1_BASIC_QUESTIONS } from "../data/madeEasyFullSyllabusTest1";
+import { MADE_EASY_FULL_MOCK_2_QUESTIONS } from "../data/madeEasyFullMock2";
 
 interface Props {
   isOpen: boolean;
@@ -217,6 +218,37 @@ export default function MadeEasyTestSeriesModal({
       ],
       chapterId: "me-cs-fst-1-basic",
       questions: MADE_EASY_FULL_SYLLABUS_TEST_1_BASIC_QUESTIONS,
+    },
+    {
+      id: "me-cs-fst-2-basic",
+      testNumber: 2,
+      badge: "Full Mock 2",
+      title: "Full Syllabus Test - 2 (Basic Level)",
+      subjectKey: "mock",
+      subjectName: "Full Mock",
+      subjectIcon: "🏆",
+      type: "Full Syllabus Mock",
+      totalQuestions: MADE_EASY_FULL_MOCK_2_QUESTIONS.length,
+      totalMarks: 100,
+      durationMinutes: 180,
+      scqCount: 36,
+      msqCount: 12,
+      natCount: 17,
+      topics: [
+        "General Aptitude (Averages, Mensuration, Races, Mirror Images, Logic)",
+        "Digital Logic (Stuck-at Faults, Flip-Flop Conversion, Shift Registers)",
+        "Computer Organization (Addressing Modes, DMA, Pipelining Speedup, Cache)",
+        "Operating Systems (Scheduling, Paging, Deadlocks, Disk Scheduling)",
+        "Computer Networks (DNS TTL Caching, TCP Termination, Subnetting, ALOHA, Fragmentation)",
+        "Database Management Systems (SQL Quantification, B+ Trees, Normalization, Conflict Serializability)",
+        "Theory of Computation (Undecidability, CFLs, Regular Languages, Automata)",
+        "Compiler Design (FIRST/FOLLOW, SDT, Activation Records, Left Recursion)",
+        "Data Structures & Algorithms (Sorting, Heaps, BSTs, Shortest Paths, Asymptotics)",
+        "Discrete Mathematics (Graph Isomorphism, Predicates, Generating Functions, Hamiltonian Cycles)",
+        "Engineering Mathematics (Continuous PDF, Calculus Integrals, Linear Equations)"
+      ],
+      chapterId: "me-cs-fst-2-basic",
+      questions: MADE_EASY_FULL_MOCK_2_QUESTIONS,
     },
     {
       id: "algo-twt-3",
