@@ -26,6 +26,9 @@ import ScientificCalculatorModal from "../components/ScientificCalculatorModal";
 import ScratchpadModal from "../components/ScratchpadModal";
 import HighlightedTopicsModal from "../components/HighlightedTopicsModal";
 import MadeEasyTestSeriesModal from "../components/MadeEasyTestSeriesModal";
+import { getAllMadeEasyTests, getMadeEasyStats } from "../data/madeEasyTestsData";
+import { GATE_PYQ_PAPERS } from "../data/gatePyqData";
+import { HIGHLIGHTED_TOPICS } from "../data/highlightedTopics";
 
 function playAudioFeedback(type: "click" | "correct" | "wrong" | "next") {
   if (typeof window === "undefined") return;
@@ -433,6 +436,21 @@ export default function Home() {
 
   const totalQs = useMemo(() => getTotalQuestionCount(), []);
   const totalChapters = useMemo(() => getTotalChapterCount(), []);
+
+  const gateSubjectsList = useMemo(() => {
+    return (EXAMS_DATA.find(e => e.id === "gate")?.branches?.find(b => b.id === "cs")?.subjects) || [];
+  }, []);
+
+  const madeEasyStats = useMemo(() => getMadeEasyStats(gateSubjectsList), [gateSubjectsList]);
+  const totalGatePyqPapers = useMemo(() => GATE_PYQ_PAPERS.length, []);
+  const totalGatePyqQuestions = useMemo(() => GATE_PYQ_PAPERS.reduce((acc, p) => acc + p.questions.length, 0), []);
+  const totalLiveCBTTests = useMemo(() => madeEasyStats.totalTests + totalGatePyqPapers, [madeEasyStats.totalTests, totalGatePyqPapers]);
+  const totalPlatformQuestions = useMemo(() => {
+    return totalQs + madeEasyStats.totalQuestions + totalGatePyqQuestions;
+  }, [totalQs, madeEasyStats.totalQuestions, totalGatePyqQuestions]);
+  const totalHighlightedQuestions = useMemo(() => {
+    return HIGHLIGHTED_TOPICS.reduce((acc, t) => acc + t.questions.length, 0);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -1010,142 +1028,293 @@ export default function Home() {
       {currentScreen === "dashboard" && (
         <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
 
-          {/* ── Question Bank Stats Hub ── */}
-          <div className="glass-card p-5 sm:p-6 border-white/[0.07]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-cyan-400 mb-1">📚 Question Bank Explorer</p>
-                <h2 className="text-xl sm:text-2xl font-black text-white">
-                  <span className="neon-text-green">{totalQs.toLocaleString()}</span> Curated Questions Ready
-                </h2>
-                <p className="text-xs text-slate-400 mt-1">Covering GATE · JEE · NEET · SSC · All Subjects — deduplicated &amp; verified</p>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => setIsQuestionSearchOpen(true)} className="px-4 py-2 btn-3d-blue rounded-xl text-[11px] font-bold cursor-pointer flex items-center gap-1.5">
-                  🔍 Browse All Questions
-                </button>
-                <button onClick={() => setIsGatePyqModalOpen(true)} className="px-4 py-2 btn-3d-amber rounded-xl text-[11px] font-bold cursor-pointer flex items-center gap-1.5">
-                  📜 PYQ Papers
-                </button>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {[
-                { value: totalQs.toLocaleString(), label: "Total Questions", cls: "stat-badge-green", icon: "🎯" },
-                { value: String(totalChapters), label: "Chapters Covered", cls: "stat-badge-blue", icon: "📖" },
-                { value: "16", label: "Official GATE Papers", cls: "stat-badge-amber", icon: "📜" },
-                { value: "5", label: "Exam Categories", cls: "stat-badge-purple", icon: "🏆" },
-              ].map((s, i) => (
-                <div key={i} className={`stat-badge ${s.cls}`}>
-                  <div className="text-xl mb-1">{s.icon}</div>
-                  <div className="text-xl sm:text-2xl font-black text-white">{s.value}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5 font-medium">{s.label}</div>
+          {/* ── 🟢 CBT Platform HUD & Live Command Center ── */}
+          <div className="glass-card p-5 sm:p-6 border-white/[0.08] relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
+            <div className="relative z-10">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-black text-emerald-400 uppercase tracking-widest">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      CBT Engine Active • 2027 Pattern
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-semibold hidden md:inline">
+                      Official GATE Marking (+1/−0.33, +2/−0.66)
+                    </span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-black text-white">
+                    <span className="neon-text-green">{totalPlatformQuestions.toLocaleString()}</span> Authentic Questions Live
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Covering {selectedExam.name} ({availableSubjects.length} Core Subjects) · {madeEasyStats.totalTests} Made Easy Tests · {totalGatePyqPapers} Official PYQ Papers · Deduplicated &amp; Verified
+                  </p>
                 </div>
-              ))}
+                <div className="flex flex-wrap items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => setIsQuestionSearchOpen(true)}
+                    className="px-4 py-2.5 btn-3d-blue rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-md"
+                  >
+                    🔍 Search Questions
+                  </button>
+                  <button
+                    onClick={() => setIsGatePyqModalOpen(true)}
+                    className="px-4 py-2.5 btn-3d-amber rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-md"
+                  >
+                    📜 16 PYQ Papers
+                  </button>
+                </div>
+              </div>
+
+              {/* ── 4 Live Dynamic Metrics ── */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="stat-badge stat-badge-green">
+                  <div className="text-xl mb-1">🎯</div>
+                  <div className="text-xl sm:text-2xl font-black text-white">{totalPlatformQuestions.toLocaleString()}</div>
+                  <div className="text-[10px] text-emerald-300 font-bold mt-0.5">Total Questions Ready</div>
+                  <div className="text-[9px] text-slate-400 font-medium mt-0.5">Chapter Bank + OTS + PYQs</div>
+                </div>
+
+                <div className="stat-badge stat-badge-amber">
+                  <div className="text-xl mb-1">📜</div>
+                  <div className="text-xl sm:text-2xl font-black text-white">{totalLiveCBTTests}</div>
+                  <div className="text-[10px] text-amber-300 font-bold mt-0.5">Live CBT Tests</div>
+                  <div className="text-[9px] text-slate-400 font-medium mt-0.5">{madeEasyStats.totalTests} OTS + {totalGatePyqPapers} PYQs</div>
+                </div>
+
+                <div className="stat-badge stat-badge-blue">
+                  <div className="text-xl mb-1">📚</div>
+                  <div className="text-xl sm:text-2xl font-black text-white">{availableSubjects.length}</div>
+                  <div className="text-[10px] text-cyan-300 font-bold mt-0.5">Active Subjects</div>
+                  <div className="text-[9px] text-slate-400 font-medium mt-0.5">Target: {selectedExam.name} {selectedBranch ? `(${selectedBranch.name})` : ""}</div>
+                </div>
+
+                <div className="stat-badge stat-badge-purple">
+                  <div className="text-xl mb-1">🏆</div>
+                  <div className="text-xl sm:text-2xl font-black text-white">{totalChapters}</div>
+                  <div className="text-[10px] text-purple-300 font-bold mt-0.5">Chapters Covered</div>
+                  <div className="text-[9px] text-slate-400 font-medium mt-0.5">{EXAMS_DATA.length} Exam Tracks</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* ── Top Action Bar ── */}
+          {/* ── Top Action / Mode Switcher Bar ── */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* 🎯 MADE EASY – Featured Hero Button */}
             <button
               onClick={() => setIsMadeEasyModalOpen(true)}
-              className="px-5 py-2.5 rounded-xl text-sm font-black cursor-pointer flex items-center gap-2 shadow-xl transition hover:scale-[1.03] active:scale-[0.98]"
+              className="px-4 py-2.5 rounded-xl text-xs font-black cursor-pointer flex items-center gap-2 shadow-lg transition hover:scale-[1.02] active:scale-[0.98]"
               style={{
                 background: "linear-gradient(135deg, #be123c, #9f1239, #7c3aed)",
                 border: "1px solid rgba(225,29,72,0.5)",
-                boxShadow: "0 0 20px rgba(225,29,72,0.3)",
+                boxShadow: "0 0 16px rgba(225,29,72,0.25)",
               }}
             >
-              🎯 MADE EASY Test Series (GATE 2027)
-              <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full font-black">14 LIVE</span>
+              🎯 MADE EASY OTS 2027
+              <span className="text-[10px] bg-white/20 px-2 py-0.5 rounded-full font-black text-white">
+                {madeEasyStats.totalTests} LIVE
+              </span>
             </button>
-            <button onClick={() => setIsGatePyqModalOpen(true)} className="px-4 py-2.5 btn-3d-amber rounded-xl text-xs font-black cursor-pointer flex items-center gap-1.5 shadow-lg">
-              📜 GATE Year-Wise PYQ (2015-2024)
+            <button
+              onClick={() => setIsGatePyqModalOpen(true)}
+              className="px-4 py-2.5 btn-3d-amber rounded-xl text-xs font-black cursor-pointer flex items-center gap-1.5 shadow-md"
+            >
+              📜 GATE PYQ Papers
+              <span className="text-[10px] bg-amber-900/40 px-1.5 py-0.5 rounded-full text-amber-300 font-black">
+                {totalGatePyqPapers} Papers
+              </span>
             </button>
-            <button onClick={() => setShowAnalyticsView(false)} className={`px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${!showAnalyticsView ? "btn-3d-blue" : "btn-3d-slate"}`}>
+            <button
+              onClick={() => setShowAnalyticsView(false)}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${!showAnalyticsView ? "btn-3d-blue" : "btn-3d-slate"}`}
+            >
               🗺️ Learning Pathway
             </button>
-            <button onClick={() => setShowAnalyticsView(true)} className={`px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${showAnalyticsView ? "btn-3d-blue" : "btn-3d-slate"}`}>
-              📊 Analytics
+            <button
+              onClick={() => setShowAnalyticsView(true)}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition cursor-pointer ${showAnalyticsView ? "btn-3d-blue" : "btn-3d-slate"}`}
+            >
+              📊 Performance Analytics
             </button>
-            <button onClick={() => setIsRankEstimatorOpen(true)} className="px-4 py-2.5 btn-3d-slate rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5">
-              📊 Rank Estimator
+            <button
+              onClick={() => setIsRankEstimatorOpen(true)}
+              className="px-4 py-2.5 btn-3d-slate rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5"
+            >
+              🎯 Rank Estimator
             </button>
-            <button onClick={() => setIsHighlightedTopicsOpen(true)} className="px-4 py-2.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-lg" style={{background:"linear-gradient(135deg,#7c3aed,#db2777)",border:"1px solid rgba(219,39,119,0.4)"}}>
-              🔥 Must-Do Topics
+            <button
+              onClick={() => setIsHighlightedTopicsOpen(true)}
+              className="px-4 py-2.5 rounded-xl text-xs font-black transition cursor-pointer flex items-center gap-1.5 shadow-md text-white"
+              style={{ background: "linear-gradient(135deg, #7c3aed, #db2777)", border: "1px solid rgba(219,39,119,0.4)" }}
+            >
+              🔥 Must-Do High Yield Topics
+              <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full font-black">
+                {totalHighlightedQuestions}+ Qs
+              </span>
             </button>
           </div>
 
-          {/* ── MADE EASY Featured Banner Card ── */}
-          <div
-            className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-4 sm:p-6 cursor-pointer group transition hover:scale-[1.01] duration-200"
-            style={{
-              background: theme === "light"
-                ? "linear-gradient(135deg, #fff1f2 0%, #fdf2f8 50%, #f5f3ff 100%)"
-                : "linear-gradient(135deg, #180010 0%, #2b082c 40%, #0d0c2c 100%)",
-              border: theme === "light" ? "1px solid rgba(244,63,94,0.3)" : "1px solid rgba(225,29,72,0.4)",
-              boxShadow: theme === "light" ? "0 4px 20px rgba(225,29,72,0.08)" : "0 0 28px rgba(225,29,72,0.12)",
-            }}
-            onClick={() => setIsMadeEasyModalOpen(true)}
-          >
-            <div className="absolute -right-8 -top-8 w-44 h-44 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -right-4 bottom-0 w-36 h-36 bg-violet-600/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="flex items-start sm:items-center gap-3.5">
-                <div
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl flex items-center justify-center text-2xl sm:text-3xl shrink-0 font-black shadow-lg"
-                  style={{
-                    background: "linear-gradient(135deg, #be123c, #7c3aed)",
-                    boxShadow: "0 4px 16px rgba(190,18,60,0.35)",
-                  }}
-                >
-                  🎯
-                </div>
-                <div className="space-y-1">
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-rose-500 bg-rose-500/15 px-2.5 py-0.5 rounded-full border border-rose-500/30">
-                      🏆 Official Pattern
+          {/* ── 🎯 DUAL HERO ARENAS (Side-by-Side Premium Cards) ── */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Arena 1: MADE EASY OTS */}
+            <div
+              onClick={() => setIsMadeEasyModalOpen(true)}
+              className="relative overflow-hidden rounded-3xl p-5 sm:p-6 cursor-pointer group transition hover:scale-[1.01] duration-200 flex flex-col justify-between"
+              style={{
+                background: theme === "light"
+                  ? "linear-gradient(135deg, #fff1f2 0%, #fdf2f8 50%, #f5f3ff 100%)"
+                  : "linear-gradient(135deg, #180010 0%, #2b082c 45%, #0d0c2c 100%)",
+                border: theme === "light" ? "1px solid rgba(244,63,94,0.3)" : "1px solid rgba(225,29,72,0.45)",
+                boxShadow: theme === "light" ? "0 4px 20px rgba(225,29,72,0.08)" : "0 0 28px rgba(225,29,72,0.15)",
+              }}
+            >
+              <div className="absolute -right-8 -top-8 w-40 h-40 bg-rose-600/10 rounded-full blur-3xl pointer-events-none" />
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-rose-500 bg-rose-500/15 px-2.5 py-0.5 rounded-full border border-rose-500/30">
+                      🏆 Premier Test Series
                     </span>
-                    <span className="text-[10px] sm:text-xs font-black text-amber-500 bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-500/30">
+                    <span className="text-[10px] font-black text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded-md border border-amber-500/30">
                       SCQ • MSQ • NAT
                     </span>
-                    <span className="text-[10px] sm:text-xs font-bold text-emerald-500 bg-emerald-500/15 px-2 py-0.5 rounded-md border border-emerald-500/30 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      14 Tests Live
-                    </span>
                   </div>
-                  <h3 className={`text-base sm:text-xl font-black ${theme === "light" ? "text-slate-900" : "text-white"} tracking-tight`}>
-                    MADE EASY Online Test Series (OTS) — GATE CS 2027
-                  </h3>
-                  <p className={`text-xs ${theme === "light" ? "text-slate-600" : "text-slate-300"} max-w-xl leading-relaxed`}>
-                    Topic-wise &amp; Full Mocks with authentic marking (+1/−0.33, +2/−0.66) · MSQ &amp; NAT with 0 negative penalty · Real CBT simulator.
-                  </p>
+                  <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    {madeEasyStats.totalTests} Tests Live
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-3.5 mb-3">
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 font-black shadow-lg"
+                    style={{
+                      background: "linear-gradient(135deg, #be123c, #7c3aed)",
+                      boxShadow: "0 4px 16px rgba(190,18,60,0.35)",
+                    }}
+                  >
+                    🎯
+                  </div>
+                  <div>
+                    <h3 className={`text-base sm:text-lg font-black ${theme === "light" ? "text-slate-900" : "text-white"} tracking-tight leading-snug`}>
+                      MADE EASY OTS (GATE CS 2027)
+                    </h3>
+                    <p className={`text-xs ${theme === "light" ? "text-slate-600" : "text-slate-300"} mt-1 leading-relaxed`}>
+                      {madeEasyStats.fullMocksCount} Full-Length 65-Q Mocks + {madeEasyStats.topicTestsCount} Topic Tests with authentic GATE marking &amp; CBT timer.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quick stats strip */}
+                <div className="grid grid-cols-3 gap-2 py-2.5 border-y border-black/[0.06] dark:border-white/[0.08] my-3 text-center">
+                  <div>
+                    <div className={`text-base sm:text-lg font-black ${theme === "light" ? "text-slate-900" : "text-white"}`}>{madeEasyStats.fullMocksCount}</div>
+                    <div className="text-[10px] text-slate-400 font-semibold">Full Mocks (65Q)</div>
+                  </div>
+                  <div>
+                    <div className={`text-base sm:text-lg font-black ${theme === "light" ? "text-slate-900" : "text-white"}`}>{madeEasyStats.topicTestsCount}</div>
+                    <div className="text-[10px] text-slate-400 font-semibold">Topic/Subject Tests</div>
+                  </div>
+                  <div>
+                    <div className={`text-base sm:text-lg font-black ${theme === "light" ? "text-slate-900" : "text-white"}`}>{madeEasyStats.totalQuestions}</div>
+                    <div className="text-[10px] text-slate-400 font-semibold">OTS Questions</div>
+                  </div>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center md:items-end justify-between w-full md:w-auto gap-3 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-black/[0.06] dark:border-white/[0.08]">
-                <div className="flex justify-around sm:justify-start gap-4 text-center">
-                  {[
-                    { val: "10", lbl: "Subjects" },
-                    { val: "14", lbl: "Live Tests" },
-                    { val: "286+", lbl: "Questions" },
-                  ].map((s, i) => (
-                    <div key={i} className="text-center">
-                      <div className={`text-lg sm:text-xl font-black ${theme === "light" ? "text-slate-900" : "text-white"}`}>{s.val}</div>
-                      <div className={`text-[10px] sm:text-xs ${theme === "light" ? "text-slate-500" : "text-slate-400"} font-semibold`}>{s.lbl}</div>
-                    </div>
-                  ))}
-                </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-xs text-rose-400 font-bold group-hover:underline">Explore all {madeEasyStats.totalTests} tests</span>
                 <button
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs sm:text-sm font-black text-white cursor-pointer group-hover:shadow-xl transition flex items-center justify-center gap-1.5 shrink-0"
+                  className="px-4 py-2 rounded-xl text-xs font-black text-white cursor-pointer group-hover:shadow-lg transition flex items-center gap-1.5"
                   style={{
-                    background: "linear-gradient(135deg, #e11d48, #be123c, #9f1239)",
-                    border: "1px solid rgba(244,63,94,0.5)",
-                    boxShadow: "0 4px 14px rgba(225,29,72,0.35)",
+                    background: "linear-gradient(135deg, #e11d48, #be123c)",
+                    boxShadow: "0 4px 12px rgba(225,29,72,0.35)",
                   }}
                   onClick={(e) => { e.stopPropagation(); setIsMadeEasyModalOpen(true); }}
                 >
                   <span>Open OTS Dashboard</span>
+                  <span>→</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Arena 2: GATE PYQ Simulator */}
+            <div
+              onClick={() => setIsGatePyqModalOpen(true)}
+              className="relative overflow-hidden rounded-3xl p-5 sm:p-6 cursor-pointer group transition hover:scale-[1.01] duration-200 flex flex-col justify-between"
+              style={{
+                background: theme === "light"
+                  ? "linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #eff6ff 100%)"
+                  : "linear-gradient(135deg, #241400 0%, #1f1b0a 45%, #05192d 100%)",
+                border: theme === "light" ? "1px solid rgba(245,158,11,0.3)" : "1px solid rgba(245,158,11,0.45)",
+                boxShadow: theme === "light" ? "0 4px 20px rgba(245,158,11,0.08)" : "0 0 28px rgba(245,158,11,0.15)",
+              }}
+            >
+              <div className="absolute -right-8 -top-8 w-40 h-40 bg-amber-600/10 rounded-full blur-3xl pointer-events-none" />
+              <div>
+                <div className="flex items-center justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 bg-amber-500/15 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                      📜 Official GATE Papers
+                    </span>
+                    <span className="text-[10px] font-black text-cyan-400 bg-cyan-500/15 px-2 py-0.5 rounded-md border border-cyan-500/30">
+                      2015 – 2024
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-bold text-amber-400 bg-amber-500/15 px-2.5 py-0.5 rounded-full border border-amber-500/30 flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                    {totalGatePyqPapers} Papers Live
+                  </span>
+                </div>
+
+                <div className="flex items-start gap-3.5 mb-3">
+                  <div
+                    className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 font-black shadow-lg"
+                    style={{
+                      background: "linear-gradient(135deg, #d97706, #0284c7)",
+                      boxShadow: "0 4px 16px rgba(217,119,6,0.35)",
+                    }}
+                  >
+                    📜
+                  </div>
+                  <div>
+                    <h3 className={`text-base sm:text-lg font-black ${theme === "light" ? "text-slate-900" : "text-white"} tracking-tight leading-snug`}>
+                      Official GATE CSE Year-Wise PYQs
+                    </h3>
+                    <p className={`text-xs ${theme === "light" ? "text-slate-600" : "text-slate-300"} mt-1 leading-relaxed`}>
+                      16 complete original papers (2015 to 2024 Set 1 &amp; 2) with authentic 180-min CBT interface &amp; verified solutions.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quick stats strip */}
+                <div className="grid grid-cols-3 gap-2 py-2.5 border-y border-black/[0.06] dark:border-white/[0.08] my-3 text-center">
+                  <div>
+                    <div className={`text-base sm:text-lg font-black ${theme === "light" ? "text-slate-900" : "text-white"}`}>{totalGatePyqPapers}</div>
+                    <div className="text-[10px] text-slate-400 font-semibold">Official Papers</div>
+                  </div>
+                  <div>
+                    <div className={`text-base sm:text-lg font-black ${theme === "light" ? "text-slate-900" : "text-white"}`}>1,040</div>
+                    <div className="text-[10px] text-slate-400 font-semibold">PYQ Questions</div>
+                  </div>
+                  <div>
+                    <div className={`text-base sm:text-lg font-black ${theme === "light" ? "text-slate-900" : "text-white"}`}>180 Min</div>
+                    <div className="text-[10px] text-slate-400 font-semibold">CBT Simulator</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-xs text-amber-400 font-bold group-hover:underline">Explore 2015-2024 papers</span>
+                <button
+                  className="px-4 py-2 rounded-xl text-xs font-black text-white cursor-pointer group-hover:shadow-lg transition flex items-center gap-1.5"
+                  style={{
+                    background: "linear-gradient(135deg, #d97706, #b45309)",
+                    boxShadow: "0 4px 12px rgba(217,119,6,0.35)",
+                  }}
+                  onClick={(e) => { e.stopPropagation(); setIsGatePyqModalOpen(true); }}
+                >
+                  <span>Open PYQ Simulator</span>
                   <span>→</span>
                 </button>
               </div>
@@ -1164,7 +1333,7 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
               <div className="lg:col-span-8 space-y-6">
 
-                {/* Exam Selector */}
+                {/* Exam Target Selector */}
                 <div>
                   <div className="flex justify-between items-center mb-3">
                     <h2 className="text-[11px] font-black uppercase tracking-widest text-slate-400">Select Exam Target</h2>
@@ -1195,13 +1364,13 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Hero Banner */}
+                {/* Current Target Banner */}
                 <div className="relative overflow-hidden rounded-3xl p-6 text-white" style={{background: "linear-gradient(135deg, #003d2e 0%, #004d4d 50%, #001a3d 100%)", border: "1px solid rgba(0,230,118,0.15)"}}>
                   <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-400/5 rounded-full blur-3xl pointer-events-none" />
                   <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                       <span className="text-[10px] font-black uppercase tracking-wider bg-white/10 px-3 py-1 rounded-full border border-white/10">
-                        📌 Current Target: {selectedExam.name} {selectedBranch ? `(${selectedBranch.name})` : ""}
+                        📌 Target: {selectedExam.name} {selectedBranch ? `(${selectedBranch.name})` : ""}
                       </span>
                       <h2 className="text-xl sm:text-2xl font-black mt-2 mb-1">{selectedExam.fullName}</h2>
                       <p className="text-xs text-white/60 max-w-lg leading-relaxed">{selectedExam.description}</p>
@@ -1215,7 +1384,7 @@ export default function Home() {
 
                 {/* Subjects & Chapters */}
                 <div className="space-y-5">
-                  {availableSubjects.map((subj, subjIdx) => (
+                  {availableSubjects.map((subj) => (
                     <div key={subj.id} className="glass-card p-5">
                       <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/[0.06]">
                         <div className="flex items-center gap-3">
@@ -1259,62 +1428,67 @@ export default function Home() {
 
               </div>
 
-              {/* ── Sidebar ── */}
+              {/* ── Sidebar: Student Action & Revision Hub ── */}
               <div className="lg:col-span-4 space-y-4">
 
-                {/* 🎯 MADE EASY Test Series Sidebar Card */}
+                {/* 🔴 Mistakes Notebook Hub */}
                 <div
-                  className="p-5 sm:p-6 space-y-3.5 rounded-3xl cursor-pointer group transition hover:scale-[1.01] duration-200"
-                  style={{
-                    background: theme === "light"
-                      ? "linear-gradient(135deg, #fff1f2, #fdf2f8)"
-                      : "linear-gradient(135deg, #1c0012, #2e0a2f)",
-                    border: theme === "light" ? "1px solid rgba(244,63,94,0.3)" : "1px solid rgba(225,29,72,0.4)",
-                    boxShadow: theme === "light" ? "0 4px 18px rgba(225,29,72,0.06)" : "0 0 22px rgba(225,29,72,0.12)",
-                  }}
-                  onClick={() => setIsMadeEasyModalOpen(true)}
+                  className="glass-card p-5 space-y-3 cursor-pointer group transition hover:scale-[1.01]"
+                  style={{ background: "rgba(35, 10, 10, 0.4)", borderColor: "rgba(239, 68, 68, 0.25)" }}
+                  onClick={() => setIsMistakesModalOpen(true)}
                 >
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-black uppercase tracking-wider text-rose-500 bg-rose-500/15 px-3 py-1 rounded-full border border-rose-500/30">
-                      🎯 MADE EASY OTS 2027
+                    <span className="text-[10px] font-black uppercase tracking-wider text-rose-400 bg-rose-500/15 px-2.5 py-1 rounded-full border border-rose-500/30">
+                      📖 Mistakes Notebook
                     </span>
-                    <span className="text-xs font-bold text-emerald-500 flex items-center gap-1.5 bg-emerald-500/15 px-2 py-0.5 rounded-full border border-emerald-500/30">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-pulse" />
-                      14 Tests Live
+                    <span className="text-xs font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-full border border-rose-500/20">
+                      {mistakesCount} To Revise
                     </span>
                   </div>
-                  <h4 className={`font-extrabold ${theme === "light" ? "text-slate-900" : "text-white"} text-base leading-snug`}>
-                    GATE 2027 CS &amp; IT Online Test Series
+                  <h4 className="font-extrabold text-white text-sm leading-snug">
+                    {mistakesCount > 0 ? `You have ${mistakesCount} flagged mistakes to fix` : "Clean Record! Zero pending mistakes"}
                   </h4>
-                  <p className={`text-xs ${theme === "light" ? "text-slate-600" : "text-rose-100/70"} leading-relaxed`}>
-                    Topic Wise Tests &amp; Full Mocks ready with authentic SCQ / MSQ / NAT marking and CBT timer simulator.
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Auto-tracks every incorrect answer. Re-test your weak concepts with instant AI solutions.
                   </p>
-                  <div className="flex items-center justify-between pt-1">
-                    <div className="flex gap-2">
-                      <span className="text-xs bg-blue-500/15 border border-blue-500/30 text-blue-500 dark:text-blue-300 px-2 py-0.5 rounded-md font-bold">SCQ</span>
-                      <span className="text-xs bg-purple-500/15 border border-purple-500/30 text-purple-500 dark:text-purple-300 px-2 py-0.5 rounded-md font-bold">MSQ</span>
-                      <span className="text-xs bg-amber-500/15 border border-amber-500/30 text-amber-500 dark:text-amber-300 px-2 py-0.5 rounded-md font-bold">NAT</span>
-                    </div>
-                    <span className="text-sm font-black text-rose-500 dark:text-rose-300 group-hover:translate-x-1 transition flex items-center gap-1">
-                      Dashboard →
-                    </span>
-                  </div>
-                </div>
-
-                {/* GATE PYQ Banner */}
-                <div className="glass-card glass-card-amber p-5 space-y-3" style={{background: "rgba(30,15,0,0.6)", borderColor: "rgba(255,171,0,0.15)"}}>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-300 bg-amber-500/15 px-2.5 py-1 rounded-full border border-amber-400/20">📜 Official GATE PYQs</span>
-                    <span className="text-xs font-bold text-amber-400">2015 – 2024</span>
-                  </div>
-                  <h4 className="font-extrabold text-white text-sm leading-snug">GATE CSE Official Year-Wise Papers</h4>
-                  <p className="text-[11px] text-amber-100/60 leading-relaxed">16 complete original GATE papers with step-by-step solutions. 1040+ authentic questions.</p>
-                  <button onClick={() => setIsGatePyqModalOpen(true)} className="w-full py-3 btn-3d-amber font-black text-xs rounded-xl cursor-pointer">
-                    Explore All Year Papers 🚀
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setIsMistakesModalOpen(true); }}
+                    className="w-full py-2.5 rounded-xl font-bold text-xs cursor-pointer text-white flex items-center justify-center gap-1.5"
+                    style={{ background: "linear-gradient(135deg, #e11d48, #be123c)" }}
+                  >
+                    <span>Open Mistakes Notebook ({mistakesCount})</span>
+                    <span>→</span>
                   </button>
                 </div>
 
-                {/* Daily Challenge */}
+                {/* 🔖 Saved Bookmarks Hub */}
+                <div
+                  className="glass-card p-5 space-y-3 cursor-pointer group transition hover:scale-[1.01]"
+                  onClick={() => setIsBookmarksModalOpen(true)}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400 bg-cyan-500/15 px-2.5 py-1 rounded-full border border-cyan-500/30">
+                      🔖 Saved Bookmarks
+                    </span>
+                    <span className="text-xs font-bold text-cyan-400">
+                      {bookmarksCount} Saved
+                    </span>
+                  </div>
+                  <h4 className="font-extrabold text-white text-sm leading-snug">
+                    Quick Access to Important Questions
+                  </h4>
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Review your starred high-value questions and formulas anytime before test day.
+                  </p>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setIsBookmarksModalOpen(true); }}
+                    className="w-full py-2.5 btn-3d-blue font-bold text-xs rounded-xl cursor-pointer"
+                  >
+                    Open Bookmarks ({bookmarksCount}) →
+                  </button>
+                </div>
+
+                {/* ⚡ Daily Challenge Question */}
                 {dailyChallengeQuestion && (
                   <div className="glass-card glass-card-purple p-5 space-y-3" style={{background: "rgba(20,0,30,0.6)", borderColor: "rgba(213,0,249,0.15)"}}>
                     <div className="flex justify-between items-center">
@@ -1330,7 +1504,7 @@ export default function Home() {
                   </div>
                 )}
 
-                {/* Rank Estimator */}
+                {/* 📊 Rank Estimator */}
                 <div className="glass-card p-5 space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-400 text-xl flex items-center justify-center border border-amber-500/20">📊</div>
@@ -1342,7 +1516,7 @@ export default function Home() {
                   <button onClick={() => setIsRankEstimatorOpen(true)} className="w-full py-2.5 btn-3d-blue font-bold text-xs rounded-xl cursor-pointer">Open Rank Estimator →</button>
                 </div>
 
-                {/* AI Quiz */}
+                {/* ✨ AI Quiz Generator */}
                 <div className="glass-card p-5 space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-2xl bg-cyan-500/10 text-cyan-400 text-xl flex items-center justify-center border border-cyan-500/20">✨</div>
@@ -1359,8 +1533,7 @@ export default function Home() {
           )}
         </div>
       )}
-
-      {/* ═══════════════ SETTINGS SCREEN ═══════════════ */}
+{/* ═══════════════ SETTINGS SCREEN ═══════════════ */}
       {currentScreen === "settings" && selectedSubject && selectedChapter && (
         <div className="flex-1 max-w-2xl mx-auto w-full px-4 py-8 flex flex-col justify-center">
           <div className="glass-card p-6 sm:p-8 space-y-6">
