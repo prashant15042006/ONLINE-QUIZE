@@ -44,9 +44,9 @@ $$(0 + 1)^* 00$$
     questionType: "MSQ",
     text: "Which of the following is a context free language?",
     options: [
-      "L = {ww | w ∈ {a, b}*}",
-      "L = {wcw^R | w ∈ {a, b}*}",
-      "L = {a^n b^(2n) | n ≥ 0}",
+      "$L = \\{ww \\mid w \\in \\{a, b\\}^*\\}$",
+      "$L = \\{wcw^R \\mid w \\in \\{a, b\\}^*\\}$",
+      "$L = \\{a^n b^{2n} \\mid n \\geq 0\\}$",
       "None of these"
     ],
     correctAnswerIndex: 1,
@@ -303,10 +303,10 @@ C. Recursive languages
 - (c) A:1, B:2, C:3
 - (d) A:3, B:1, C:1`,
     options: [
-      "(a)",
-      "(b)",
-      "(c)",
-      "(d)"
+      "A:3, B:1, C:2",
+      "A:3, B:2, C:1",
+      "A:1, B:2, C:3",
+      "A:3, B:1, C:1"
     ],
     correctAnswerIndex: 0,
     correctAnswerIndices: [0, 1],

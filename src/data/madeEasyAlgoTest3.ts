@@ -62,10 +62,10 @@ Hence, the correct option is **Option 3: $O(n^3 \\log n)$**.`
     text: `Let $n$ be an odd natural number. Suppose we increase the array size to $n + 1$ (making it even). Let $A_n$ be the comparisons to find both minimum and maximum simultaneously for size $n$, and $B_{n + 1}$ be the comparisons for size $n + 1$.
 Which of the following is correct?`,
     options: [
-      "B_{n+1} - A_n = 0.5",
-      "B_{n+1} - A_n = 1",
-      "B_{n+1} - A_n = 1.5",
-      "B_{n+1} - A_n = 2"
+      "$B_{n+1} - A_n = 0.5$",
+      "$B_{n+1} - A_n = 1$",
+      "$B_{n+1} - A_n = 1.5$",
+      "$B_{n+1} - A_n = 2$"
     ],
     correctAnswerIndex: 1,
     correctAnswerIndices: [1],
@@ -517,10 +517,10 @@ Hence, the correct option is **Option 3: $((M_0 (M_1 M_2)) M_3)$**.`
 - **(c)** A: 3, B: 3, C: 4, D: 1, E: 4
 - **(d)** A: 4, B: 4, C: 4, D: 1, E: 5`,
     options: [
-      "(a)",
-      "(b)",
-      "(c)",
-      "(d)"
+      "A: 4, B: 4, C: 3, D: 2, E: 5",
+      "A: 4, B: 3, C: 4, D: 2, E: 4",
+      "A: 3, B: 3, C: 4, D: 1, E: 4",
+      "A: 4, B: 4, C: 4, D: 1, E: 5"
     ],
     correctAnswerIndex: 3,
     correctAnswerIndices: [3],
@@ -609,10 +609,10 @@ Hence, **Statements 2 and 3** are correct.`
 - Assume that the key is present uniformly at random in the array.
 - If all operations (comparison, jump, etc.) take unit time, what is the expected number of comparisons required to search for the key using this algorithm?`,
     options: [
-      "\\frac{n + 1}{2}",
-      "\\frac{k}{n} \\cdot \\frac{k + 1}{2} + \\frac{n - k}{n} \\cdot (\\log_2(n - k) + k)",
-      "\\frac{k + 1}{2} + \\log_2(n - k)",
-      "\\log_2(n)"
+      "$\frac{n + 1}{2}$",
+      "$\frac{k}{n} \cdot \frac{k + 1}{2} + \frac{n - k}{n} \cdot (\log_2(n - k) + k)$",
+      "$\frac{k + 1}{2} + \log_2(n - k)$",
+      "$\log_2(n)$"
     ],
     correctAnswerIndex: 1,
     correctAnswerIndices: [1],
@@ -758,10 +758,10 @@ Hence, the correct option is **Option 2**.`
     imageAlt: "Options for Q.15 number of elements sorted in linear time",
     text: `Which of the following represents the number of elements that can be sorted in $\\Theta(n)$ time using merge sort?`,
     options: [
-      "\\Theta(\\log n)",
-      "\\Theta(n)",
-      "\\Theta\\left(\\frac{n}{\\log n}\\right)",
-      "\\Theta(\\sqrt{n})"
+      "$\\Theta(\\log n)$",
+      "$\\Theta(n)$",
+      "$\\Theta\\left(\\frac{n}{\\log n}\\right)$",
+      "$\\Theta(\\sqrt{n})$"
     ],
     correctAnswerIndex: 2,
     correctAnswerIndices: [2],

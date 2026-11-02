@@ -48,10 +48,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_ga_q03.png",
     "questionType": "SCQ",
     "options": [
-      "3\\sqrt{31}",
-      "4\\sqrt{5}",
-      "3\\sqrt{7}",
-      "2\\sqrt{7}"
+      "$3\\sqrt{31}$",
+      "$4\\sqrt{5}$",
+      "$3\\sqrt{7}$",
+      "$2\\sqrt{7}$"
     ],
     "correctAnswerIndex": 2,
     "explanation": "### Solution\nGiven:\n$$\\sqrt{5x+9} + \\sqrt{5x-9} = 3(2+\\sqrt{2}) = 6 + 3\\sqrt{2} \\quad \\text{--- (1)}$$\n\nNotice that:\n$$(\\sqrt{5x+9} + \\sqrt{5x-9})(\\sqrt{5x+9} - \\sqrt{5x-9}) = (5x+9) - (5x-9) = 18$$\n\nTherefore:\n$$\\sqrt{5x+9} - \\sqrt{5x-9} = \\frac{18}{3(2+\\sqrt{2})} = \\frac{6}{2+\\sqrt{2}} = \\frac{6(2-\\sqrt{2})}{(2+\\sqrt{2})(2-\\sqrt{2})} = \\frac{6(2-\\sqrt{2})}{2} = 3(2-\\sqrt{2}) = 6 - 3\\sqrt{2} \\quad \\text{--- (2)}$$\n\nAdding equations (1) and (2):\n$$2\\sqrt{5x+9} = (6 + 3\\sqrt{2}) + (6 - 3\\sqrt{2}) = 12$$\n$$\\sqrt{5x+9} = 6$$\nSquaring both sides:\n$$5x + 9 = 36 \\implies 5x = 27$$\n\nNow, evaluate $\\sqrt{10x+9}$:\n$$\\sqrt{10x+9} = \\sqrt{2(5x) + 9} = \\sqrt{2(27) + 9} = \\sqrt{54 + 9} = \\sqrt{63} = \\sqrt{9 \\times 7} = 3\\sqrt{7}$$\n\n**Correct Option: 3** ($3\\sqrt{7}$)"
@@ -67,9 +67,9 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_ga_q04.png",
     "questionType": "SCQ",
     "options": [
-      "(2 + 3\\sqrt{2})r^2",
-      "\\frac{\\pi r^2}{(3 + 2\\sqrt{2})}",
-      "\\left(\\frac{3 + 2\\sqrt{2}}{r^2}\\right)\\pi",
+      "$(2 + 3\\sqrt{2})r^2$",
+      "$\\frac{\\pi r^2}{(3 + 2\\sqrt{2})}$",
+      "$\\left(\\frac{3 + 2\\sqrt{2}}{r^2}\\right)\\pi$",
       "None of these"
     ],
     "correctAnswerIndex": 1,
@@ -86,10 +86,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_ga_q05.png",
     "questionType": "SCQ",
     "options": [
-      "\\frac{1}{3}\\left[n - \\frac{1}{9}\\left(1 - \\frac{1}{10^n}\\right)\\right]",
-      "\\frac{1}{3}\\left[n - \\frac{2}{9}\\left(1 - \\frac{1}{10^n}\\right)\\right]",
-      "\\frac{1}{3}\\left[n - \\frac{1}{3}\\left(1 - \\frac{1}{10^n}\\right)\\right]",
-      "\\frac{1}{3}\\left[n - \\frac{1}{9}\\left(1 + \\frac{1}{10^n}\\right)\\right]"
+      "$\\frac{1}{3}\\left[n - \\frac{1}{9}\\left(1 - \\frac{1}{10^n}\\right)\\right]$",
+      "$\\frac{1}{3}\\left[n - \\frac{2}{9}\\left(1 - \\frac{1}{10^n}\\right)\\right]$",
+      "$\\frac{1}{3}\\left[n - \\frac{1}{3}\\left(1 - \\frac{1}{10^n}\\right)\\right]$",
+      "$\\frac{1}{3}\\left[n - \\frac{1}{9}\\left(1 + \\frac{1}{10^n}\\right)\\right]$"
     ],
     "correctAnswerIndex": 0,
     "explanation": "### Solution\nLet $S_n = 0.3 + 0.33 + 0.333 + \\dots + \\text{upto } n \\text{ terms}$.\n$$S_n = 3 \\left(0.1 + 0.01 + 0.001 + \\dots\\right) = \\frac{3}{9} \\left(0.9 + 0.99 + 0.999 + \\dots\\right)$$\n$$S_n = \\frac{1}{3} \\left[(1 - 10^{-1}) + (1 - 10^{-2}) + (1 - 10^{-3}) + \\dots + (1 - 10^{-n})\\right]$$\n$$S_n = \\frac{1}{3} \\left[ n - \\left(\\frac{1}{10} + \\frac{1}{10^2} + \\dots + \\frac{1}{10^n}\\right) \\right]$$\n\nThe sum of geometric series $\\sum_{k=1}^n \\frac{1}{10^k}$:\n$$\\text{Sum} = \\frac{\\frac{1}{10}\\left(1 - \\left(\\frac{1}{10}\\right)^n\\right)}{1 - \\frac{1}{10}} = \\frac{\\frac{1}{10}\\left(1 - \\frac{1}{10^n}\\right)}{\\frac{9}{10}} = \\frac{1}{9}\\left(1 - \\frac{1}{10^n}\\right)$$\n\nSubstituting back:\n$$S_n = \\frac{1}{3}\\left[n - \\frac{1}{9}\\left(1 - \\frac{1}{10^n}\\right)\\right]$$\n\n**Correct Option: 1**"
@@ -197,10 +197,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_cs_q01.png",
     "questionType": "SCQ",
     "options": [
-      "0, 1, A, \\overline{A}",
-      "1, 0, A, \\overline{A}",
-      "0, 1, \\overline{A}, A",
-      "\\overline{A}, 0, 1, A"
+      "$0, 1, A, \\overline{A}$",
+      "$1, 0, A, \\overline{A}$",
+      "$0, 1, \\overline{A}, A$",
+      "$\\overline{A}, 0, 1, A$"
     ],
     "correctAnswerIndex": 3,
     "explanation": "### Solution\nGiven maxterm expression:\n$$f(A, B, C) = \\Pi M(1, 3, 4, 5) = \\Sigma m(0, 2, 6, 7)$$\n\nSelect lines are $S_1 = B$ and $S_0 = C$.\nThe input lines correspond to combinations of $(B, C)$:\n- **$I_0$ ($BC = 00$)**: Evaluates at minterms $m_0 (A=0)$ and $m_4 (A=1)$:\n  - $m_0 = 1, m_4 = 0 \\implies I_0 = \\overline{A}$\n- **$I_1$ ($BC = 01$)**: Evaluates at minterms $m_1 (A=0)$ and $m_5 (A=1)$:\n  - $m_1 = 0, m_5 = 0 \\implies I_1 = 0$\n- **$I_2$ ($BC = 10$)**: Evaluates at minterms $m_2 (A=0)$ and $m_6 (A=1)$:\n  - $m_2 = 1, m_6 = 1 \\implies I_2 = 1$\n- **$I_3$ ($BC = 11$)**: Evaluates at minterms $m_3 (A=0)$ and $m_7 (A=1)$:\n  - $m_3 = 0, m_7 = 1 \\implies I_3 = A$\n\nTherefore, the required inputs are:\n$$I_0, I_1, I_2, I_3 = \\overline{A}, 0, 1, A$$\n\n**Correct Option: 4**"
@@ -687,10 +687,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_cs_q28.png",
     "questionType": "SCQ",
     "options": [
-      "{w \\in {0, 1}^* | w = w^R \\text{ and } |w| \\text{ is odd}}",
-      "{w \\in {0, 1}^* | w = w^R \\text{ and } |w| \\text{ is even}}",
-      "{ww^R | w \\in {0, 1}^*}",
-      "{w \\in {0, 1}^* | w \\text{ contains an odd number of 0's}}"
+      "$\\{w \\in \\{0, 1\\}^* \\mid w = w^R \\text{ and } |w| \\text{ is odd}\\}$",
+      "$\\{w \\in \\{0, 1\\}^* \\mid w = w^R \\text{ and } |w| \\text{ is even}\\}$",
+      "$\\{ww^R \\mid w \\in \\{0, 1\\}^*\\}$",
+      "$\\{w \\in \\{0, 1\\}^* \\mid w \\text{ contains an odd number of 0's}\\}$"
     ],
     "correctAnswerIndex": 0,
     "explanation": "### Solution\nTracing the transitions of the PDA:\n1. $q_1 \\xrightarrow{\\epsilon, \\epsilon \\to \\$} q_2$: Pushes bottom marker $\\$$ onto the stack.\n2. In state $q_2$:\n   - Loop on $0, \\epsilon \\to 0$ and $1, \\epsilon \\to 1$: Pushes the first half of the input string onto the stack.\n3. Transition from $q_2$ to $q_3$:\n   - $0, \\epsilon \\to \\epsilon$ OR $1, \\epsilon \\to \\epsilon$: Reads exactly one middle symbol from the input tape WITHOUT modifying the stack.\n4. In state $q_3$:\n   - Loop on $0, 0 \\to \\epsilon$ and $1, 1 \\to \\epsilon$: Matches and pops the second half of the string against the reversed first half stored on the stack.\n5. Transition to final state $q_4$:\n   - $\\epsilon, \\$ \\to \\epsilon$: When the stack is emptied of symbols, transitions to accepting state $q_4$.\n\nBecause exactly one middle character is consumed during the transition $q_2 \\to q_3$, the PDA accepts precisely **odd-length palindromes**: $\\{w \\in \\{0, 1\\}^* \\mid w = w^R \\text{ and } |w| \\text{ is odd}\\}$.\n\n**Correct Option: 1**"
@@ -706,10 +706,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_cs_q29.png",
     "questionType": "SCQ",
     "options": [
-      "(\\forall x [(\\exists y < x, P(y)) \\implies P(x)]) \\implies (\\forall x P(x))",
-      "(\\forall x [(\\forall y < x, P(y)) \\implies P(x)]) \\implies (\\forall x P(x))",
-      "\\forall x [(\\forall y < x, P(y)) \\implies (\\forall x P(x))]",
-      "(\\forall x [(\\forall y \\le x, P(y)) \\implies P(x)]) \\implies (\\forall x P(x))"
+      "$(\\forall x [(\\exists y < x, P(y)) \\implies P(x)]) \\implies (\\forall x P(x))$",
+      "$(\\forall x [(\\forall y < x, P(y)) \\implies P(x)]) \\implies (\\forall x P(x))$",
+      "$\\forall x [(\\forall y < x, P(y)) \\implies (\\forall x P(x))]$",
+      "$(\\forall x [(\\forall y \\le x, P(y)) \\implies P(x)]) \\implies (\\forall x P(x))$"
     ],
     "correctAnswerIndex": 1,
     "explanation": "### Solution\n- The principle of **Strong (Complete) Mathematical Induction** over the well-ordered domain of natural numbers $\\mathbb{N} = \\{0, 1, 2, \\dots\\}$ states that if a property $P(x)$ holds whenever it holds for all strictly smaller predecessors $y < x$, then $P(x)$ holds for all $x \\in \\mathbb{N}$:\n  $$(\\forall x [(\\forall y < x, P(y)) \\implies P(x)]) \\implies (\\forall x P(x))$$\n- For the base case $x = 0$, the premise $(\\forall y < 0, P(y))$ is vacuously true, forcing $P(0)$ to be true.\n- Then by induction, $P(x)$ holds for all natural numbers.\n\nHence, statement 2 is valid.\n\n**Correct Option: 2**"
@@ -725,10 +725,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_cs_q30.png",
     "questionType": "SCQ",
     "options": [
-      "(a)",
-      "(b)",
-      "(c)",
-      "(d)"
+      "$(((A_1 A_2) A_3) A_4)$",
+      "$(A_1 ((A_2 A_3) A_4))$",
+      "$((A_1 (A_2 A_3)) A_4)$",
+      "$((A_1 A_2) (A_3 A_4))$"
     ],
     "correctAnswerIndex": 2,
     "explanation": "### Solution\nDimensions: $A_1: 5 \\times 4, A_2: 4 \\times 6, A_3: 6 \\times 2, A_4: 2 \\times 7$.\n\nLet us compute costs for chain lengths:\n1. **Chains of length 2**:\n   - $m[1, 2] = 5 \\times 4 \\times 6 = 120$\n   - $m[2, 3] = 4 \\times 6 \\times 2 = 48$\n   - $m[3, 4] = 6 \\times 2 \\times 7 = 84$\n\n2. **Chains of length 3**:\n   - $m[1, 3]$:\n     - $k = 1: m[1, 1] + m[2, 3] + 5 \\times 4 \\times 2 = 0 + 48 + 40 = 88$\n     - $k = 2: m[1, 2] + m[3, 3] + 5 \\times 6 \\times 2 = 120 + 0 + 60 = 180$\n     - $\\implies m[1, 3] = 88$ with split $k = 1$: $(A_1 (A_2 A_3))$.\n   - $m[2, 4]$:\n     - $k = 2: m[2, 2] + m[3, 4] + 4 \\times 6 \\times 7 = 0 + 84 + 168 = 252$\n     - $k = 3: m[2, 3] + m[4, 4] + 4 \\times 2 \\times 7 = 48 + 0 + 56 = 104$\n     - $\\implies m[2, 4] = 104$ with split $k = 3$: $((A_2 A_3) A_4)$.\n\n3. **Full chain $m[1, 4]$**:\n   - $k = 1: m[1, 1] + m[2, 4] + 5 \\times 4 \\times 7 = 0 + 104 + 140 = 244$\n   - $k = 2: m[1, 2] + m[3, 4] + 5 \\times 6 \\times 7 = 120 + 84 + 210 = 414$\n   - $k = 3: m[1, 3] + m[4, 4] + 5 \\times 2 \\times 7 = 88 + 0 + 70 = 158$\n\nMinimum cost is **$158$** with split at $k = 3$ $\\implies (A_1 A_2 A_3) A_4$.\nSince $A_1 A_2 A_3$ splits at $k = 1$, the optimal parenthesization is:\n$$((A_1 (A_2 A_3)) A_4)$$\n\n**Correct Option: 3 ((c))**"
@@ -744,10 +744,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_cs_q31.png",
     "questionType": "SCQ",
     "options": [
-      "{w | w \\in (a, b, c)^*; n_a(w) \\ge 1, n_b(w) \\ge 1, n_c(w) \\ge 1}",
-      "{w | w \\in (a, b, c)^*; n_a(w) \\le 1, n_c(w) \\ge 1, n_b(w) \\ge 0}",
-      "{w | w \\in (a, b, c)^*; n_a(w) \\le 1, n_b(w) \\le 1, n_c(w) \\ge 1}",
-      "{w | w \\in (a, b, c)^*; n_a(w) \\ge 1, n_c(w) \\ge 1, n_b(w) \\ge 0}"
+      "$\\{w \\mid w \\in \\{a, b, c\\}^*;\ n_a(w) \\ge 1, n_b(w) \\ge 1, n_c(w) \\ge 1\\}$",
+      "$\\{w \\mid w \\in \\{a, b, c\\}^*;\ n_a(w) \\le 1, n_c(w) \\ge 1, n_b(w) \\ge 0\\}$",
+      "$\\{w \\mid w \\in \\{a, b, c\\}^*;\ n_a(w) \\le 1, n_b(w) \\le 1, n_c(w) \\ge 1\\}$",
+      "$\\{w \\mid w \\in \\{a, b, c\\}^*;\ n_a(w) \\ge 1, n_c(w) \\ge 1, n_b(w) \\ge 0\\}$"
     ],
     "correctAnswerIndex": 3,
     "explanation": "### Solution\n- The DFA is structured on the vertices of a 3-dimensional cube tracking whether characters $a, b, c$ have appeared at least once.\n- The initial state at $(0, 0, 0)$ transitions forward along dimension $a$ on symbol $a$, dimension $b$ on $b$, and dimension $c$ on $c$.\n- The double-circle accepting states are those where both $a$ and $c$ have appeared at least once ($n_a(w) \\ge 1$ and $n_c(w) \\ge 1$), while symbol $b$ may appear any number of times ($n_b(w) \\ge 0$).\n\nThus, the language accepted is:\n$$\\{w \\mid w \\in (a, b, c)^*; n_a(w) \\ge 1, n_c(w) \\ge 1, n_b(w) \\ge 0\\}$$\n\n**Correct Option: 4**"
@@ -782,10 +782,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_cs_q33.png",
     "questionType": "SCQ",
     "options": [
-      "(a)",
-      "(b)",
-      "(c)",
-      "(d)"
+      "$\\dfrac{2^{120} - 2^{90} - 2^{100} + 2^{80}}{2^{120} - 1}$",
+      "$\\dfrac{2^{120} - 2^{90} - 2^{100} + 2^{30}}{2^{120} - 1}$",
+      "$\\dfrac{2^{120} - 2^{90} - 2^{100} + 2^{20}}{2^{120} - 1}$",
+      "$\\dfrac{2^{120} - 2^{90} - 2^{100} + 2^{80} - 1}{2^{120} - 1}$"
     ],
     "correctAnswerIndex": 0,
     "explanation": "### Solution\nTotal number of elements in $S$ is $|S| = 120$.\n- Total non-empty subsets of $S$ is $2^{120} - 1$.\n- Multiples of 4 in $S$: $\\lfloor 120 / 4 \\rfloor = 30$.\n- Multiples of 6 in $S$: $\\lfloor 120 / 6 \\rfloor = 20$.\n- Multiples of both 4 and 6 (i.e. $\\text{lcm}(4, 6) = 12$): $\\lfloor 120 / 12 \\rfloor = 10$.\n- Total multiples of 4 or 6: $30 + 20 - 10 = 40$.\n\nLet $E_1$ be the event that $T$ contains no multiple of 4: subsets formed only from the remaining $120 - 30 = 90$ elements $\\implies 2^{90}$ subsets.\nLet $E_2$ be the event that $T$ contains no multiple of 6: subsets formed only from the remaining $120 - 20 = 100$ elements $\\implies 2^{100}$ subsets.\nSubsets containing neither multiple of 4 nor multiple of 6: formed from the remaining $120 - 40 = 80$ elements $\\implies 2^{80}$ subsets.\n\nBy the Principle of Inclusion-Exclusion:\n$$\\text{Number of subsets missing at least one multiple} = 2^{90} + 2^{100} - 2^{80}$$\nSubtracting the empty set (which contains no multiples and is excluded from non-empty subsets):\n$$\\text{Number of valid non-empty subsets} = (2^{120} - 1) - (2^{90} + 2^{100} - 2^{80} - 1) = 2^{120} - 2^{90} - 2^{100} + 2^{80}$$\n\nDividing by total non-empty subsets ($2^{120} - 1$):\n$$P = \\frac{2^{120} - 2^{90} - 2^{100} + 2^{80}}{2^{120} - 1}$$\n\nThis matches option **(a)**.\n\n**Correct Option: 1 ((a))**"
@@ -893,10 +893,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_cs_q39.png",
     "questionType": "SCQ",
     "options": [
-      "P : Flag[j] = true and S1 != S2; Q : Flag[i] = true and S1 == S2",
-      "P : Flag[j] = true and S1 == S2; Q : Flag[i] = true and S1 != S2",
-      "P : Flag[i] = true and S1 != S2; Q : Flag[j] = true and S1 == S2",
-      "P : Flag[i] = true and S1 == S2; Q : Flag[j] = true and S1 != S2"
+      "P : Flag[j] = true and $S_1 \\neq S_2$;  Q : Flag[i] = true and $S_1 = S_2$",
+      "P : Flag[j] = true and $S_1 = S_2$;  Q : Flag[i] = true and $S_1 \\neq S_2$",
+      "P : Flag[i] = true and $S_1 \\neq S_2$;  Q : Flag[j] = true and $S_1 = S_2$",
+      "P : Flag[i] = true and $S_1 = S_2$;  Q : Flag[j] = true and $S_1 \\neq S_2$"
     ],
     "correctAnswerIndex": 0,
     "explanation": "### Solution\nIn this 2-process synchronization algorithm:\n- $P_1$ sets $flag[i] = \\text{True}$ and sets $S_1 = S_2$.\n- $P_2$ sets $flag[j] = \\text{True}$ and sets $S_1 = S_2 + 1$.\n\nNotice the tie-breaking condition:\n- If $P_1$ executes its assignment last, $S_1 = S_2$.\n- If $P_2$ executes its assignment last, $S_1 = S_2 + 1 \\implies S_1 \\ne S_2$.\n\nTo ensure mutual exclusion:\n- For $P_1$ to wait, $P_2$ must want to enter ($flag[j] = \\text{true}$) and it must be $P_2$'s turn ($S_1 \\ne S_2$).\n  $$\\mathbf{P}: \\text{Flag}[j] = \\text{true} \\land S_1 \\ne S_2$$\n- For $P_2$ to wait, $P_1$ must want to enter ($flag[i] = \\text{true}$) and it must be $P_1$'s turn ($S_1 == S_2$).\n  $$\\mathbf{Q}: \\text{Flag}[i] = \\text{true} \\land S_1 == S_2$$\n\n**Correct Option: 1**"
@@ -949,10 +949,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_cs_q42.png",
     "questionType": "SCQ",
     "options": [
-      "\\frac{\\pi^2}{4} + 4",
-      "\\frac{\\pi^2}{2} + 4",
-      "\\frac{\\pi^2}{2}",
-      "\\frac{\\pi^2}{2} - 4"
+      "$\\dfrac{\\pi^2}{4} + 4$",
+      "$\\dfrac{\\pi^2}{2} + 4$",
+      "$\\dfrac{\\pi^2}{2}$",
+      "$\\dfrac{\\pi^2}{2} - 4$"
     ],
     "correctAnswerIndex": 3,
     "explanation": "### Solution\nSplit the integral into two parts:\n$$I = \\int_{-\\frac{\\pi}{2}}^{\\frac{\\pi}{2}} x^2 \\cos x \\, dx + \\int_{-\\frac{\\pi}{2}}^{\\frac{\\pi}{2}} \\log\\left(\\frac{\\pi - x}{\\pi + x}\\right) \\cos x \\, dx$$\n\n1. Let $g(x) = \\log\\left(\\frac{\\pi - x}{\\pi + x}\\right) \\cos x$:\n   $$g(-x) = \\log\\left(\\frac{\\pi + x}{\\pi - x}\\right) \\cos(-x) = \\log\\left(\\left(\\frac{\\pi - x}{\\pi + x}\\right)^{-1}\\right) \\cos x = -\\log\\left(\\frac{\\pi - x}{\\pi + x}\\right) \\cos x = -g(x)$$\n   - Thus, $g(x)$ is an **odd function** over the symmetric interval $[-\\frac{\\pi}{2}, \\frac{\\pi}{2}]$.\n   - Its integral evaluates to **0**!\n\n2. The remaining part $x^2 \\cos x$ is an **even function**:\n   $$I = 2 \\int_0^{\\frac{\\pi}{2}} x^2 \\cos x \\, dx$$\n\n   Integrating by parts:\n   $$\\int x^2 \\cos x \\, dx = x^2 \\sin x - 2 \\int x \\sin x \\, dx = x^2 \\sin x - 2[-x \\cos x + \\sin x] = x^2 \\sin x + 2x \\cos x - 2\\sin x$$\n   Evaluating from $0$ to $\\frac{\\pi}{2}$:\n   $$\\left[\\left(\\frac{\\pi}{2}\\right)^2 \\sin\\frac{\\pi}{2} + 2\\left(\\frac{\\pi}{2}\\right)\\cos\\frac{\\pi}{2} - 2\\sin\\frac{\\pi}{2}\\right] - [0 + 0 - 0] = \\frac{\\pi^2}{4} (1) + 0 - 2(1) = \\frac{\\pi^2}{4} - 2$$\n\n   Multiplying by $2$:\n   $$I = 2\\left(\\frac{\\pi^2}{4} - 2\\right) = \\frac{\\pi^2}{2} - 4$$\n\n**Correct Option: 4**"
@@ -1033,7 +1033,7 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "options": [
       "L(D1) = L(D2)",
       "L(D2) is a proper subset of L(D1)",
-      "L(D1) \\cap L(D2) = L(D2)",
+      "$L(D_1) \\cap L(D_2) = L(D_2)$",
       "L(D1) \\setminus L(D2) is an infinite language."
     ],
     "correctAnswerIndices": [
@@ -1055,10 +1055,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_cs_q47.png",
     "questionType": "MCQ",
     "options": [
-      "(a)",
-      "(b)",
-      "(c)",
-      "(d)"
+      "$A_{TM}$ is recursively enumerable but not recursive.",
+      "$\\overline{A_{TM}}$ is recursively enumerable.",
+      "$\\overline{A_{TM}}$ is not recursive.",
+      "If both $A_{TM}$ and $\\overline{A_{TM}}$ are recursively enumerable, then $A_{TM}$ is recursive."
     ],
     "correctAnswerIndices": [
       0,
@@ -1100,10 +1100,10 @@ export const MADE_EASY_FULL_MOCK_4_QUESTIONS: Question[] = [
     "imageUrl": "/images/made_easy/full_mock4_cs_q49.png",
     "questionType": "MCQ",
     "options": [
-      "(a)",
-      "(b)",
-      "(c)",
-      "(d)"
+      "$\\{T \\mid \\exists T_1 \\in \\text{Catalog}\ (\\exists T_2 \\in \\text{Catalog})\ (T_{2.pid} = T_{1.pid} \\vee T_{2.sid} = T_{1.sid}) \\wedge T.pid = T_{1.pid}\\}$",
+      "$\\{T \\mid \\exists T_1 \\in \\text{Catalog}\ (\\exists T_2 \\in \\text{Catalog})\ (T_{2.pid} = T_{1.pid} \\wedge T_{2.sid} \\ne T_{1.sid} \\wedge T.pid = T_{1.pid})\\}$",
+      "$\\rho(R_1, \\text{Catalog}),\ \\rho(R_2, \\text{Catalog}),\ \\Pi_{R_1.pid}\ \\sigma_{R_1.pid = R_2.pid \\vee R_1.sid \\ne R_2.sid}(R_1 \\times R_2)$",
+      "$\\rho(R_1, \\text{Catalog}),\ \\rho(R_2, \\text{Catalog}),\ \\Pi_{R_1.pid}\ \\sigma_{R_1.pid = R_2.pid \\wedge R_1.sid \\ne R_2.sid}(R_1 \\times R_2)$"
     ],
     "correctAnswerIndices": [
       1,

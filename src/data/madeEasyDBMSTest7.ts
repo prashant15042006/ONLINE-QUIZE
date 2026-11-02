@@ -354,10 +354,10 @@ $$F = \\{AB \\rightarrow C,\\ CD \\rightarrow E,\\ C \\rightarrow A,\\ C \\right
 
 Which of the following statements are correct?`,
     options: [
-      "Both {AD} and {AB} are candidate keys.",
+      "Both $\\{AD\\}$ and $\\{AB\\}$ are candidate keys.",
       "Total number of candidate keys are 3.",
-      "Both {BD} and {BC} are candidate keys.",
-      "The set of prime attributes is {A, B, C, D}."
+      "Both $\\{BD\\}$ and $\\{BC\\}$ are candidate keys.",
+      "The set of prime attributes is $\\{A, B, C, D\\}$."
     ],
     correctAnswerIndex: 0,
     correctAnswerIndices: [0, 1, 3],
@@ -431,10 +431,10 @@ Therefore, the decomposition is **Neither lossless join nor dependency preservin
     text: `Identify the minimal cover for the following FD set:
 $$\\{A \\rightarrow BC,\\ C \\rightarrow A,\\ BC \\rightarrow D,\\ ACD \\rightarrow B,\\ BE \\rightarrow C,\\ EC \\rightarrow FA,\\ CF \\rightarrow BD,\\ D \\rightarrow E\\}$$`,
     options: [
-      "{A → BC, C → ADF, D → E, BE → C}",
-      "{A → C, C → ADF, D → E, BE → C}",
-      "{A → BC, C → ADEF, D → E, BE → C}",
-      "{A → BC, C → ADF, E → D, BE → C}"
+      "$\\{A \\to BC,\ C \\to ADF,\ D \\to E,\ BE \\to C\\}$",
+      "$\\{A \\to C,\ C \\to ADF,\ D \\to E,\ BE \\to C\\}$",
+      "$\\{A \\to BC,\ C \\to ADEF,\ D \\to E,\ BE \\to C\\}$",
+      "$\\{A \\to BC,\ C \\to ADF,\ E \\to D,\ BE \\to C\\}$"
     ],
     correctAnswerIndex: 0,
     explanation: `### Solution

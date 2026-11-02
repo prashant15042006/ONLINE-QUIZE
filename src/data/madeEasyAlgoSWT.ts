@@ -858,10 +858,10 @@ Matching: **A-1, B-3, C-3, D-2**, which is code **(b)**.
 $$T(n) = T\\left(\\frac{n}{2}\\right) + T\\left(\\frac{3n}{4}\\right) + n; \\quad T(1) = 1$$
 Solve the above recurrence relation asymptotically and select the correct option:`,
     options: [
-      "O(n^(1 + log_{5/4}(4/3)))",
-      "O(n^(1 + log_{5/4}(3/4)))",
-      "O(n^(1 + log_{3/4}(5/4)))",
-      "O(n^(1 + log_{4/3}(5/4)))"
+      "$O\\left(n^{1 + \\log_{5/4}(4/3)}\\right)$",
+      "$O\\left(n^{1 + \\log_{5/4}(3/4)}\\right)$",
+      "$O\\left(n^{1 + \\log_{3/4}(5/4)}\\right)$",
+      "$O\\left(n^{1 + \\log_{4/3}(5/4)}\\right)$"
     ],
     correctAnswerIndex: 3,
     explanation: `### Solution

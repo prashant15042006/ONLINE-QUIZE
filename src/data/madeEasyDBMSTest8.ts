@@ -69,10 +69,10 @@ $$\\{(1, 5), (2, 6), (4, 7)\\}$$
 Note that $\\bowtie$ is Natural Join.
 Which of the following relational algebra expressions are equivalent, with respect to the above information?`,
     options: [
-      "\\pi_A(\\sigma_{B=2}(R)) \\text{ and } \\sigma_{B=2}(\\pi_A(R))",
-      "\\pi_A(\\sigma_{A=2}(R)) \\text{ and } \\sigma_{A=2}(\\pi_A(R))",
-      "\\pi_{A, B}(R \\bowtie S) \\text{ and } (\\pi_{A, B}(R)) \\bowtie S",
-      "\\sigma_{B=3}(R \\bowtie S) \\text{ and } (\\sigma_{B=3}(R)) \\bowtie S"
+      "$\\pi_A(\\sigma_{B=2}(R))$ and $\\sigma_{B=2}(\\pi_A(R))$",
+      "$\\pi_A(\\sigma_{A=2}(R))$ and $\\sigma_{A=2}(\\pi_A(R))$",
+      "$\\pi_{A,B}(R \\bowtie S)$ and $(\\pi_{A,B}(R)) \\bowtie S$",
+      "$\\sigma_{B=3}(R \\bowtie S)$ and $(\\sigma_{B=3}(R)) \\bowtie S$"
     ],
     correctAnswerIndex: 1,
     correctAnswerIndices: [1, 3],
@@ -139,10 +139,10 @@ Hence, **Options 2 and 4** are equivalent.`
 (x)   failure
 \`\`\``,
     options: [
-      "T_2, T_4 \\text{ redo}",
-      "T_4 \\text{ redo}",
-      "T_1, T_3, T_5 \\text{ undo}",
-      "T_1, T_4, T_5 \\text{ undo}"
+      "$T_2, T_4$ redo",
+      "$T_4$ redo",
+      "$T_1, T_3, T_5$ undo",
+      "$T_1, T_4, T_5$ undo"
     ],
     correctAnswerIndex: 1,
     correctAnswerIndices: [1, 2],
@@ -242,10 +242,10 @@ Hence, **Option 4** is correct.`
 
 Which of the following queries retrieve the \`Sid\` of suppliers who supply some red or green part?`,
     options: [
-      "{T | \\exists T1 \\in \\text{Catalog} \\; (\\exists X \\in \\text{Parts} \\; ((X.\\text{color} = \\text{'red'} \\wedge X.\\text{color} = \\text{'green'}) \\wedge X.\\text{pid} = T1.\\text{pid}) \\wedge T.\\text{sid} = T1.\\text{sid})}",
-      "{T.\\text{sid} | \\exists T1 \\in \\text{Catalog} \\; (\\exists X \\in \\text{Parts} \\; ((X.\\text{color} = \\text{'red'} \\vee X.\\text{color} = \\text{'green'}) \\wedge X.\\text{pid} = T1.\\text{pid}) \\wedge T.\\text{sid} = T1.\\text{sid})}",
-      "\\pi_{\\text{sid}}(\\pi_{\\text{pid}}(\\sigma_{\\text{color} = \\text{'red'} \\vee \\text{color} = \\text{'green'}}\\text{Parts}) \\bowtie \\text{Catalog})",
-      "\\pi_{\\text{sname}}(\\pi_{\\text{sid}}((\\pi_{\\text{pid}}\\sigma_{\\text{color} = \\text{'red'}}\\text{Parts}) \\bowtie \\text{Catalog}) \\bowtie \\text{Suppliers})"
+      "$\\{T \\mid \\exists T_1 \\in \\text{Catalog},\ \\exists X \\in \\text{Parts}: ((X.\\text{color} = \\text{'red'} \\wedge X.\\text{color} = \\text{'green'}) \\wedge X.\\text{pid} = T_1.\\text{pid}) \\wedge T.\\text{sid} = T_1.\\text{sid}\\}$",
+      "$\\{T.\\text{sid} \\mid \\exists T_1 \\in \\text{Catalog},\ \\exists X \\in \\text{Parts}: ((X.\\text{color} = \\text{'red'} \\vee X.\\text{color} = \\text{'green'}) \\wedge X.\\text{pid} = T_1.\\text{pid}) \\wedge T.\\text{sid} = T_1.\\text{sid}\\}$",
+      "$\\pi_{\\text{sid}}(\\pi_{\\text{pid}}(\\sigma_{\\text{color} = \\text{'red'} \\vee \\text{color} = \\text{'green'}}(\\text{Parts})) \\bowtie \\text{Catalog})$",
+      "$\\pi_{\\text{sname}}(\\pi_{\\text{sid}}((\\pi_{\\text{pid}}(\\sigma_{\\text{color} = \\text{'red'}}(\\text{Parts}))) \\bowtie \\text{Catalog}) \\bowtie \\text{Suppliers})$"
     ],
     correctAnswerIndex: 1,
     correctAnswerIndices: [1, 2],

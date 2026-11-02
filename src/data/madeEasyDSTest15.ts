@@ -797,10 +797,10 @@ C. Heap allocation
 (c) A-3, B-2, C-1
 (d) None of these`,
     options: [
-      "(a)",
-      "(b)",
-      "(c)",
-      "(d)"
+      "A-1, B-2, C-3",
+      "A-2, B-3, C-1",
+      "A-3, B-2, C-1",
+      "None of these"
     ],
     correctAnswerIndex: 2,
     explanation: `### Solution

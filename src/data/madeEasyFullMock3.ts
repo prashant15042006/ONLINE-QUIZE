@@ -707,10 +707,10 @@ Therefore, $F(A, B, C) = \\sum m(0, 2, 3, 6)$ is **self-dual**.
     imageAlt: "Turing Machine matching a's and b's",
     text: "Identify the language accepted by the Turing Machine shown below:",
     options: [
-      "{a^m b^n | m > n}",
-      "{a^m b^n | m = 2n}",
-      "{a^m b^n | n = 2m}",
-      "{a^m b^n | m \u2265 n}"
+      "$\\{a^m b^n \\mid m > n\\}$",
+      "$\\{a^m b^n \\mid m = 2n\\}$",
+      "$\\{a^m b^n \\mid n = 2m\\}$",
+      "$\\{a^m b^n \\mid m \\geq n\\}$"
     ],
     correctAnswerIndex: 1,
     explanation: `### Solution
@@ -1967,7 +1967,7 @@ CLIENT (Clid, Clname, sex)
 BOOKING (Clid, SvcId)
 Which of the following represent "Services in which only male clients are booked"? (Assume every service is taken by at least one male or at least one female client).`,
     options: [
-      "Query 1",
+      "π_SvcId((π_Clid(σ_sex='male'(CLIENT)) × π_SvcId(BOOKING)) − BOOKING)",
       "\u03c0_SvcId(\u03c3_sex='male'(CLIENT \u22c8 BOOKING)) \u2013 \u03c0_SvcId(\u03c3_sex='female'(BOOKING \u22c8 CLIENT))",
       "\u03c0_SvcId(BOOKING) \u2013 \u03c0_SvcId(\u03c3_sex='female'(CLIENT \u22c8 BOOKING))",
       "None of these"
