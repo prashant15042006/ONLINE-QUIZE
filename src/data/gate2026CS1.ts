@@ -41,7 +41,8 @@ export const GATE_2026_SET1_QUESTIONS: Question[] = [
     "concept": "General Aptitude \u2014 Spatial Aptitude & Tiling",
     "year": "GATE 2026 CS-1",
     "explanation": "### Solution\nEach given pattern consists of exactly **4 unit tiles**:\n- Pattern 1: $2 \\times 2 = 4$ tiles\n- Pattern 2: $1 \\times 4 = 4$ tiles\n\nAny figure constructed without overlaps using these patterns must have a total tile count that is an **integer multiple of 4** (i.e. Area $\\equiv 0 \\pmod 4$):\n- **Option (A):** $2 \\times 6 = 12$ tiles ($12 = 3 \\times 4$, multiple of 4)\n- **Option (B):** $4 \\times 3 = 12$ tiles ($12 = 3 \\times 4$, multiple of 4)\n- **Option (C):** $3 \\times 6 = 18$ tiles. Since 18 is **not divisible by 4** ($18 \\pmod 4 = 2$), it can never be tiled with 4-tile shapes!\n- **Option (D):** $5 \\times 4 = 20$ tiles ($20 = 5 \\times 4$, multiple of 4)\n\n$$\\therefore \\text{Option (C) cannot be constructed.}$$",
-    "imageUrl": "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 120' width='320' height='120' font-family='sans-serif'>\n  <rect width='320' height='120' fill='#0f172a' rx='8'/>\n  <text x='80' y='25' fill='#94a3b8' font-size='12' text-anchor='middle'>Pattern 1 (2x2)</text>\n  <rect x='60' y='40' width='20' height='20' fill='#38bdf8' stroke='#0f172a' stroke-width='2'/>\n  <rect x='80' y='40' width='20' height='20' fill='#38bdf8' stroke='#0f172a' stroke-width='2'/>\n  <rect x='60' y='60' width='20' height='20' fill='#38bdf8' stroke='#0f172a' stroke-width='2'/>\n  <rect x='80' y='60' width='20' height='20' fill='#38bdf8' stroke='#0f172a' stroke-width='2'/>\n  <text x='220' y='25' fill='#94a3b8' font-size='12' text-anchor='middle'>Pattern 2 (1x4)</text>\n  <rect x='210' y='35' width='20' height='18' fill='#f59e0b' stroke='#0f172a' stroke-width='2'/>\n  <rect x='210' y='53' width='20' height='18' fill='#f59e0b' stroke='#0f172a' stroke-width='2'/>\n  <rect x='210' y='71' width='20' height='18' fill='#f59e0b' stroke='#0f172a' stroke-width='2'/>\n  <rect x='210' y='89' width='20' height='18' fill='#f59e0b' stroke='#0f172a' stroke-width='2'/>\n</svg>"
+    "imageUrl": "/images/gate2026/q02_tile_options.png",
+    "imageAlt": "Q2: Tile options A, B, C, D showing different rectangular grid patterns"
   },
   {
     "id": "gate26-s1-q03",
@@ -131,7 +132,9 @@ export const GATE_2026_SET1_QUESTIONS: Question[] = [
     "difficulty": "medium",
     "concept": "General Aptitude \u2014 Spatial Reasoning",
     "year": "GATE 2026 CS-1",
-    "explanation": "### Solution\nComparing the orthographic projections in Panel I with the 3D structures in Panel II:\n- The Front View requires 3 stacked cubes on the left column, 2 cubes in the center column, and 1 cube on the right column.\n- Structure **(iv)** perfectly matches both the front elevation and top plan projections.\n\n$$\\therefore \\text{Answer: (D) (iv)}$$"
+    "explanation": "### Solution\nComparing the orthographic projections in Panel I with the 3D structures in Panel II:\n- The Front View requires 3 stacked cubes on the left column, 2 cubes in the center column, and 1 cube on the right column.\n- Structure **(iv)** perfectly matches both the front elevation and top plan projections.\n\n$$\\therefore \\text{Answer: (D) (iv)}$$",
+    "imageUrl": "/images/gate2026/q07_3d_structure.jpg",
+    "imageAlt": "Q7: Panel I (front view and top view) and Panel II showing four 3D block structures (i), (ii), (iii), (iv)"
   },
   {
     "id": "gate26-s1-q08",
@@ -712,7 +715,9 @@ export const GATE_2026_SET1_QUESTIONS: Question[] = [
     "difficulty": "medium",
     "concept": "Digital Logic \u2014 Sequential Circuits & D Flip-Flops",
     "year": "GATE 2026 CS-1",
-    "explanation": "### Solution\nFor D flip-flops, $D_1 = Q_1^+$ and $D_0 = Q_0^+$.\n\n1. **K-Map for $D_1(P, Q_1, Q_0)$:**\n   Minterms where $Q_1^+ = 1$:\n   - $(P=0, Q_1=0, Q_0=1) \\implies m_1$\n   - $(P=0, Q_1=1, Q_0=0) \\implies m_2$\n   - $(P=0, Q_1=1, Q_0=1) \\implies m_3$\n   - $(P=1, Q_1=1, Q_0=1) \\implies m_7$\n   $$D_1 = \\sum m(1, 2, 3, 7)$$\n   Grouping on 3-variable K-map:\n   - Group $m_2, m_3$: $\\bar{P} Q_1$\n   - Group $m_1, m_3$: $\\bar{P} Q_0$\n   - Group $m_3, m_7$: $Q_1 Q_0$\n   $$\\implies D_1 = \\bar{P} Q_1 + \\bar{P} Q_0 + Q_1 Q_0$$\n\n2. **K-Map for $D_0(P, Q_1, Q_0)$:**\n   Minterms where $Q_0^+ = 1$:\n   - $(0, 0, 0) \\implies m_0$\n   - $(0, 1, 0) \\implies m_2$\n   - $(0, 1, 1) \\implies m_3$\n   - $(1, 1, 0) \\implies m_6$\n   $$D_0 = \\sum m(0, 2, 3, 6)$$\n   Grouping on 3-variable K-map:\n   - Group $m_0, m_2$: $\\bar{P} \\bar{Q_0}$\n   - Group $m_2, m_3$: $\\bar{P} Q_1$\n   - Group $m_2, m_6$: $Q_1 \\bar{Q_0}$\n   $$\\implies D_0 = \\bar{P} \\bar{Q_0} + \\bar{P} Q_1 + Q_1 \\bar{Q_0}$$\n\n$$\\therefore \\text{Answer: (B)}$$"
+    "explanation": "### Solution\nFor D flip-flops, $D_1 = Q_1^+$ and $D_0 = Q_0^+$.\n\n1. **K-Map for $D_1(P, Q_1, Q_0)$:**\n   Minterms where $Q_1^+ = 1$:\n   - $(P=0, Q_1=0, Q_0=1) \\implies m_1$\n   - $(P=0, Q_1=1, Q_0=0) \\implies m_2$\n   - $(P=0, Q_1=1, Q_0=1) \\implies m_3$\n   - $(P=1, Q_1=1, Q_0=1) \\implies m_7$\n   $$D_1 = \\sum m(1, 2, 3, 7)$$\n   Grouping on 3-variable K-map:\n   - Group $m_2, m_3$: $\\bar{P} Q_1$\n   - Group $m_1, m_3$: $\\bar{P} Q_0$\n   - Group $m_3, m_7$: $Q_1 Q_0$\n   $$\\implies D_1 = \\bar{P} Q_1 + \\bar{P} Q_0 + Q_1 Q_0$$\n\n2. **K-Map for $D_0(P, Q_1, Q_0)$:**\n   Minterms where $Q_0^+ = 1$:\n   - $(0, 0, 0) \\implies m_0$\n   - $(0, 1, 0) \\implies m_2$\n   - $(0, 1, 1) \\implies m_3$\n   - $(1, 1, 0) \\implies m_6$\n   $$D_0 = \\sum m(0, 2, 3, 6)$$\n   Grouping on 3-variable K-map:\n   - Group $m_0, m_2$: $\\bar{P} \\bar{Q_0}$\n   - Group $m_2, m_3$: $\\bar{P} Q_1$\n   - Group $m_2, m_6$: $Q_1 \\bar{Q_0}$\n   $$\\implies D_0 = \\bar{P} \\bar{Q_0} + \\bar{P} Q_1 + Q_1 \\bar{Q_0}$$\n\n$$\\therefore \\text{Answer: (B)}$$",
+    "imageUrl": "/images/gate2026/q37_counter_table.png",
+    "imageAlt": "Q37: 2-bit saturating counter next-state table with inputs P, Q1, Q0 and next states Q1+, Q0+"
   },
   {
     "id": "gate26-s1-q38",
@@ -802,7 +807,9 @@ export const GATE_2026_SET1_QUESTIONS: Question[] = [
     "difficulty": "medium",
     "concept": "Compiler Design \u2014 Available Expressions & Optimization",
     "year": "GATE 2026 CS-1",
-    "explanation": "### Solution\nAn expression is redundant (available) at a program point if it is computed along **EVERY** path leading to that point, and none of its operands are modified after that computation.\n\n1. **In Block B4:**\n   - Paths entering B4 come from B2 and B3.\n   - **Expression `g * k`:** Computed in B2 (`a = g * k`) and in B3 (`t = g * k`). Neither `g` nor `k` is redefined along either branch. Hence, `g * k` is available along all paths entering B4 $\\implies$ **`g * k` is redundant in B4**.\n   - **Expression `b + i`:** In B3, `b` is redefined (`b = c + m`). Hence `b + i` is killed in B3 and NOT available entering B4.\n\n2. **In Block B5:**\n   - **Expression `c + m`:** Computed in B3 (`b = c + m`), but along the path through B2, `c + m` is NEVER computed! Since it is not computed along all incoming paths, it is NOT available at B5 $\\implies$ `c + m` is NOT redundant in B5.\n\nTherefore, B4: $\\{g * k\\}$ and B5: $\\{\\}$.\n\n$$\\therefore \\text{Answer: (D)}$$"
+    "explanation": "### Solution\nAn expression is redundant (available) at a program point if it is computed along **EVERY** path leading to that point, and none of its operands are modified after that computation.\n\n1. **In Block B4:**\n   - Paths entering B4 come from B2 and B3.\n   - **Expression `g * k`:** Computed in B2 (`a = g * k`) and in B3 (`t = g * k`). Neither `g` nor `k` is redefined along either branch. Hence, `g * k` is available along all paths entering B4 $\\implies$ **`g * k` is redundant in B4**.\n   - **Expression `b + i`:** In B3, `b` is redefined (`b = c + m`). Hence `b + i` is killed in B3 and NOT available entering B4.\n\n2. **In Block B5:**\n   - **Expression `c + m`:** Computed in B3 (`b = c + m`), but along the path through B2, `c + m` is NEVER computed! Since it is not computed along all incoming paths, it is NOT available at B5 $\\implies$ `c + m` is NOT redundant in B5.\n\nTherefore, B4: $\\{g * k\\}$ and B5: $\\{\\}$.\n\n$$\\therefore \\text{Answer: (D)}$$",
+    "imageUrl": "/images/gate2026/q42_cfg.png",
+    "imageAlt": "Q42: Control flow graph with blocks B1, B2, B3, B4, B5"
   },
   {
     "id": "gate26-s1-q43",
@@ -966,7 +973,9 @@ export const GATE_2026_SET1_QUESTIONS: Question[] = [
     "correctAnswerIndices": [
       1,
       3
-    ]
+    ],
+    "imageUrl": "/images/gate2026/q50_dfs_pseudocode.jpg",
+    "imageAlt": "Q50: DFS pseudocode showing DFS(G) and Explore(G,v,t) procedures"
   },
   {
     "id": "gate26-s1-q51",
@@ -1032,7 +1041,9 @@ export const GATE_2026_SET1_QUESTIONS: Question[] = [
       0,
       1,
       3
-    ]
+    ],
+    "imageUrl": "/images/gate2026/q53_sdd_table.png",
+    "imageAlt": "Q53: SDD1 and SDD2 tables for type declarations"
   },
   {
     "id": "gate26-s1-q54",
@@ -1159,7 +1170,9 @@ export const GATE_2026_SET1_QUESTIONS: Question[] = [
     "year": "GATE 2026 CS-1",
     "explanation": "### Solution\nThe clock cycle duration is $\\tau = 1$ ns.\nWhen an instruction requires execution time $t_{EX} > 1$ ns in the EX stage:\n- Total clock cycles required in EX stage $= \\lceil t_{EX} \\rceil$\n- Number of stall cycles introduced $= \\lceil t_{EX} \\rceil - 1$\n\nCalculating stalls for each instruction type:\n- **LOAD:** $t_{EX} = 1.8$ ns $\\implies \\lceil 1.8 \\rceil - 1 = 2 - 1 = 1$ stall. Total $= 15 \\times 1 = 15$\n- **IMUL:** $t_{EX} = 1.5$ ns $\\implies \\lceil 1.5 \\rceil - 1 = 2 - 1 = 1$ stall. Total $= 10 \\times 1 = 10$\n- **IDIV:** $t_{EX} = 2.5$ ns $\\implies \\lceil 2.5 \\rceil - 1 = 3 - 1 = 2$ stalls. Total $= 5 \\times 2 = 10$\n- **FADD:** $t_{EX} = 1.7$ ns $\\implies \\lceil 1.7 \\rceil - 1 = 2 - 1 = 1$ stall. Total $= 10 \\times 1 = 10$\n- **FSUB:** $t_{EX} = 1.7$ ns $\\implies \\lceil 1.7 \\rceil - 1 = 2 - 1 = 1$ stall. Total $= 5 \\times 1 = 5$\n- **FMUL:** $t_{EX} = 2.8$ ns $\\implies \\lceil 2.8 \\rceil - 1 = 3 - 1 = 2$ stalls. Total $= 15 \\times 2 = 30$\n- **FDIV:** $t_{EX} = 3.2$ ns $\\implies \\lceil 3.2 \\rceil - 1 = 4 - 1 = 3$ stalls. Total $= 5 \\times 3 = 15$\n- **All others:** $t_{EX} < 1.0$ ns $\\implies 0$ stalls. Total $= 35 \\times 0 = 0$\n\nSum of all stall cycles:\n$$\\text{Total Stalls} = 15 + 10 + 10 + 10 + 5 + 30 + 15 = 95$$\n\n$$\\therefore \\text{Answer: } 95$$",
     "natAnswer": 95,
-    "natTolerance": 0
+    "natTolerance": 0,
+    "imageUrl": "/images/gate2026/q60_pipeline_table.jpg",
+    "imageAlt": "Q60: Instruction table with tEX values and M counts for pipelined processor"
   },
   {
     "id": "gate26-s1-q61",
