@@ -5,6 +5,7 @@ import { GATE_2025_SET1_QUESTIONS } from "./gate2025CS1";
 import { GATE_2025_SET2_QUESTIONS } from "./gate2025CS2";
 import { GATE_2024_SET1_QUESTIONS } from "./gate2024CS1";
 import { GATE_2024_SET2_QUESTIONS } from "./gate2024CS2";
+import { GATE_2023_QUESTIONS } from "./gate2023CS";
 
 export interface GatePaper {
   id: string;
@@ -89,8 +90,8 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
     title: "GATE CSE 2023",
     totalQuestions: 65,
     timeMinutes: 180,
-    url: "https://gateoverflow.in/exam/431/gate-cse-2023",
-    questions: [],
+    url: "https://gate2027.iitm.ac.in/static/doc/download/2023/cs_2023.pdf",
+    questions: GATE_2023_QUESTIONS,
   },
   {
     id: "gate-2022",
