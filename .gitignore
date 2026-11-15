@@ -51,3 +51,7 @@ next-env.d.ts
 
 # Separate projects
 model/
+
+# Downloaded Question Paper PDFs
+*.pdf
+
