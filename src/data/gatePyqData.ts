@@ -2,6 +2,7 @@ import { Question } from "./questionTypes";
 import { GATE_2026_SET1_QUESTIONS } from "./gate2026CS1";
 import { GATE_2026_SET2_QUESTIONS } from "./gate2026CS2";
 import { GATE_2025_SET1_QUESTIONS } from "./gate2025CS1";
+import { GATE_2025_SET2_QUESTIONS } from "./gate2025CS2";
 
 export interface GatePaper {
   id: string;
@@ -48,6 +49,16 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
     timeMinutes: 180,
     url: "https://gate2027.iitm.ac.in/static/doc/download/2025/CS12025.pdf",
     questions: GATE_2025_SET1_QUESTIONS,
+  },
+  {
+    id: "gate-2025-set2",
+    year: "2025",
+    setTitle: "Set 2",
+    title: "GATE CSE 2025 (Set 2)",
+    totalQuestions: 65,
+    timeMinutes: 180,
+    url: "https://gate2027.iitm.ac.in/static/doc/download/2025/CS22025.pdf",
+    questions: GATE_2025_SET2_QUESTIONS,
   },
   {
     id: "gate-2024-set1",

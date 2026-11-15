@@ -55,3 +55,6 @@ model/
 # Downloaded Question Paper PDFs
 *.pdf
 
+# Temporary scratch scripts
+scratch/
+
