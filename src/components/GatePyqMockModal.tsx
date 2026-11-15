@@ -37,6 +37,10 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
   };
 
   const handleStartExam = (paper: GatePaper, duration: number, startIdx: number = 0) => {
+    if (!paper.questions || paper.questions.length === 0) {
+      alert("Is paper ke authentic questions jald hi add kiye ja rahe hain!");
+      return;
+    }
     onStartPaper(paper.questions, paper.title, duration, startIdx);
     onClose();
   };
@@ -186,9 +190,14 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
                 <div className="space-y-2 pt-2 border-t border-slate-800">
                   <button
                     onClick={() => handleStartExam(selectedPaper, chosenDuration, 0)}
-                    className="w-full py-3 btn-3d-green font-black text-xs sm:text-sm rounded-xl cursor-pointer flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/30"
+                    disabled={selectedPaper.questions.length === 0}
+                    className={`w-full py-3 font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg transition ${
+                      selectedPaper.questions.length === 0
+                        ? "bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed"
+                        : "btn-3d-green shadow-emerald-900/30 cursor-pointer"
+                    }`}
                   >
-                    <span>Start Exam ({chosenDuration} Mins) 🚀</span>
+                    <span>{selectedPaper.questions.length === 0 ? "Questions Coming Soon ⏳" : `Start Exam (${chosenDuration} Mins) 🚀`}</span>
                   </button>
 
                   <div className="flex items-center justify-between pt-1">
@@ -224,55 +233,67 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
                     </span>
                   </div>
 
-                  {/* Question Grid: 8 columns matching the screenshot */}
-                  <div className="grid grid-cols-8 gap-1.5 sm:gap-2 max-h-[380px] overflow-y-auto pr-1">
-                    {selectedPaper.questions.map((q, idx) => {
-                      const isHovered = previewQuestionIndex === idx;
-                      return (
-                        <button
-                          key={q.id || idx}
-                          onClick={() => handleStartExam(selectedPaper, chosenDuration, idx)}
-                          onMouseEnter={() => setPreviewQuestionIndex(idx)}
-                          className={`aspect-square rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center border ${
-                            isHovered
-                              ? "bg-amber-500 border-amber-300 text-slate-950 scale-105 shadow-md shadow-amber-500/30"
-                              : "bg-[#1e293b]/70 border-slate-700/70 text-slate-300 hover:border-amber-400 hover:text-amber-300"
-                          }`}
-                          title={`Q${idx + 1}: ${q.concept || "Question"} (${q.difficulty})`}
-                        >
-                          {idx + 1}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Question Preview Box when hovering */}
-                  <div className="mt-4 p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
-                    {previewQuestionIndex !== null && selectedPaper.questions[previewQuestionIndex] ? (
-                      (() => {
-                        const pq = selectedPaper.questions[previewQuestionIndex];
-                        return (
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between">
-                              <span className="font-black text-amber-400">Q{previewQuestionIndex + 1}: {pq.concept || "GATE Question"}</span>
-                              <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                                pq.difficulty === "easy" ? "bg-emerald-500/20 text-emerald-300" : pq.difficulty === "medium" ? "bg-amber-500/20 text-amber-300" : "bg-rose-500/20 text-rose-300"
-                              }`}>
-                                {pq.difficulty}
-                              </span>
-                            </div>
-                            <p className="text-slate-400 text-[11px] line-clamp-2">{pq.text}</p>
-                            <div className="text-[10px] text-cyan-400 font-bold">👉 Click to start exam directly at Q{previewQuestionIndex + 1}</div>
-                          </div>
-                        );
-                      })()
-                    ) : (
-                      <div className="text-slate-500 text-[11px] flex items-center justify-between">
-                        <span>💡 Tip: Click any number above to jump directly into the exam at that question!</span>
-                        <span className="text-slate-400 font-bold">Standard 100 Marks System</span>
+                  {selectedPaper.questions.length === 0 ? (
+                    <div className="p-8 text-center bg-slate-900/40 rounded-2xl border border-dashed border-slate-700/60 my-6">
+                      <div className="text-3xl mb-2">⏳</div>
+                      <p className="font-bold text-sm text-amber-300">Questions Under Update</p>
+                      <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                        Incomplete / incorrect questions have been removed. Authentic questions for {selectedPaper.title} will be added shortly.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Question Grid: 8 columns matching the screenshot */}
+                      <div className="grid grid-cols-8 gap-1.5 sm:gap-2 max-h-[380px] overflow-y-auto pr-1">
+                        {selectedPaper.questions.map((q, idx) => {
+                          const isHovered = previewQuestionIndex === idx;
+                          return (
+                            <button
+                              key={q.id || idx}
+                              onClick={() => handleStartExam(selectedPaper, chosenDuration, idx)}
+                              onMouseEnter={() => setPreviewQuestionIndex(idx)}
+                              className={`aspect-square rounded-xl text-xs font-bold transition cursor-pointer flex items-center justify-center border ${
+                                isHovered
+                                  ? "bg-amber-500 border-amber-300 text-slate-950 scale-105 shadow-md shadow-amber-500/30"
+                                  : "bg-[#1e293b]/70 border-slate-700/70 text-slate-300 hover:border-amber-400 hover:text-amber-300"
+                              }`}
+                              title={`Q${idx + 1}: ${q.concept || "Question"} (${q.difficulty})`}
+                            >
+                              {idx + 1}
+                            </button>
+                          );
+                        })}
                       </div>
-                    )}
-                  </div>
+
+                      {/* Question Preview Box when hovering */}
+                      <div className="mt-4 p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-xs">
+                        {previewQuestionIndex !== null && selectedPaper.questions[previewQuestionIndex] ? (
+                          (() => {
+                            const pq = selectedPaper.questions[previewQuestionIndex];
+                            return (
+                              <div className="space-y-1">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-black text-amber-400">Q{previewQuestionIndex + 1}: {pq.concept || "GATE Question"}</span>
+                                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                                    pq.difficulty === "easy" ? "bg-emerald-500/20 text-emerald-300" : pq.difficulty === "medium" ? "bg-amber-500/20 text-amber-300" : "bg-rose-500/20 text-rose-300"
+                                  }`}>
+                                    {pq.difficulty}
+                                  </span>
+                                </div>
+                                <p className="text-slate-400 text-[11px] line-clamp-2">{pq.text}</p>
+                                <div className="text-[10px] text-cyan-400 font-bold">👉 Click to start exam directly at Q{previewQuestionIndex + 1}</div>
+                              </div>
+                            );
+                          })()
+                        ) : (
+                          <div className="text-slate-500 text-[11px] flex items-center justify-between">
+                            <span>💡 Tip: Click any number above to jump directly into the exam at that question!</span>
+                            <span className="text-slate-400 font-bold">Standard 100 Marks System</span>
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
@@ -345,7 +366,7 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
                       {paper.title}
                     </h4>
                     <p className="text-[11px] text-slate-400">
-                      {paper.questions.length} Authentic GateOverflow Questions • Complete Syllabus
+                      {paper.questions.length > 0 ? `${paper.questions.length} Authentic GateOverflow Questions • Complete Syllabus` : `Updating Questions • Official Syllabus`}
                     </p>
                   </div>
 
@@ -369,9 +390,14 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
                       </button>
                       <button
                         onClick={() => handleStartExam(paper, 180, 0)}
-                        className="px-3.5 py-1.5 btn-3d-green text-xs font-bold rounded-xl cursor-pointer shadow-md"
+                        disabled={paper.questions.length === 0}
+                        className={`px-3.5 py-1.5 text-xs font-bold rounded-xl transition ${
+                          paper.questions.length === 0
+                            ? "bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed"
+                            : "btn-3d-green shadow-md cursor-pointer"
+                        }`}
                       >
-                        Attempt 180m 🚀
+                        {paper.questions.length === 0 ? "Updating ⏳" : "Attempt 180m 🚀"}
                       </button>
                     </div>
                   </div>
