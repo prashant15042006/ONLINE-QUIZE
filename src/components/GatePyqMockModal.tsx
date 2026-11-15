@@ -58,11 +58,11 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="font-extrabold text-white text-base">GATE CSE Official PYQ Papers</h3>
-                <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                  GateOverflow Verified
+                <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  Official IIT Verified
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400">Authentic Previous Year Papers (2015–2024) with complete 65 Qs & Official Timers</p>
+              <p className="text-[11px] text-slate-400">Authentic Previous Year Papers (2023–2026) with complete 65 Qs & Official Timers</p>
             </div>
           </div>
           <button
@@ -214,7 +214,7 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
                       rel="noreferrer"
                       className="text-[11px] text-cyan-400 hover:text-cyan-300 font-bold underline flex items-center gap-1"
                     >
-                      GateOverflow Paper 🔗
+                      Official Question Paper (PDF) 📄
                     </a>
                   </div>
                 </div>
@@ -366,7 +366,7 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
                       {paper.title}
                     </h4>
                     <p className="text-[11px] text-slate-400">
-                      {paper.questions.length > 0 ? `${paper.questions.length} Authentic GateOverflow Questions • Complete Syllabus` : `Updating Questions • Official Syllabus`}
+                      {paper.questions.length > 0 ? `${paper.questions.length} Authentic Verified Questions • Complete Syllabus` : `Updating Questions • Official Syllabus`}
                     </p>
                   </div>
 
@@ -378,7 +378,7 @@ export default function GatePyqMockModal({ isOpen, onClose, onStartPaper }: Prop
                       className="text-[10px] text-slate-400 hover:text-cyan-300 underline flex items-center gap-1"
                       onClick={(e) => e.stopPropagation()}
                     >
-                      GateOverflow 🔗
+                      Official PDF 📄
                     </a>
 
                     <div className="flex items-center gap-1.5">

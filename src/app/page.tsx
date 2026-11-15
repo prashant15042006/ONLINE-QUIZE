@@ -998,7 +998,7 @@ export default function Home() {
                   { label: "🗺️ Learning Pathway", action: () => { setCurrentScreen("dashboard"); setShowAnalyticsView(false); setIsMobileDrawerOpen(false); }, active: !showAnalyticsView },
                   { label: "📊 Performance Analytics", action: () => { setCurrentScreen("dashboard"); setShowAnalyticsView(true); setIsMobileDrawerOpen(false); }, active: showAnalyticsView },
                   { label: "🎯 MADE EASY Test Series (GATE)", action: () => { setIsMadeEasyModalOpen(true); setIsMobileDrawerOpen(false); } },
-                  { label: "📜 GATE PYQ Papers (2015-2024)", action: () => { setIsGatePyqModalOpen(true); setIsMobileDrawerOpen(false); } },
+                  { label: "📜 GATE PYQ Papers", action: () => { setIsGatePyqModalOpen(true); setIsMobileDrawerOpen(false); } },
                   { label: "📊 GATE Rank Estimator", action: () => { setIsRankEstimatorOpen(true); setIsMobileDrawerOpen(false); } },
                   { label: `📕 Mistakes Notebook (${mistakesCount})`, action: () => { setIsMistakesModalOpen(true); setIsMobileDrawerOpen(false); } },
                   { label: `🔖 Bookmarked Questions (${bookmarksCount})`, action: () => { setIsBookmarksModalOpen(true); setIsMobileDrawerOpen(false); } },
@@ -1061,7 +1061,7 @@ export default function Home() {
                     onClick={() => setIsGatePyqModalOpen(true)}
                     className="px-4 py-2.5 btn-3d-amber rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-md"
                   >
-                    📜 16 PYQ Papers
+                    📜 {totalGatePyqPapers} PYQ Papers
                   </button>
                 </div>
               </div>
