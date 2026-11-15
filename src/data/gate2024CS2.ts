@@ -134,7 +134,7 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
   },
   {
     "id": "gate24-s2-q08",
-    "text": "The pie charts depict the shares of various power generation technologies in the \ntotal electricity generation of a country for the years 2007 and 2023.  \n \nThe renewable sources of electricity generation consist of Hydro, Solar and Wind. \nAssuming that the total electricity generated remains the same from 2007 to 2023, \nwhat is the percentage increase in the share of the renewable sources of electricity \ngeneration over this period?",
+    "text": "The pie charts depict the shares of various power generation technologies in the total electricity generation of a country for the years 2007 and 2023.\n\nThe renewable sources of electricity generation consist of Hydro, Solar and Wind. Assuming that the total electricity generated remains the same in both years, what is the percentage increase in the share of electricity generated from renewable sources in 2023 compared to 2007?",
     "options": [
       "25%",
       "50%",
@@ -148,7 +148,9 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
     "concept": "General Aptitude — Data Interpretation (Pie Charts)",
     "year": "GATE 2024 CS-2",
     "correctAnswerIndex": 3,
-    "explanation": "### Solution\n**Official GATE Answer Key:** D\n\n**Concept:** General Aptitude — Data Interpretation (Pie Charts)\n\n$$\\therefore \\text{Answer: } D$$"
+    "explanation": "### Solution\n**Official GATE Answer Key:** D\n\n**Concept:** General Aptitude — Data Interpretation (Pie Charts)\n\n$$\\therefore \\text{Answer: } D$$",
+    "imageUrl": "/images/gate2024cs2/q08_pie_charts.jpg",
+    "imageAlt": "Q8: Power generation technologies pie charts for 2007 and 2023"
   },
   {
     "id": "gate24-s2-q09",
@@ -170,7 +172,7 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
   },
   {
     "id": "gate24-s2-q10",
-    "text": "In the 4 × 4 array shown below, each cell of the first three rows has either a  \ncross (X) or a number.  \n \nThe number in a cell represents the count of the immediate neighboring cells  \n(left, right, top, bottom, diagonals) NOT having a cross (X). Given that the last row \nhas no crosses (X), the sum of the four numbers to be filled in the last row is",
+    "text": "In the 4 × 4 array shown below, each cell of the first three rows has either a cross (X) or a number.\n\nThe number in a cell represents the count of the immediate neighboring cells (left, right, top, bottom, and diagonally) that contain a cross. Which one of the following options correctly represents the contents of the fourth row?",
     "options": [
       "11",
       "10",
@@ -184,7 +186,9 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
     "concept": "General Aptitude — Spatial Reasoning (Array Patterns)",
     "year": "GATE 2024 CS-2",
     "correctAnswerIndex": 0,
-    "explanation": "### Solution\n**Official GATE Answer Key:** A\n\n**Concept:** General Aptitude — Spatial Reasoning (Array Patterns)\n\n$$\\therefore \\text{Answer: } A$$"
+    "explanation": "### Solution\n**Official GATE Answer Key:** A\n\n**Concept:** General Aptitude — Spatial Reasoning (Array Patterns)\n\n$$\\therefore \\text{Answer: } A$$",
+    "imageUrl": "/images/gate2024cs2/q10_array_cross_number.png",
+    "imageAlt": "Q10: 4x4 array with cross and number cells"
   },
   {
     "id": "gate24-s2-q11",
@@ -271,10 +275,10 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
     "marks": 1,
     "negativeMarks": 0.33,
     "difficulty": "medium",
-    "concept": "Engineering Mathematics — Probability Distributions (Poisson / Normal)",
+    "concept": "Engineering Mathematics — Probability Distributions",
     "year": "GATE 2024 CS-2",
     "correctAnswerIndex": 0,
-    "explanation": "### Solution\n**Official GATE Answer Key:** A\n\n**Concept:** Engineering Mathematics — Probability Distributions (Poisson / Normal)\n\n$$\\therefore \\text{Answer: } A$$"
+    "explanation": "### Solution\n**Official GATE Answer Key:** A\n\n**Concept:** Engineering Mathematics — Probability Distributions\n\n$$\\therefore \\text{Answer: } A$$"
   },
   {
     "id": "gate24-s2-q16",
@@ -386,7 +390,7 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
   },
   {
     "id": "gate24-s2-q22",
-    "text": "Which one of the following regular expressions is equivalent to the language \naccepted by the DFA given below? \n1\n1\n00",
+    "text": "Which one of the following regular expressions is equivalent to the language accepted by the DFA given below?",
     "options": [
       "0∗1(0 + 10∗1)∗",
       "0∗(10∗11)∗0∗",
@@ -400,7 +404,9 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
     "concept": "Theory of Computation — Regular Expressions & Regular Languages",
     "year": "GATE 2024 CS-2",
     "correctAnswerIndex": 0,
-    "explanation": "### Solution\n**Official GATE Answer Key:** A\n\n**Concept:** Theory of Computation — Regular Expressions & Regular Languages\n\n$$\\therefore \\text{Answer: } A$$"
+    "explanation": "### Solution\n**Official GATE Answer Key:** A\n\n**Concept:** Theory of Computation — Regular Expressions & Regular Languages\n\n$$\\therefore \\text{Answer: } A$$",
+    "imageUrl": "/images/gate2024cs2/q22_dfa.png",
+    "imageAlt": "Q22: 2-state DFA accepting strings over {0,1}"
   },
   {
     "id": "gate24-s2-q23",
@@ -749,7 +755,7 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
   },
   {
     "id": "gate24-s2-q40",
-    "text": "Consider the following context-free grammar where the start symbol is 𝑆 and the \nset of terminals is {𝑎,𝑏,𝑐,𝑑}. \n𝑆 → 𝐴𝑎𝐴𝑏⁡|⁡𝐵𝑏𝐵𝑎 \n𝐴 → 𝑐𝑆⁡|⁡𝜖 \n𝐵 → 𝑑𝑆⁡|⁡𝜖 \nThe following is a partially-filled LL(1) parsing table. \n \n \n 𝑎 𝑏 𝑐 𝑑 $ \n𝑆 𝑆 → 𝐴𝑎𝐴𝑏 𝑆 → 𝐵𝑏𝐵𝑎 (1) (2)  \n𝐴 𝐴 → 𝜖 (3) 𝐴 → 𝑐𝑆   \n𝐵 (4) 𝐵 → 𝜖  𝐵 → 𝑑𝑆  \n    \nWhich one of the following options represents the CORRECT combination for the \nnumbered cells in the parsing table? \nNote: In the options, “blank” denotes that the corresponding cell is empty.",
+    "text": "Consider the following context-free grammar where the start symbol is S and the set of terminals is {a,b,c,d}:\n\n- S → AaAb | BbBa\n- A → cS | ε\n- B → dS | ε\n\nThe following is a partially-filled LL(1) parsing table:\n\nWhich one of the following options represents the CORRECT entries for (1), (2), (3), and (4)?",
     "options": [
       "(1) 𝑆 → 𝐴𝑎𝐴𝑏  (2) 𝑆 → 𝐵𝑏𝐵𝑎  (3) 𝐴 → 𝜖  (4) 𝐵 → 𝜖",
       "(1) 𝑆 → 𝐵𝑏𝐵𝑎  (2) 𝑆 → 𝐴𝑎𝐴𝑏  (3) 𝐴 → 𝜖  (4) 𝐵 → 𝜖",
@@ -763,11 +769,13 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
     "concept": "Compiler Design — LL(1) Parsing & FIRST/FOLLOW Sets",
     "year": "GATE 2024 CS-2",
     "correctAnswerIndex": 0,
-    "explanation": "### Solution\n**Official GATE Answer Key:** A\n\n**Concept:** Compiler Design — LL(1) Parsing & FIRST/FOLLOW Sets\n\n$$\\therefore \\text{Answer: } A$$"
+    "explanation": "### Solution\n**Official GATE Answer Key:** A\n\n**Concept:** Compiler Design — LL(1) Parsing & FIRST/FOLLOW Sets\n\n$$\\therefore \\text{Answer: } A$$",
+    "imageUrl": "/images/gate2024cs2/q40_ll1_parsing_table.png",
+    "imageAlt": "Q40: Partially-filled LL(1) parsing table"
   },
   {
     "id": "gate24-s2-q41",
-    "text": "Let 𝑀 be the 5-state NFA with 𝜖-transitions shown in the diagram below.  \n \n \nWhich one of the following regular expressions represents the language accepted \nby 𝑀 ?",
+    "text": "Let M be the 5-state NFA with ε-transitions shown in the diagram below.\n\nWhich one of the following regular expressions represents the language accepted by M?",
     "options": [
       "⁡(00)∗ ⁡ + ⁡1(11)∗",
       "⁡0∗ + (1 + 0(00)∗)(11)∗⁡",
@@ -781,7 +789,9 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
     "concept": "Theory of Computation — NFA with Epsilon Transitions & Equivalence",
     "year": "GATE 2024 CS-2",
     "correctAnswerIndex": 1,
-    "explanation": "### Solution\n**Official GATE Answer Key:** B\n\n**Concept:** Theory of Computation — NFA with Epsilon Transitions & Equivalence\n\n$$\\therefore \\text{Answer: } B$$"
+    "explanation": "### Solution\n**Official GATE Answer Key:** B\n\n**Concept:** Theory of Computation — NFA with Epsilon Transitions & Equivalence\n\n$$\\therefore \\text{Answer: } B$$",
+    "imageUrl": "/images/gate2024cs2/q41_nfa.png",
+    "imageAlt": "Q41: 5-state NFA with epsilon transitions"
   },
   {
     "id": "gate24-s2-q42",
@@ -803,7 +813,7 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
   },
   {
     "id": "gate24-s2-q43",
-    "text": "Consider the following expression: 𝑥[𝑖] = (𝑝 + 𝑟) ∗ −𝑠[𝑖] + 𝑢/𝑤. The following \nsequence shows the list of triples representing the given expression, with entries \nmissing for triples (1), (3), and (6). \n \n \n \n \n \n \n \n \n \n \n \nWhich one of the following options fills in the missing entries CORRECTLY? \n(0) + 𝑝 𝑟 \n(1)    \n(2) uminus (1)  \n(3)    \n(4) / 𝑢 𝑤 \n(5) + (3) (4) \n(6)    \n(7) = (6) (5)",
+    "text": "Consider the following expression: `x[i] = (p + r) * -s[i] + u/w`.\n\nThe following sequence shows the list of triples representing the given expression, with entries missing for triples (1), (3), and (6):\n\nWhich one of the following options represents the CORRECT entries for (1), (3), and (6)?",
     "options": [
       "(1) =[]⁡⁡𝑠⁡⁡𝑖            (3) *  (0)  (2)            (6) []=⁡⁡𝑥⁡⁡𝑖",
       "(1) []=⁡⁡𝑠⁡⁡𝑖            (3) –⁡(0)⁡(2)            (6) =[] ⁡𝑥⁡⁡(5)",
@@ -817,7 +827,9 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
     "concept": "Computer Networks — TCP Flow Control & Congestion Window",
     "year": "GATE 2024 CS-2",
     "correctAnswerIndex": 0,
-    "explanation": "### Solution\n**Official GATE Answer Key:** A\n\n**Concept:** Computer Networks — TCP Flow Control & Congestion Window\n\n$$\\therefore \\text{Answer: } A$$"
+    "explanation": "### Solution\n**Official GATE Answer Key:** A\n\n**Concept:** Computer Networks — TCP Flow Control & Congestion Window\n\n$$\\therefore \\text{Answer: } A$$",
+    "imageUrl": "/images/gate2024cs2/q43_triples_table.png",
+    "imageAlt": "Q43: Triples representation table with missing entries"
   },
   {
     "id": "gate24-s2-q44",
@@ -947,7 +959,7 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
   },
   {
     "id": "gate24-s2-q50",
-    "text": "Consider 4-variable functions f1, f2, f3, f4 expressed in sum-of-minterms form as \ngiven below. \nf1 = ∑(0,2,3,5,7,8,11,13)  \nf2 = ∑(1,3,5,7,11,13, 15)  \nf3 = ∑(0,1,4,11)  \nf4 = ∑(0,2,6,13)  \n \n \nWith respect to the circuit given above, which of the following options is/are \nCORRECT?",
+    "text": "Consider 4-variable functions f1, f2, f3, f4 expressed in sum-of-minterms form as given below:\n\n- f1 = Σ(0,2,3,5,7,8,11,13)\n- f2 = Σ(1,3,5,7,11,13,15)\n- f3 = Σ(0,1,4,11)\n- f4 = Σ(0,2,6,13)\n\nWith respect to the circuit given above, which of the following options is/are CORRECT?",
     "options": [
       "𝒀 = ∑(0,1,2,11,13)",
       "𝒀 = Π(3,4, 5,6,7,8,9,10,12,14,15)",
@@ -965,7 +977,9 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
       2,
       3
     ],
-    "explanation": "### Solution\n**Official GATE Answer Key:** C;D\n\n**Concept:** Digital Logic — Multiplexer Realization of Boolean Functions\n\n$$\\therefore \\text{Answer: } C;D$$"
+    "explanation": "### Solution\n**Official GATE Answer Key:** C;D\n\n**Concept:** Digital Logic — Multiplexer Realization of Boolean Functions\n\n$$\\therefore \\text{Answer: } C;D$$",
+    "imageUrl": "/images/gate2024cs2/q50_logic_circuit.png",
+    "imageAlt": "Q50: Logic circuit with AND, OR, and XOR gates"
   },
   {
     "id": "gate24-s2-q51",
@@ -1102,7 +1116,7 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
   },
   {
     "id": "gate24-s2-q59",
-    "text": "The number of distinct minimum-weight spanning trees of the following graph  \nis _________ \na\nb\ng d\nc\nf e\n3\n2\n2\n1\n2\n3\n2\n2\n2\n1\n1\n1",
+    "text": "The number of distinct minimum-weight spanning trees of the following graph is ________",
     "options": [],
     "questionType": "NAT",
     "marks": 2,
@@ -1113,11 +1127,13 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
     "correctAnswerIndex": 0,
     "natAnswer": 9,
     "natTolerance": 0,
-    "explanation": "### Solution\n**Official GATE Answer Key:** 9\n\n**Concept:** Algorithms — Minimum Spanning Trees (Kruskal/Prim)\n\n$$\\therefore \\text{Answer: } 9$$"
+    "explanation": "### Solution\n**Official GATE Answer Key:** 9\n\n**Concept:** Algorithms — Minimum Spanning Trees (Kruskal/Prim)\n\n$$\\therefore \\text{Answer: } 9$$",
+    "imageUrl": "/images/gate2024cs2/q59_mst_graph.png",
+    "imageAlt": "Q59: Undirected weighted graph with 7 vertices"
   },
   {
     "id": "gate24-s2-q60",
-    "text": "The chromatic number of a graph is the minimum number of colours used in a \nproper colouring of the graph. The chromatic number of the following graph  \nis _________ \n \n \n \n\n \n \nOrganizing Institute: IISc, Bengaluru",
+    "text": "The chromatic number of a graph is the minimum number of colours used in a proper colouring of the graph. The chromatic number of the following graph is ________",
     "options": [],
     "questionType": "NAT",
     "marks": 2,
@@ -1128,7 +1144,9 @@ export const GATE_2024_SET2_QUESTIONS: Question[] = [
     "correctAnswerIndex": 0,
     "natAnswer": 2,
     "natTolerance": 0,
-    "explanation": "### Solution\n**Official GATE Answer Key:** 2\n\n**Concept:** Discrete Mathematics — Graph Coloring & Chromatic Number\n\n$$\\therefore \\text{Answer: } 2$$"
+    "explanation": "### Solution\n**Official GATE Answer Key:** 2\n\n**Concept:** Discrete Mathematics — Graph Coloring & Chromatic Number\n\n$$\\therefore \\text{Answer: } 2$$",
+    "imageUrl": "/images/gate2024cs2/q60_chromatic_graph.png",
+    "imageAlt": "Q60: 8-vertex symmetric graph for chromatic number"
   },
   {
     "id": "gate24-s2-q61",
