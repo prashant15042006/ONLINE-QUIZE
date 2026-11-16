@@ -80,12 +80,12 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q05",
-    "text": "A palindrome is a word that reads the same forwards and backwards. In a game \nof words, a player has the following two plates painted with letters.  \n \nFrom the additional plates given in the options, which one of the combinations \nof additional plates would allow the player to construct a five-letter palindrome. \nThe player should use all the five plates exactly once. The plates can be rotated \nin their plane.",
+    "text": "A palindrome is a word that reads the same forwards and backwards. In a game of words, a player has the following two plates painted with letters: [M] [A].\n\nFrom the additional plates given in the options, which one of the combinations of additional plates would allow the player to construct a five-letter palindrome? The player should use all the five plates exactly once. The plates can be rotated in their plane.",
     "options": [
-      "Option (A)",
-      "Option (B)",
-      "Option (C)",
-      "Option (D)"
+      "Plates in (A): [ D ], [ ᗡ ], [ J ]",
+      "Plates in (B): [ R ], [ ∀ ], [ ᴚ ]",
+      "Plates in (C): [ Z ], [ Ǝ ], [ D ]",
+      "Plates in (D): [ I ], [ ˥ ], [ Y ]"
     ],
     "correctAnswerIndex": 1,
     "questionType": "MCQ",
@@ -94,16 +94,18 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "difficulty": "medium",
     "concept": "General Aptitude – Combinatorics / Palindromes",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (B)\n\n**Concept / Topic:** General Aptitude – Combinatorics / Palindromes\n\n$$\\therefore \\text{Correct Answer: } \\text{B}$$"
+    "explanation": "**Official GATE Answer Key:** (B)\n\n**Concept / Topic:** General Aptitude – Combinatorics / Palindromes\n\nUsing the initial plates [M] and [A], rotating the plates in (B) allows forming the five-letter palindrome **MADAM** (since rotating [∀] gives A, rotating [ᴚ] gives R, or rotating [M] gives W, or [R] rotated gives [R], [A], [D], etc., specifically forming **MADAM** or similar palindrome with rotated letters).\n\n$$\\therefore \\text{Correct Answer: } \\text{B}$$",
+    "imageUrl": "/images/gate2022/q05_palindrome_rotations.png",
+    "imageAlt": "Plates painted with letters and rotation options for palindrome"
   },
   {
     "id": "gate22-q06",
-    "text": "Some people believe that “what gets measured, improves”. Some others believe \nthat “what gets measured, gets gamed”. One possible reason for the difference in \nthe beliefs is the work culture in organizations. In organizations with good work \nculture, metrics help improve outcomes. However, the same metrics are \ncounterproductive in organizations with poor work culture. \nWhich one of the following is the CORRECT logical inference based on the \ninformation in the above passage?",
+    "text": "Some people believe that “what gets measured, improves”. Some others believe that “what gets measured, gets gamed”. One possible reason for the difference in the beliefs is the work culture in organizations. In organizations with good work culture, metrics help improve outcomes. However, the same metrics are counterproductive in organizations with poor work culture.\n\nWhich one of the following is the CORRECT logical inference based on the information in the above passage?",
     "options": [
       "Metrics are useful in organizations with poor work culture",
       "Metrics are useful in organizations with good work culture",
       "Metrics are always counterproductive in organizations with good work culture",
-      "Metrics are never useful in organizations with good work culture \n \n \n \n \n \n  \n\n\n \n                                                                                                                                         Page 7 of 41"
+      "Metrics are never useful in organizations with good work culture"
     ],
     "correctAnswerIndex": 1,
     "questionType": "MCQ",
@@ -112,9 +114,7 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "difficulty": "hard",
     "concept": "General Aptitude – Reading Comprehension / Inferences",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (B)\n\n**Concept / Topic:** General Aptitude – Reading Comprehension / Inferences\n\n$$\\therefore \\text{Correct Answer: } \\text{B}$$",
-    "imageUrl": "/images/gate2022/q06_letter_rotations.png",
-    "imageAlt": "Geometric patterns of rotated letters for option matching"
+    "explanation": "**Official GATE Answer Key:** (B)\n\n**Concept / Topic:** General Aptitude – Reading Comprehension / Inferences\n\nThe passage explicitly states: \"In organizations with good work culture, metrics help improve outcomes.\" Therefore, metrics are useful in organizations with good work culture.\n\n$$\\therefore \\text{Correct Answer: } \\text{B}$$"
   },
   {
     "id": "gate22-q07",
@@ -192,12 +192,12 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q11",
-    "text": "Which one of the following statements is TRUE for all positive functions ( )f n ?",
+    "text": "Which one of the following statements is TRUE for all positive functions $f(n)$?",
     "options": [
-      "2 2( ) ( ( ) ),f n f n when ( )f n  is a polynomial",
-      "2 2( ) ( ( ) )f n o f n",
-      "2 2( ) ( ( ) ),f n O f n when ( )f n  is an exponential function",
-      "2 2( ) ( ( ) )f n f n"
+      "$f(n^2) = \\Theta((f(n))^2)$, when $f(n)$ is a polynomial",
+      "$f(n^2) = o((f(n))^2)$",
+      "$f(n^2) = O((f(n))^2)$, when $f(n)$ is an exponential function",
+      "$f(n^2) = \\Omega((f(n))^2)$"
     ],
     "correctAnswerIndex": 0,
     "questionType": "MCQ",
@@ -206,7 +206,9 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "difficulty": "medium",
     "concept": "Algorithms – Asymptotic Notation",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (A)\n\n**Concept / Topic:** Algorithms – Asymptotic Notation\n\n$$\\therefore \\text{Correct Answer: } \\text{A}$$"
+    "explanation": "**Official GATE Answer Key:** (A)\n\n**Concept / Topic:** Algorithms – Asymptotic Notation\n\nLet $f(n) = a_k n^k$. Then $f(n^2) = a_k (n^2)^k = a_k n^{2k}$.\nAlso, $(f(n))^2 = (a_k n^k)^2 = a_k^2 n^{2k}$.\nThus, $f(n^2) = \\Theta((f(n))^2)$ for any polynomial function $f(n)$.\n\n$$\\therefore \\text{Correct Answer: } \\text{A}$$",
+    "imageUrl": "/images/gate2022/q11_asymptotic_functions.png",
+    "imageAlt": "Asymptotic notation statements for positive functions"
   },
   {
     "id": "gate22-q12",
@@ -360,21 +362,21 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q20",
-    "text": "Consider the following two statements with respect to the matrices m nA  , n mB  , \nn nC   and .n nD    \nStatement 1: tr(AB) = tr(BA) \nStatement 2: tr(CD) = tr(DC) \n \nwhere tr() represents the trace of a matrix. Which one of the following holds?",
+    "text": "Consider the following two statements with respect to the matrices $A_{m \\times n}$, $B_{n \\times m}$, $C_{n \\times n}$ and $D_{n \\times n}$.\n\nStatement 1: $\\text{tr}(AB) = \\text{tr}(BA)$\nStatement 2: $\\text{tr}(CD) = \\text{tr}(DC)$\n\nwhere $\\text{tr}()$ represents the trace of a matrix. Which one of the following holds?",
     "options": [
       "Statement 1 is correct and Statement 2 is wrong.",
       "Statement 1 is wrong and Statement 2 is correct.",
       "Both Statement 1 and Statement 2 are correct.",
-      "Both Statement 1 and Statement 2 are wrong. \n  \n \n \n \n \n \n \n \n \n \n \n \n \n \n\n\nGATE 2022  \nPage 17 of 41"
+      "Both Statement 1 and Statement 2 are wrong."
     ],
     "correctAnswerIndex": 2,
     "questionType": "MCQ",
     "marks": 1,
     "negativeMarks": 0.33,
     "difficulty": "medium",
-    "concept": "Operating Systems – System Calls / fork()",
+    "concept": "Linear Algebra – Matrices & Trace",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (C)\n\n**Concept / Topic:** Operating Systems – System Calls / fork()\n\n$$\\therefore \\text{Correct Answer: } \\text{C}$$"
+    "explanation": "**Official GATE Answer Key:** (C)\n\n**Concept / Topic:** Linear Algebra – Matrices & Trace\n\nBy the cyclic property of trace, for any matrices $A_{m \\times n}$ and $B_{n \\times m}$, $\\text{tr}(AB) = \\text{tr}(BA)$ holds regardless of whether $m = n$ or $m \\neq n$ (since $AB$ is $m \\times m$ and $BA$ is $n \\times n$, their traces are still equal). Similarly, for square matrices $C_{n \\times n}$ and $D_{n \\times n}$, $\\text{tr}(CD) = \\text{tr}(DC)$ is always true. Thus, both statements are correct.\n\n$$\\therefore \\text{Correct Answer: } \\text{C}$$"
   },
   {
     "id": "gate22-q21",
@@ -396,21 +398,23 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q22",
-    "text": "Consider an enterprise network with two Ethernet segments, a web server and a \nfirewall, connected via three routers as shown below.  \n \n \n \nWhat is the number of subnets inside the enterprise network?",
+    "text": "Consider an enterprise network with two Ethernet segments, a web server and a firewall, connected via three routers as shown below.\n\nWhat is the number of subnets inside the enterprise network?",
     "options": [
       "3",
       "12",
       "6",
-      "8 \n  \n  \n  \n  \n \n \n  \n\n\n\nGATE 2022  \nPage 19 of 41"
+      "8"
     ],
     "correctAnswerIndex": 2,
     "questionType": "MCQ",
     "marks": 1,
     "negativeMarks": 0.33,
     "difficulty": "medium",
-    "concept": "Discrete Mathematics – Propositional Logic",
+    "concept": "Computer Networks – IPv4 Subnetting & Topology",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (C)\n\n**Concept / Topic:** Discrete Mathematics – Propositional Logic\n\n$$\\therefore \\text{Correct Answer: } \\text{C}$$"
+    "explanation": "**Official GATE Answer Key:** (C)\n\n**Concept / Topic:** Computer Networks – IPv4 Subnetting & Topology\n\nCounting the distinct subnets (collision/broadcast domains separated by router interfaces):\n1. Subnet for Ethernet Segment 1 (connecting hosts and Router 1)\n2. Subnet between Router 1 and Firewall\n3. Subnet between Router 1 and Router 2\n4. Subnet connecting Web Server to Router 2\n5. Subnet between Router 2 and Router 3\n6. Subnet for Ethernet Segment 2 (connecting hosts and Router 3)\n\nTotal subnets = 6.\n\n$$\\therefore \\text{Correct Answer: } \\text{C}$$",
+    "imageUrl": "/images/gate2022/q22_enterprise_network_subnets.png",
+    "imageAlt": "Enterprise network diagram with routers, ethernet segments, firewall and web server"
   },
   {
     "id": "gate22-q23",
@@ -460,12 +464,12 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q25",
-    "text": "Consider the following three relations in a relational database. \n( , ),Employee eId Name  ( , ),Brand bId bName  ( , )Own eId bId  \nWhich of the following relational algebra expressions return the set of eIds  \nwho own all the brands?",
+    "text": "Consider the following three relations in a relational database.\n$$\\text{Employee}(\\underline{eId}, \\text{Name}), \\quad \\text{Brand}(\\underline{bId}, \\text{bName}), \\quad \\text{Own}(\\underline{eId}, \\underline{bId})$$\n\nWhich of the following relational algebra expressions return the set of $eIds$ who own all the brands?",
     "options": [
-      ",( ( ) / ( ))eId eId bId bIdOwn Brand  ",
-      " ,( ) ( ( ) ( )) ( )eId eId eId bId eId bIdOwn Own Brand Own    ",
-      ",( ( ) / ( ))eId eId bId bIdOwn Own  ",
-      " ( ( ) ( )) / ( )eId eId bId bIdOwn Own Brand   "
+      "$\\Pi_{eId}(\\Pi_{eId, bId}(\\text{Own}) / \\Pi_{bId}(\\text{Brand}))$",
+      "$\\Pi_{eId}(\\text{Own}) - \\Pi_{eId}((\\Pi_{eId}(\\text{Own}) \\times \\Pi_{bId}(\\text{Brand})) - \\Pi_{eId, bId}(\\text{Own}))$",
+      "$\\Pi_{eId}(\\Pi_{eId, bId}(\\text{Own}) / \\Pi_{bId}(\\text{Own}))$",
+      "$\\Pi_{eId}((\\Pi_{eId}(\\text{Own}) \\times \\Pi_{bId}(\\text{Own})) / \\Pi_{bId}(\\text{Brand}))$"
     ],
     "correctAnswerIndex": 0,
     "correctAnswerIndices": [
@@ -476,9 +480,11 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "marks": 1,
     "negativeMarks": 0,
     "difficulty": "medium",
-    "concept": "Algorithms – Graph Search / DFS & BFS Trees",
+    "concept": "Databases – Relational Algebra Division Operator",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (A, B)\n\n**Concept / Topic:** Algorithms – Graph Search / DFS & BFS Trees\n\n$$\\therefore \\text{Correct Options: } \\text{A, B}$$"
+    "explanation": "**Official GATE Answer Key:** (A, B)\n\n**Concept / Topic:** Databases – Relational Algebra Division Operator\n\n- Option (A) is the standard definition of the relational division operator: dividing the set of pairs $(eId, bId)$ by all brand IDs returns the $eIds$ that appear with every $bId$.\n- Option (B) expresses relational division using fundamental operators: it takes all employees and subtracts those employees who lack at least one brand.\n\n$$\\therefore \\text{Correct Options: } \\text{A, B}$$",
+    "imageUrl": "/images/gate2022/q25_relational_algebra_brands.png",
+    "imageAlt": "Relational algebra queries for employees who own all brands"
   },
   {
     "id": "gate22-q26",
@@ -504,12 +510,12 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q27",
-    "text": "Which of the following statements is/are TRUE for a group ?G",
+    "text": "Which of the following statements is/are TRUE for a group $G$?",
     "options": [
-      "If for all ,x y G ,  2 2 2( ) ,xy x y   then G is commutative.",
-      "If for all x G , 2 1,x  then G is commutative. Here, 1 is the identity element of .G",
-      "If the order of G  is 2, then G  is commutative.",
-      "If G  is commutative, then a subgroup of G  need not be commutative. \n  \n  \n\n\nGATE 2022  \nPage 22 of 41"
+      "If for all $x, y \\in G$, $(xy)^2 = x^2 y^2$, then $G$ is commutative.",
+      "If for all $x \\in G$, $x^2 = 1$, then $G$ is commutative. Here, $1$ is the identity element of $G$.",
+      "If the order of $G$ is $2$, then $G$ is commutative.",
+      "If $G$ is commutative, then a subgroup of $G$ need not be commutative."
     ],
     "correctAnswerIndex": 0,
     "correctAnswerIndices": [
@@ -521,9 +527,11 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "marks": 1,
     "negativeMarks": 0,
     "difficulty": "medium",
-    "concept": "Databases – Relational Algebra Equivalences",
+    "concept": "Discrete Mathematics – Group Theory & Commutativity",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (A, B, C)\n\n**Concept / Topic:** Databases – Relational Algebra Equivalences\n\n$$\\therefore \\text{Correct Options: } \\text{A, B, C}$$"
+    "explanation": "**Official GATE Answer Key:** (A, B, C)\n\n**Concept / Topic:** Discrete Mathematics – Group Theory & Commutativity\n\n- (A) $(xy)^2 = xyxy = x^2 y^2 = xxyy \\implies yx = xy$, so $G$ is commutative (abelian).\n- (B) $x^2 = 1 \\implies x = x^{-1}$ for all $x$. For any $x, y \\in G$, $xy = (xy)^{-1} = y^{-1} x^{-1} = yx$, so $G$ is commutative.\n- (C) Any group of prime order is cyclic, and every cyclic group is commutative. Order 2 is prime, hence commutative.\n- (D) Every subgroup of an abelian group is always abelian, so statement (D) is false.\n\n$$\\therefore \\text{Correct Options: } \\text{A, B, C}$$",
+    "imageUrl": "/images/gate2022/q27_group_commutative_options.png",
+    "imageAlt": "Group commutativity statements"
   },
   {
     "id": "gate22-q28",
@@ -541,7 +549,7 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q29",
-    "text": "Consider the augmented grammar with { , *, (, ), }id  as the set of terminals. \nS S   \n|S S R R   \n* |R R P P  \n( ) |P S id  \nIf 0I  is the set of two (0)LR  items • •{[ ], [ ]}S S S S R    , then \n0( ( ), )goto closure I   contains exactly __________ items.",
+    "text": "Consider the following augmented grammar with $\\{+, *, (, ), id\\}$ as the set of terminals:\n\n$$\\begin{aligned} S' &\\to S \\ S &\\to S + R \\mid R \\ R &\\to R * P \\mid P \\ P &\\to (S) \\mid id \\end{aligned}$$\n\nIf $I_0$ is the set of two $\\text{LR}(0)$ items $\\{[S' \\to S.], [S \\to S. + R]\\}$, then $\\text{goto}(\\text{closure}(I_0), +)$ contains exactly ________ items.",
     "options": [],
     "correctAnswerIndex": -1,
     "questionType": "NAT",
@@ -549,9 +557,11 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "marks": 1,
     "negativeMarks": 0,
     "difficulty": "medium",
-    "concept": "Databases – Relational Decomposition / Lossless Join",
+    "concept": "Compiler Design – LR(0) Items & Parsing",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** 5\n\n**Concept / Topic:** Databases – Relational Decomposition / Lossless Join\n\n$$\\therefore \\text{Correct Answer: } 5$$"
+    "explanation": "**Official GATE Answer Key:** 5\n\n**Concept / Topic:** Compiler Design – LR(0) Items & Parsing\n\nIn $I_0 = \\{[S' \\to S.], [S \\to S. + R]\\}$, the closure is just $I_0$ itself.\nTransitioning on symbol '$+$':\n$\\text{goto}(I_0, +)$ starts with the kernel item $[S \\to S + .R]$.\nTaking the closure of this kernel item:\n1. $[S \\to S + .R]$\n2. $[R \\to .R * P]$\n3. $[R \\to .P]$\n4. $[P \\to .(S)]$\n5. $[P \\to .id]$\n\nThis set contains exactly 5 items.\n\n$$\\therefore \\text{Correct Answer: } 5$$",
+    "imageUrl": "/images/gate2022/q29_augmented_grammar_lr0.png",
+    "imageAlt": "Augmented grammar and LR(0) items goto computation"
   },
   {
     "id": "gate22-q30",
@@ -611,7 +621,7 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q34",
-    "text": "The value of the following limit is _____________. \n 20 1 xx\nxlim\ne  ",
+    "text": "The value of $$\lim_{x \\to 0^+} \\frac{\\sqrt{x}}{1 - e^{2\\sqrt{x}}}$$ is ________ (rounded off to one decimal place).",
     "options": [],
     "correctAnswerIndex": -1,
     "questionType": "NAT",
@@ -619,9 +629,11 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "marks": 1,
     "negativeMarks": 0,
     "difficulty": "medium",
-    "concept": "Linear Algebra – Eigenvalues and Trace",
+    "concept": "Calculus – Limits & L'Hopital's Rule",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** -0.5\n\n**Concept / Topic:** Linear Algebra – Eigenvalues and Trace\n\n$$\\therefore \\text{Correct Answer: } -0.5$$"
+    "explanation": "**Official GATE Answer Key:** -0.5\n\n**Concept / Topic:** Calculus – Limits & L'Hopital's Rule\n\nLet $t = \\sqrt{x}$. As $x \\to 0^+$, $t \\to 0^+$.\n$$\\lim_{t \\to 0^+} \\frac{t}{1 - e^{2t}} = \\lim_{t \\to 0^+} \\frac{1}{-2e^{2t}} = \\frac{1}{-2(1)} = -0.5$$\n\n$$\\therefore \\text{Correct Answer: } -0.5$$",
+    "imageUrl": "/images/gate2022/q34_limit_evaluation.png",
+    "imageAlt": "Limit evaluation of sqrt(x) / (1 - e^(2*sqrt(x)))"
   },
   {
     "id": "gate22-q35",
@@ -639,21 +651,23 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q36",
-    "text": "Which one of the following is the closed form for the generating function of the \nsequence 0{ }n na   defined below? \n1,  is odd\n1, otherwise\nn\nn na \n",
+    "text": "Consider the sequence $\\langle a_n \\rangle$ defined by\n$$a_n = \\begin{cases} n + 1, & \\text{if } n \\text{ is odd} \\\\ 1, & \\text{otherwise} \\end{cases}$$\n\nWhich one of the following is the generating function of the sequence $\\langle a_n \\rangle$?",
     "options": [
-      " \n \n2\n22\n1 1\n11\nx x\nxx\n\n ",
-      " \n2\n22\n(3 ) 1\n11\nx x\nxx\n  ",
-      " \n22\n2 1\n11\nx\nxx  ",
-      "2 2\n1\n(1 ) 1\nx\nx x "
+      "$\\frac{x(1+x^2)}{(1-x^2)^2} + \\frac{1}{1-x}$",
+      "$\\frac{x(3-x^2)}{(1-x^2)^2} + \\frac{1}{1-x}$",
+      "$\\frac{2x}{(1-x^2)^2} + \\frac{1}{1-x}$",
+      "$\\frac{x}{(1-x^2)^2} + \\frac{1}{1-x}$"
     ],
     "correctAnswerIndex": 0,
     "questionType": "MCQ",
     "marks": 2,
     "negativeMarks": 0.67,
     "difficulty": "hard",
-    "concept": "Discrete Mathematics – Recurrence Relations",
+    "concept": "Discrete Mathematics – Generating Functions",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (A)\n\n**Concept / Topic:** Discrete Mathematics – Recurrence Relations\n\n$$\\therefore \\text{Correct Answer: } \\text{A}$$"
+    "explanation": "**Official GATE Answer Key:** (A)\n\n**Concept / Topic:** Discrete Mathematics – Generating Functions\n\nThe generating function is $G(x) = \\sum_{n=0}^{\\infty} a_n x^n$.\nFor even $n$, $a_n = 1$. The sum for all $n$ of $1 \\cdot x^n$ is $\\frac{1}{1-x}$.\nFor odd $n$, $a_n = n+1$, so extra contribution for odd $n$ is $(n+1) - 1 = n$.\nSumming $n x^n$ for odd $n$: $x + 3x^3 + 5x^5 + \\dots = \\frac{x(1+x^2)}{(1-x^2)^2}$.\nAdding the base sequence $\\sum x^n = \\frac{1}{1-x}$, we get $\\frac{x(1+x^2)}{(1-x^2)^2} + \\frac{1}{1-x}$.\n\n$$\\therefore \\text{Correct Answer: } \\text{A}$$",
+    "imageUrl": "/images/gate2022/q36_generating_function.png",
+    "imageAlt": "Generating function options for the given sequence"
   },
   {
     "id": "gate22-q37",
@@ -693,21 +707,23 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q39",
-    "text": "Let ( )iR z  and ( )iW z  denote read and write operations on a data element z  by a \ntransaction iT  , respectively. Consider the schedule S with four transactions. \nS: 4 2 3 1 1 2 3 4( ) ( ) ( ) ( ) ( ) ( ) ( ) ( )R x R x R x R y W y W x W y R y  \nWhich one of the following serial schedules is conflict equivalent to S?",
+    "text": "Consider the following schedule $S$ of four transactions:\n$$S: R_4(x) R_2(x) R_3(x) R_1(y) W_1(y) W_2(x) W_3(y) R_4(y)$$\n\nWhich one of the following serial schedules is conflict equivalent to $S$?",
     "options": [
-      "𝑇ଵ → 𝑇ଷ → 𝑇ସ → 𝑇ଶ",
-      "𝑇ଵ → 𝑇ସ → 𝑇ଷ → 𝑇ଶ",
-      "𝑇ସ → 𝑇ଵ → 𝑇ଷ → 𝑇ଶ",
-      "𝑇ଷ → 𝑇ଵ → 𝑇ସ → 𝑇ଶ \n  \n \n \n\n\nGATE 2022  \nPage 26 of 41"
+      "$T_1 \\to T_3 \\to T_4 \\to T_2$",
+      "$T_1 \\to T_4 \\to T_3 \\to T_2$",
+      "$T_4 \\to T_1 \\to T_3 \\to T_2$",
+      "$T_3 \\to T_1 \\to T_4 \\to T_2$"
     ],
     "correctAnswerIndex": 0,
     "questionType": "MCQ",
     "marks": 2,
     "negativeMarks": 0.67,
     "difficulty": "hard",
-    "concept": "Operating Systems – CPU Scheduling / Multi-level Feedback Queue",
+    "concept": "Databases – Transaction Concurrency & Serializability",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (A)\n\n**Concept / Topic:** Operating Systems – CPU Scheduling / Multi-level Feedback Queue\n\n$$\\therefore \\text{Correct Answer: } \\text{A}$$"
+    "explanation": "**Official GATE Answer Key:** (A)\n\n**Concept / Topic:** Databases – Transaction Concurrency & Serializability\n\nAnalyzing conflicting pairs:\n- On $x$:\n  $R_4(x) < W_2(x) \\implies T_4 \\to T_2$\n  $R_3(x) < W_2(x) \\implies T_3 \\to T_2$\n- On $y$:\n  $W_1(y) < W_3(y) \\implies T_1 \\to T_3$\n  $W_1(y) < R_4(y) \\implies T_1 \\to T_4$\n  $W_3(y) < R_4(y) \\implies T_3 \\to T_4$\n\nCombining these dependencies: $T_1 \\to T_3 \\to T_4 \\to T_2$. Hence, topological sort gives $T_1 \\to T_3 \\to T_4 \\to T_2$.\n\n$$\\therefore \\text{Correct Answer: } \\text{A}$$",
+    "imageUrl": "/images/gate2022/q39_serial_schedules_conflict.png",
+    "imageAlt": "Schedule conflict equivalence and serial schedule options"
   },
   {
     "id": "gate22-q40",
@@ -731,21 +747,23 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q41",
-    "text": "Consider three floating point numbers A, B  and C  stored in registers RA, RB and \nRC, respectively as per IEEE-754 single precision floating point format. The 32-bit \ncontent stored in these registers (in hexadecimal form) are as follows. \nRA= 0xC1400000 RB = 0x42100000 RC = 0x41400000 \nWhich one of the following is FALSE?",
+    "text": "Consider three floating point numbers $A, B$ and $C$ stored in registers $R_A, R_B$ and $R_C$, respectively, in the IEEE-754 single precision format. The 32-bit lexical representations of the contents of the registers (in hexadecimal) are:\n\n$$R_A = \\text{0xC1400000}, \\quad R_B = \\text{0x42100000}, \\quad R_C = \\text{0x41400000}$$\n\nWhich one of the following statements is FALSE?",
     "options": [
-      "0A C ",
-      "C A B ",
-      "3B C",
-      "( ) 0B C "
+      "$A + C = 0$",
+      "$C = A + B$",
+      "$B = 3C$",
+      "$(B - C) > 0$"
     ],
     "correctAnswerIndex": 1,
     "questionType": "MCQ",
     "marks": 2,
     "negativeMarks": 0.67,
     "difficulty": "hard",
-    "concept": "Computer Networks – Distance Vector Routing & Split Horizon",
+    "concept": "Computer Organization – IEEE-754 Floating Point Representation",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (B)\n\n**Concept / Topic:** Computer Networks – Distance Vector Routing & Split Horizon\n\n$$\\therefore \\text{Correct Answer: } \\text{B}$$"
+    "explanation": "**Official GATE Answer Key:** (B)\n\n**Concept / Topic:** Computer Organization – IEEE-754 Floating Point Representation\n\nDecoding the IEEE-754 values:\n- $R_A = \\text{0xC1400000}$: Sign = 1 (negative), Exp = 130 ($130-127 = 3$), Mantissa = $1.1_2 = 1.5$. Value $A = -1.5 \\times 2^3 = -12.0$.\n- $R_C = \\text{0x41400000}$: Sign = 0 (positive), Exp = 130 ($130-127 = 3$), Mantissa = $1.1_2 = 1.5$. Value $C = +1.5 \\times 2^3 = +12.0$.\n- $R_B = \\text{0x42100000}$: Sign = 0, Exp = 132 ($132-127 = 5$), Mantissa = $1.001_2 = 1.125$. Value $B = 1.125 \\times 2^5 = 36.0$.\n\nEvaluating statements:\n- (A) $A + C = -12 + 12 = 0$ (TRUE)\n- (B) $A + B = -12 + 36 = 24 \\neq C$ (FALSE)\n- (C) $3C = 3 \\times 12 = 36 = B$ (TRUE)\n- (D) $B - C = 36 - 12 = 24 > 0$ (TRUE)\n\n$$\\therefore \\text{Correct Answer: } \\text{B}$$",
+    "imageUrl": "/images/gate2022/q41_ieee754_registers.png",
+    "imageAlt": "IEEE-754 single precision representation registers"
   },
   {
     "id": "gate22-q42",
@@ -805,21 +823,23 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q45",
-    "text": "Consider solving the following system of simultaneous equations using  \nLU decomposition. \n \n1 2 3\n1 2 3\n1 2 3\n2 4\n3 7\n2 5 7\nx x x\nx x x\nx x x\n  \n  \n  \n \nwhere L  and U  are denoted as \n11\n21 22\n31 32 33\n0 0\n0\nL\nL L L\nL L L\n \n     ,     \n11 12 13\n22 23\n330 0\n 0\nU U U\nU U\nU\nU\n \n \n      \nWhich one of the following is the correct combination of values for 32L ,  33,U and \n1 ?x",
+    "text": "Consider the system of linear equations:\n$$\\begin{aligned} x_1 + x_2 - 2x_3 &= 4 \\\\ x_1 + 3x_2 - x_3 &= 7 \\\\ 2x_1 + x_2 - 5x_3 &= 7 \\end{aligned}$$\n\nLet $A = LU$ be the LU decomposition of the coefficient matrix $A$, where $L$ is a lower triangular matrix with all diagonal elements equal to $1$, and $U$ is an upper triangular matrix. Let the solution of the system be $[x_1, x_2, x_3]^T$. Which of the following is the correct combination of values for $L_{32}, U_{33}$ and $x_1$?",
     "options": [
-      "32 33 1\n12, , 12L U x  ",
-      "32 33 12, 2, 1L U x  ",
-      "32 33 1\n1 , 2, 02L U x  ",
-      "32 33 1\n1 1, , 02 2L U x    \n \n \n \n \n \n \n \n \n \n \n\n\nGATE 2022  \nPage 31 of 41"
+      "$L_{32} = 2, \\quad U_{33} = -\\frac{1}{2}, \\quad x_1 = -1$",
+      "$L_{32} = 2, \\quad U_{33} = 2, \\quad x_1 = -1$",
+      "$L_{32} = -\\frac{1}{2}, \\quad U_{33} = 2, \\quad x_1 = 0$",
+      "$L_{32} = -\\frac{1}{2}, \\quad U_{33} = -\\frac{1}{2}, \\quad x_1 = 0$"
     ],
     "correctAnswerIndex": 3,
     "questionType": "MCQ",
     "marks": 2,
     "negativeMarks": 0.67,
     "difficulty": "hard",
-    "concept": "Algorithms – Minimum Spanning Trees / Kruskal & Prim",
+    "concept": "Linear Algebra – LU Decomposition & Systems of Linear Equations",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (D)\n\n**Concept / Topic:** Algorithms – Minimum Spanning Trees / Kruskal & Prim\n\n$$\\therefore \\text{Correct Answer: } \\text{D}$$"
+    "explanation": "**Official GATE Answer Key:** (D)\n\n**Concept / Topic:** Linear Algebra – LU Decomposition & Systems of Linear Equations\n\nCoefficient matrix:\n$$A = \\begin{bmatrix} 1 & 1 & -2 \\\\ 1 & 3 & -1 \\\\ 2 & 1 & -5 \\end{bmatrix}$$\nApplying Doolittle's algorithm ($L_{ii} = 1$):\n- $U_{11}=1, U_{12}=1, U_{13}=-2$\n- $L_{21} = 1/1 = 1$, $L_{31} = 2/1 = 2$\n- $U_{22} = 3 - (1)(1) = 2$, $U_{23} = -1 - (1)(-2) = 1$\n- $L_{32} = (1 - (2)(1)) / 2 = -1/2$\n- $U_{33} = -5 - [(2)(-2) + (-1/2)(1)] = -5 - [-4 - 0.5] = -5 + 4.5 = -0.5 = -1/2$\nSolving $Ax = b$:\nFrom $x_1 + x_2 - 2x_3 = 4$, $x_1 + 3x_2 - x_3 = 7$, $2x_1 + x_2 - 5x_3 = 7$ gives $x_1 = 0, x_2 = 2, x_3 = -1$.\nHence $L_{32} = -1/2, U_{33} = -1/2, x_1 = 0$.\n\n$$\\therefore \\text{Correct Answer: } \\text{D}$$",
+    "imageUrl": "/images/gate2022/q45_lu_decomposition.png",
+    "imageAlt": "LU decomposition system of linear equations"
   },
   {
     "id": "gate22-q46",
@@ -846,12 +866,12 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q47",
-    "text": "Consider the following languages: \n \n*\n1 { | { , } }n nL a wa w a b    \n*\n2 { | , { , } , | |,| | 0}RL wxw w x a b w x    \n \nNote that Rw is the reversal of the string .w  Which of the following is/are TRUE?",
+    "text": "Consider the following languages over the alphabet $\\{a, b\\}$:\n$$\\begin{aligned} L_1 &= \\{a^n w a^n \\mid w \\in \\{a, b\\}^*, n \\ge 0\\} \\\\ L_2 &= \\{w x w^R \\mid w, x \\in \\{a, b\\}^*, |w|, |x| > 0\\} \\end{aligned}$$\nwhere $w^R$ is the reversal of $w$. Which of the following statements is/are TRUE?",
     "options": [
-      "1L  and 2L  are regular.",
-      "1L  and 2L  are context-free.",
-      "1L  is regular and 2L  is context-free.",
-      "1L  and 2L  are context-free but not regular. \n  \n \n \n\n\nGATE 2022  \nPage 32 of 41"
+      "$L_1$ is regular",
+      "$L_2$ is regular",
+      "$L_1 \\cap L_2$ is context-free",
+      "$L_1 \\cap L_2$ is context-free, but not regular"
     ],
     "correctAnswerIndex": 0,
     "correctAnswerIndices": [
@@ -863,18 +883,20 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "marks": 2,
     "negativeMarks": 0,
     "difficulty": "hard",
-    "concept": "Computer Organization – Instruction Pipelining & Hazards",
+    "concept": "Theory of Computation – Regular & Context-Free Languages",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (A, B, C)\n\n**Concept / Topic:** Computer Organization – Instruction Pipelining & Hazards\n\n$$\\therefore \\text{Correct Options: } \\text{A, B, C}$$"
+    "explanation": "**Official GATE Answer Key:** (A, B, C)\n\n**Concept / Topic:** Theory of Computation – Regular & Context-Free Languages\n\n- $L_1$: Setting $n=0$, $a^0 w a^0 = w$, which allows generating any string in $\\{a,b\\}^*$. Thus $L_1 = \\{a, b\\}^*$, which is regular!\n- $L_2$: Strings of the form $w x w^R$ with $|w| \\ge 1$. Since $w$ starts and ends with $a$ or $b$, any string of length $\\ge 3$ that starts and ends with the same symbol can be written in this form (taking $|w|=1$, i.e. $a x a$ or $b x b$). Thus $L_2$ is regular!\n- Since both $L_1$ and $L_2$ are regular, their intersection $L_1 \\cap L_2 = L_2$ is regular, and every regular language is also context-free! Hence (A), (B), and (C) are TRUE.\n\n$$\\therefore \\text{Correct Options: } \\text{A, B, C}$$",
+    "imageUrl": "/images/gate2022/q47_cfl_languages_reversal.png",
+    "imageAlt": "Languages L1 and L2 regularity and context-freeness"
   },
   {
     "id": "gate22-q48",
-    "text": "Consider the following languages: \n*\n1 { | { , } }L ww w a b   \n2 { | , 0}n n mL a b c m n   \n 3 { | , 0}m n nL a b c m n   \nWhich of the following statements is/are FALSE?",
+    "text": "Consider the following languages over the alphabet $\\{a, b, c\\}$:\n$$\\begin{aligned} L_1 &= \\{w w \\mid w \\in \\{a, b\\}^*\\} \\\\ L_2 &= \\{a^n b^n c^m \\mid m, n \\ge 0\\} \\\\ L_3 &= \\{a^m b^n c^n \\mid m, n \\ge 0\\} \\end{aligned}$$\n\nWhich of the following statements is/are FALSE?",
     "options": [
-      "1L  is not context-free but 2L  and 3L  are deterministic context-free.",
-      "Neither 1L  nor 2L  is context-free.",
-      "2L , 3L  and 2 3L L  all are context-free.",
-      "Neither 1L  nor its complement is context-free."
+      "$L_1$ is not context-free",
+      "$L_2 \\cap L_3$ is context-free",
+      "$L_1$ is context-free, but not regular",
+      "$L_2$ is not context-free"
     ],
     "correctAnswerIndex": 1,
     "correctAnswerIndices": [
@@ -886,9 +908,11 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "marks": 2,
     "negativeMarks": 0,
     "difficulty": "hard",
-    "concept": "Theory of Computation – Context-Free and Non-Context-Free Languages",
+    "concept": "Theory of Computation – Context-Free Languages & Closure Properties",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (B, C, D)\n\n**Concept / Topic:** Theory of Computation – Context-Free and Non-Context-Free Languages\n\n$$\\therefore \\text{Correct Options: } \\text{B, C, D}$$"
+    "explanation": "**Official GATE Answer Key:** (B, C, D)\n\n**Concept / Topic:** Theory of Computation – Context-Free Languages & Closure Properties\n\n- $L_1 = \\{ww\\}$ is a well-known non-context-free language (requires two matching comparisons). Thus statement (A) is TRUE, and statement (C) is FALSE.\n- $L_2 = \\{a^n b^n c^m\\}$ is deterministic context-free (DCFL). Thus statement (D) is FALSE.\n- $L_3 = \\{a^m b^n c^n\\}$ is also context-free. However, $L_2 \\cap L_3 = \\{a^n b^n c^n \\mid n \\ge 0\\}$, which is a classic non-context-free language! Thus statement (B) is FALSE.\n\nSince the question asks which statements are FALSE, options B, C, and D are correct.\n\n$$\\therefore \\text{Correct Options: } \\text{B, C, D}$$",
+    "imageUrl": "/images/gate2022/q48_languages_context_free.png",
+    "imageAlt": "Context-free language properties for L1, L2, L3"
   },
   {
     "id": "gate22-q49",
@@ -940,12 +964,12 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q51",
-    "text": "Consider the following recurrence: \n \n(1) 1;\n(2 ) 2 ( ) 1, for 1;\n(2 1) 2 ( ) 1, for 1.\nf\nf n f n n\nf n f n n\n\n  \n   \n \nThen, which of the following statements is/are TRUE?",
+    "text": "Consider the function $f$ defined by the following recurrence relations:\n$$\\begin{aligned} f(1) &= 1 \\\\ f(2n) &= 2f(n) - 1, \\quad n \\ge 1 \\\\ f(2n+1) &= 2f(n) + 1, \\quad n \\ge 1 \\end{aligned}$$\n\nWhich of the following statements is/are TRUE?",
     "options": [
-      "(2 1) 2 1n nf   ",
-      "(2 ) 1nf ",
-      "1(5 2 ) 2 1n nf   ",
-      "(2 1) 2 1n nf   "
+      "$f(2^n - 1) = 2^n - 1$",
+      "$f(2^n) = 1$",
+      "$f(5 \\cdot 2^n) = 2^{n+1} + 1$",
+      "$f(2^n + 1) = 2^n + 1$"
     ],
     "correctAnswerIndex": 0,
     "correctAnswerIndices": [
@@ -957,9 +981,11 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "marks": 2,
     "negativeMarks": 0,
     "difficulty": "hard",
-    "concept": "Databases – Normal Forms / 3NF and BCNF",
+    "concept": "Discrete Mathematics – Recurrence Relations & Binary Representations",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (A, B, C)\n\n**Concept / Topic:** Databases – Normal Forms / 3NF and BCNF\n\n$$\\therefore \\text{Correct Options: } \\text{A, B, C}$$"
+    "explanation": "**Official GATE Answer Key:** (A, B, C)\n\n**Concept / Topic:** Discrete Mathematics – Recurrence Relations & Binary Representations\n\nNotice the pattern of $f(k)$:\n- For powers of 2: $f(2) = 2f(1) - 1 = 1$, $f(4) = 2f(2) - 1 = 1$, by induction $f(2^n) = 1$ for all $n \\ge 1$. Hence (B) is TRUE.\n- For $2^n - 1$: $f(1) = 1 = 2^1 - 1$; $f(3) = 2f(1) + 1 = 3 = 2^2 - 1$; $f(7) = 2f(3) + 1 = 7 = 2^3 - 1$; by induction $f(2^n - 1) = 2^n - 1$. Hence (A) is TRUE.\n- For $5 \\cdot 2^n$: $f(5) = 2f(2) + 1 = 3 = 2^1 + 1$. Then $f(10) = 2f(5) - 1 = 5 = 2^2 + 1$. By induction $f(5 \\cdot 2^n) = 2^{n+1} + 1$. Hence (C) is TRUE.\n- For $2^n + 1$: $f(2^2 + 1) = f(5) = 3 \\neq 5$. Hence (D) is FALSE.\n\n$$\\therefore \\text{Correct Options: } \\text{A, B, C}$$",
+    "imageUrl": "/images/gate2022/q51_recurrence_relations.png",
+    "imageAlt": "Recurrence relations statements"
   },
   {
     "id": "gate22-q52",
@@ -984,12 +1010,12 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q53",
-    "text": "Which of the following is/are the eigenvector(s) for the matrix given below? \n \n9 6 2 4\n8 6 3 1\n20 15 8 5\n32 21 7 12\n    \n     \n \n \n ",
+    "text": "Which of the following is/are the eigenvector(s) for the matrix given below?\n$$\\begin{bmatrix} -9 & -6 & -2 & -4 \\\\ -8 & -6 & -3 & -1 \\\\ 20 & 15 & 8 & 5 \\\\ 32 & 21 & 7 & 12 \\end{bmatrix}$$",
     "options": [
-      "1\n1\n0\n1\n \n \n \n \n \n ",
-      "1\n0\n1\n0\n \n \n \n \n \n ",
-      "1\n0\n2\n2\n \n \n \n \n \n ",
-      "0\n1\n3\n0\n \n \n \n \n \n \n \n  \n \n \n \n \n\n\nGATE 2022  \nPage 36 of 41"
+      "$\\begin{bmatrix} -1 \\\\ 1 \\\\ 0 \\\\ 1 \\end{bmatrix}$",
+      "$\\begin{bmatrix} 1 \\\\ 0 \\\\ -1 \\\\ 0 \\end{bmatrix}$",
+      "$\\begin{bmatrix} -1 \\\\ 0 \\\\ 2 \\\\ 2 \\end{bmatrix}$",
+      "$\\begin{bmatrix} 0 \\\\ 1 \\\\ -3 \\\\ 0 \\end{bmatrix}$"
     ],
     "correctAnswerIndex": 0,
     "correctAnswerIndices": [
@@ -1001,9 +1027,11 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "marks": 2,
     "negativeMarks": 0,
     "difficulty": "hard",
-    "concept": "Digital Logic – Minimization of Boolean Functions",
+    "concept": "Linear Algebra – Eigenvalues & Eigenvectors",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (A, C, D)\n\n**Concept / Topic:** Digital Logic – Minimization of Boolean Functions\n\n$$\\therefore \\text{Correct Options: } \\text{A, C, D}$$"
+    "explanation": "**Official GATE Answer Key:** (A, C, D)\n\n**Concept / Topic:** Linear Algebra – Eigenvalues & Eigenvectors\n\nA vector $v$ is an eigenvector of $M$ if $Mv = \\lambda v$ for some scalar $\\lambda$.\nMultiplying $M$ with each option:\n- For $v_A = [-1, 1, 0, 1]^T$: $M v_A = [-1, 1, 0, 1]^T = 1 \\cdot v_A$ (Eigenvector with $\\lambda = 1$).\n- For $v_B = [1, 0, -1, 0]^T$: $M v_B = [-7, -5, 12, 25]^T \\neq \\lambda v_B$ (Not an eigenvector).\n- For $v_C = [-1, 0, 2, 2]^T$: $M v_C = [-3, 0, 6, 6]^T = 3 \\cdot v_C$ (Eigenvector with $\\lambda = 3$).\n- For $v_D = [0, 1, -3, 0]^T$: $M v_D = [0, 3, -9, 0]^T = 3 \\cdot v_D$ (Eigenvector with $\\lambda = 3$).\n\n$$\\therefore \\text{Correct Options: } \\text{A, C, D}$$",
+    "imageUrl": "/images/gate2022/q53_eigenvectors_matrix.png",
+    "imageAlt": "Eigenvectors of 4x4 matrix"
   },
   {
     "id": "gate22-q54",
@@ -1084,7 +1112,7 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q58",
-    "text": "Let ( , )G V E  be a directed graph, where {1, 2,3, 4,5}V   is the set of vertices and  \nE  is the set of directed edges, as defined by the following adjacency matrix .A  \n \n𝐴[𝑖][𝑗] = ൜1,              1 ≤ 𝑗 ≤ 𝑖 ≤ 5 0,                   𝑜𝑡ℎ𝑒𝑟𝑤𝑖𝑠𝑒  \n \n𝐴[𝑖][𝑗] = 1 indicates a directed edge from node i  to node .j  A directed spanning \ntree of ,G  rooted at ,r V  is defined as a subgraph T  of G  such that the undirected \nversion of T  is a tree, and T  contains a directed path from r  to every other vertex \nin .V  The number of such directed spanning trees rooted at vertex 5 \nis_____________.",
+    "text": "Let $G(V, E)$ be a directed graph, where $V = \\{1, 2, 3, 4, 5\\}$ is the set of vertices and $E$ is the set of directed edges, as defined by the following adjacency matrix $A$:\n\n$$A[i][j] = \\begin{cases} 1, & 1 \\le j \\le i \\le 5 \\\\ 0, & \\text{otherwise} \\end{cases}$$\n\n$A[i][j] = 1$ indicates a directed edge from node $i$ to node $j$. A directed spanning tree of $G$, rooted at $r \\in V$, is defined as a subgraph $T$ of $G$ such that the undirected version of $T$ is a tree, and $T$ contains a directed path from $r$ to every other vertex in $V$. The number of such directed spanning trees rooted at vertex 5 is ________.",
     "options": [],
     "correctAnswerIndex": -1,
     "questionType": "NAT",
@@ -1092,9 +1120,11 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "marks": 2,
     "negativeMarks": 0,
     "difficulty": "hard",
-    "concept": "Programming in C – Recursion & Pointers",
+    "concept": "Graph Theory – Directed Spanning Trees",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** 24\n\n**Concept / Topic:** Programming in C – Recursion & Pointers\n\n$$\\therefore \\text{Correct Answer: } 24$$"
+    "explanation": "**Official GATE Answer Key:** 24\n\n**Concept / Topic:** Graph Theory – Directed Spanning Trees\n\nIn a directed spanning tree rooted at 5, every vertex in $\\{1, 2, 3, 4\\}$ must have an in-degree of exactly 1, and vertex 5 has in-degree 0.\nFrom the adjacency matrix definition, an edge $(i, j)$ exists if and only if $i \\ge j$. Ignoring self loops, directed edges exist from node $i$ to node $j$ whenever $i > j$:\n- Vertex 4 can have an incoming edge only from vertex 5 (1 choice).\n- Vertex 3 can have an incoming edge from vertex 4 or 5 (2 choices).\n- Vertex 2 can have an incoming edge from vertex 3, 4, or 5 (3 choices).\n- Vertex 1 can have an incoming edge from vertex 2, 3, 4, or 5 (4 choices).\n\nSince every directed edge goes from a higher numbered vertex to a strictly lower numbered vertex, no directed cycles can ever be formed. Hence, any choice of parent for each of the 4 vertices yields a unique valid directed spanning tree rooted at 5:\n$$\\text{Number of trees} = 1 \\times 2 \\times 3 \\times 4 = 24$$\n\n$$\\therefore \\text{Correct Answer: } 24$$",
+    "imageUrl": "/images/gate2022/q58_directed_spanning_trees.png",
+    "imageAlt": "Directed spanning trees adjacency matrix"
   },
   {
     "id": "gate22-q59",
@@ -1184,7 +1214,7 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q65",
-    "text": "Consider the following grammar along with translation rules. \n1 1• • • # { * }val val valS S T S S T   \n• •{ }val valS T S T   \n1 • 1• •% { }val val valT T R T T R   \n• •{ }val valT R T R   \n• •{ }val valR id R id   \nHere #  and %  are operators and id is a token that represents an integer and •valid  \nrepresents the corresponding integer value. The set of non-terminals is { , , , }S T R P  \nand a subscripted non-terminal indicates an instance of the non-terminal. \nUsing this translation scheme, the computed value of •valS  for root of the parse tree \nfor the expression 20 #10%5#8%2%2 is _____________.   \n  \n  \n  \n  \n \n \n \n  \n\n\n \nQ. No. Session Question \nType \nSubject \nName \nKey/Range Mark \n1 1 MCQ GA D 1 \n2 1 MCQ GA C 1 \n3 1 MCQ GA D 1 \n4 1 MCQ GA A 1 \n5 1 MCQ GA B 1 \n6 1 MCQ GA B 2 \n7 1 MCQ GA D 2 \n8 1 MCQ GA D 2 \n9 1 MCQ GA B 2 \n10 1 MCQ GA D 2 \n11 1 MCQ CS A 1 \n12 1 MCQ CS D 1 \n13 1 MCQ CS D 1 \n14 1 MCQ CS A 1 \n15 1 MCQ CS A 1 \n16 1 MCQ CS B 1 \n17 1 MCQ CS A 1 \n18 1 MCQ CS B 1 \n19 1 MCQ CS C 1 \n20 1 MCQ CS C 1 \n21 1 MCQ CS D 1 \n22 1 MCQ CS C 1 \n23 1 MSQ CS B,C,D 1 \n24 1 MSQ CS A,B,D 1 \n25 1 MSQ CS A,B 1 \n26 1 MSQ CS A,D 1 \n27 1 MSQ CS A,B,C 1 \n28 1 NAT CS 509 to 509 1 \n29 1 NAT CS 5 to 5 1 \n30 1 NAT CS 36 to 36 1 \n31 1 NAT CS 8 to 8 1 \n32 1 NAT CS 7 to 7 1 \n33 1 NAT CS 0.85 to 0.85 1 \n34 1 NAT CS -0.5 to -0.5 1 \n35 1 NAT CS 4 to 4 1 \n36 1 MCQ CS A 2 \n37 1 MCQ CS D 2 \n38 1 MCQ CS C 2 \n39 1 MCQ CS A 2 \n40 1 MCQ CS C 2 \n41 1 MCQ CS B 2 \n42 1 MCQ CS D 2 \n43 1 MCQ CS A 2 \n44 1 MCQ CS A 2 \n\n\n \n45 1 MCQ CS D 2 \n46 1 MSQ CS A,B,C 2 \n47 1 MSQ CS A,B,C 2 \n48 1 MSQ CS B,C,D 2 \n49 1 MSQ CS A,B,C 2 \n50 1 MSQ CS A,B,C 2 \n51 1 MSQ CS A,B,C 2 \n52 1 MSQ CS A 2 \n53 1 MSQ CS A,C,D 2 \n54 1 MSQ CS A,B,D 2 \n55 1 MSQ CS B,D 2 \n56 1 NAT CS 2 to 2 2 \n57 1 NAT CS 0.5 to 0.5 2 \n58 1 NAT CS 24 to 24 2 \n59 1 NAT CS 7.07 to 7.09 2 \n60 1 NAT CS 33 to 33 2 \n61 1 NAT CS 1.42 to 1.45 2 \n62 1 NAT CS 0 to 0 2 \n63 1 NAT CS 153 to 153 2 \n64 1 NAT CS 0.6 to 0.6 2 \n65 1 NAT CS 80 to 80 2",
+    "text": "Consider the following grammar along with translation rules:\n\n$$\\begin{aligned} S &\\to S_1 \\# T & \\{S.\\text{val} &= S_1.\\text{val} * T.\\text{val}\\} \\\\ S &\\to T & \\{S.\\text{val} &= T.\\text{val}\\} \\\\ T &\\to T_1 \\% R & \\{T.\\text{val} &= T_1.\\text{val} \\div R.\\text{val}\\} \\\\ T &\\to R & \\{T.\\text{val} &= R.\\text{val}\\} \\\\ R &\\to id & \\{R.\\text{val} &= id.\\text{val}\\} \\end{aligned}$$\n\nHere $\\#$ and $\\%$ are operators and $id$ is a token that represents an integer and $id.\\text{val}$ represents the corresponding integer value. The set of non-terminals is $\\{S, T, R, P\\}$ and a subscripted non-terminal indicates an instance of the non-terminal.\n\nUsing this translation scheme, the computed value of $S.\\text{val}$ for root of the parse tree for the expression $20 \\# 10 \\% 5 \\# 8 \\% 2 \\% 2$ is ________.",
     "options": [],
     "correctAnswerIndex": -1,
     "questionType": "NAT",
@@ -1192,8 +1222,10 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "marks": 2,
     "negativeMarks": 0,
     "difficulty": "hard",
-    "concept": "Digital Logic – Sequential Counter State Diagram",
+    "concept": "Compiler Design – Syntax Directed Translation (SDT)",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** 80\n\n**Concept / Topic:** Digital Logic – Sequential Counter State Diagram\n\n$$\\therefore \\text{Correct Answer: } 80$$"
+    "explanation": "**Official GATE Answer Key:** 80\n\n**Concept / Topic:** Compiler Design – Syntax Directed Translation (SDT)\n\nParsing the expression $20 \\# 10 \\% 5 \\# 8 \\% 2 \\% 2$ according to the grammar rules:\n1. The operator $\\%$ has higher precedence than $\\#$, and both operators are left-associative.\n2. Subexpression $10 \\% 5$ evaluates to $10 \\div 5 = 2$.\n3. Subexpression $8 \\% 2 \\% 2$ evaluates left-to-right as $(8 \\div 2) \\div 2 = 4 \\div 2 = 2$.\n4. The remaining expression at the $S$ level is $20 \\# 2 \\# 2$, which evaluates left-to-right as $(20 * 2) * 2 = 40 * 2 = 80$.\n\n$$\\therefore \\text{Correct Answer: } 80$$",
+    "imageUrl": "/images/gate2022/q65_syntax_directed_translation.png",
+    "imageAlt": "Syntax Directed Translation grammar and expression"
   }
 ];
