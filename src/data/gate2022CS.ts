@@ -26,12 +26,12 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q02",
-    "text": "A function y(x) is defined in the interval [0, 1] on the 𝑥-axis as \n𝑦(𝑥) =\n⎩\n⎪\n⎨\n⎪\n⎧\n \n      2   if    0 ≤ 𝑥 < 1 3\n     3   if   1 3 ≤ 𝑥 < 3 4\n     1   if   3 4 ≤ 𝑥 ≤ 1\n \nWhich one of the following is the area under the curve for the interval [0, 1] on \nthe 𝑥-axis?",
+    "text": "A function $y(x)$ is defined in the interval $[0, 1]$ on the $x$-axis as\n\n$$y(x) = \\begin{cases} 2, & \\text{if } 0 \\le x < \\frac{1}{3} \\\\ 3, & \\text{if } \\frac{1}{3} \\le x < \\frac{3}{4} \\\\ 1, & \\text{if } \\frac{3}{4} \\le x \\le 1 \\end{cases}$$\n\nWhich one of the following is the area under the curve for the interval $[0, 1]$ on the $x$-axis?",
     "options": [
-      "5\n6",
-      "6\n5",
-      "13\n6",
-      "6\n13  \n  \n\n\n \n                                                                                                                                         Page 3 of 41"
+      "$\\frac{5}{6}$",
+      "$\\frac{6}{5}$",
+      "$\\frac{13}{6}$",
+      "$\\frac{6}{13}$"
     ],
     "correctAnswerIndex": 2,
     "questionType": "MCQ",
@@ -40,7 +40,7 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "difficulty": "medium",
     "concept": "General Aptitude – Calculus / Definite Integral",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (C)\n\n**Concept / Topic:** General Aptitude – Calculus / Definite Integral\n\n$$\\therefore \\text{Correct Answer: } \\text{C}$$"
+    "explanation": "**Official GATE Answer Key:** (C)\n\n**Concept / Topic:** General Aptitude – Calculus / Definite Integral\n\nThe area under the curve in the interval $[0, 1]$ is the definite integral:\n$$\\text{Area} = \\int_0^1 y(x) \\, dx = \\int_0^{1/3} 2 \\, dx + \\int_{1/3}^{3/4} 3 \\, dx + \\int_{3/4}^1 1 \\, dx$$\n$$\\text{Area} = 2\\left(\\frac{1}{3} - 0\\right) + 3\\left(\\frac{3}{4} - \\frac{1}{3}\\right) + 1\\left(1 - \\frac{3}{4}\\right)$$\n$$\\text{Area} = \\frac{2}{3} + 3\\left(\\frac{5}{12}\\right) + \\frac{1}{4} = \\frac{2}{3} + \\frac{5}{4} + \\frac{1}{4} = \\frac{2}{3} + \\frac{6}{4} = \\frac{2}{3} + \\frac{3}{2} = \\frac{13}{6}$$\n\n$$\\therefore \\text{Correct Answer: } \\text{C}$$"
   },
   {
     "id": "gate22-q03",
@@ -154,12 +154,12 @@ export const GATE_2022_QUESTIONS: Question[] = [
   },
   {
     "id": "gate22-q09",
-    "text": "The corners and mid-points of the sides of a triangle are named using the distinct \nletters P, Q, R, S, T and U, but not necessarily in the same order. Consider the \nfollowing statements: \n The line joining P and R is parallel to the line joining Q and S. \n P is placed on the side opposite to the corner T.  \n S and U cannot be placed on the same side. \nWhich one of the following statements is correct based on the above \ninformation?",
+    "text": "The corners and mid-points of the sides of a triangle are named using the distinct letters P, Q, R, S, T and U, but not necessarily in the same order. Consider the following statements:\n- The line joining P and R is parallel to the line joining Q and S.\n- P is placed on the side opposite to the corner T.\n- S and U cannot be placed on the same side.\n\nWhich one of the following statements is correct based on the above information?",
     "options": [
       "P cannot be placed at a corner",
       "S cannot be placed at a corner",
       "U cannot be placed at a mid-point",
-      "R cannot be placed at a corner \n \n  \n\n\n \n                                                                                                                                         Page 10 of 41"
+      "R cannot be placed at a corner"
     ],
     "correctAnswerIndex": 1,
     "questionType": "MCQ",
@@ -168,7 +168,7 @@ export const GATE_2022_QUESTIONS: Question[] = [
     "difficulty": "hard",
     "concept": "General Aptitude – Geometry / Triangles",
     "year": "GATE 2022 CS",
-    "explanation": "**Official GATE Answer Key:** (B)\n\n**Concept / Topic:** General Aptitude – Geometry / Triangles\n\n$$\\therefore \\text{Correct Answer: } \\text{B}$$"
+    "explanation": "**Official GATE Answer Key:** (B)\n\n**Concept / Topic:** General Aptitude – Geometry / Triangles\n\n1. In a triangle, a line connecting two mid-points is parallel to the third side (which connects two corners). Thus, between {P, R} and {Q, S}, one pair consists of two mid-points and the other pair consists of two corners.\n2. \"P is placed on the side opposite to the corner T\" means P is on the base opposite to T.\n3. \"S and U cannot be placed on the same side\": If S were placed at a corner, then both Q and S would be corners forming one side. Then U and S could not share that side, but placing the remaining vertices leads to a contradiction with the given constraints.\n4. Hence, S cannot be a corner; S must be a mid-point.\n\n$$\\therefore \\text{Correct Answer: } \\text{B}$$"
   },
   {
     "id": "gate22-q10",
