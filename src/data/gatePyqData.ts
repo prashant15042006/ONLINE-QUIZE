@@ -6,6 +6,7 @@ import { GATE_2025_SET2_QUESTIONS } from "./gate2025CS2";
 import { GATE_2024_SET1_QUESTIONS } from "./gate2024CS1";
 import { GATE_2024_SET2_QUESTIONS } from "./gate2024CS2";
 import { GATE_2023_QUESTIONS } from "./gate2023CS";
+import { GATE_2022_QUESTIONS } from "./gate2022CS";
 
 export interface GatePaper {
   id: string;
@@ -19,8 +20,8 @@ export interface GatePaper {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GATE CSE Previous Year Papers (Active & Fully Uploaded: 2023 - 2026)
-// Official Verified Questions (IIT Kanpur / IISc Bengaluru / IIT Roorkee / IIT Guwahati)
+// GATE CSE Previous Year Papers (Active & Fully Uploaded: 2022 - 2026)
+// Official Verified Questions (IIT Kharagpur / IIT Kanpur / IISc Bengaluru / IIT Roorkee / IIT Guwahati)
 // ─────────────────────────────────────────────────────────────────────────────
 export const GATE_PYQ_PAPERS: GatePaper[] = [
   {
@@ -92,6 +93,16 @@ export const GATE_PYQ_PAPERS: GatePaper[] = [
     timeMinutes: 180,
     url: "https://gate2027.iitm.ac.in/static/doc/download/2023/cs_2023.pdf",
     questions: GATE_2023_QUESTIONS,
+  },
+  {
+    id: "gate-2022",
+    year: "2022",
+    setTitle: "Official Paper",
+    title: "GATE CSE 2022",
+    totalQuestions: 65,
+    timeMinutes: 180,
+    url: "https://gate2027.iitm.ac.in/static/doc/download/2022/cs_2022.pdf",
+    questions: GATE_2022_QUESTIONS,
   },
 ];
 
